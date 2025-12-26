@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .stat-label {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin: 2rem 0;
+    }
+    .action-btn {
+        padding: 1.5rem;
+        text-align: center;
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        text-decoration: none;
+        color: #2d3748;
+        transition: all 0.3s;
+    }
+    .action-btn:hover {
+        border-color: #667eea;
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    .action-btn i {
+        font-size: 2rem;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+    .division-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+    .division-card {
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s;
+    }
+    .division-card.has-error {
+        border-color: #f56565;
+        background: #fed7d7;
+    }
+    .division-card.ok {
+        border-color: #48bb78;
+        background: #c6f6d5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">
+            <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+        </h1>
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_branches }}</div>
+            <div class="stat-label">
+                <i class="fas fa-building"></i> Branches
+            </div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);">
+            <div class="stat-number">{{ total_divisions }}</div>
+            <div class="stat-label">
+                <i class="fas fa-users"></i> Divisions
+            </div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);">
+            <div class="stat-number">{{ total_faculty }}</div>
+            <div class="stat-label">
+                <i class="fas fa-chalkboard-teacher"></i> Faculty
+            </div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);">
+            <div class="stat-number">{{ total_subjects }}</div>
+            <div class="stat-label">
+                <i class="fas fa-book"></i> Subjects
+            </div>
+        </div>
+    </div>
+    
+    <h3 style="margin-top: 2rem;">Quick Actions</h3>
+    <div class="quick-actions">
+        <a href="{{ url_for('manage_branches') }}" class="action-btn">
+            <div><i class="fas fa-building"></i></div>
+            <div>Manage Branches</div>
+        </a>
+        <a href="{{ url_for('manage_divisions') }}" class="action-btn">
+            <div><i class="fas fa-users"></i></div>
+            <div>Manage Divisions</div>
+        </a>
+        <a href="{{ url_for('manage_subjects') }}" class="action-btn">
+            <div><i class="fas fa-book"></i></div>
+            <div>Manage Subjects</div>
+        </a>
+        <a href="{{ url_for('manage_timeslots') }}" class="action-btn">
+            <div><i class="fas fa-clock"></i></div>
+            <div>Manage Time Slots</div>
+        </a>
+        <a href="{{ url_for('manage_faculty') }}" class="action-btn">
+            <div><i class="fas fa-chalkboard-teacher"></i></div>
+            <div>View Faculty</div>
+        </a>
+        <a href="{{ url_for('timetable_select') }}" class="action-btn">
+            <div><i class="fas fa-calendar-plus"></i></div>
+            <div>Create Timetable</div>
+        </a>
+    </div>
+</div>
+
+{% if recent_clashes %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">
+            <i class="fas fa-exclamation-triangle"></i> Recent Clashes
+        </h2>
+        <a href="{{ url_for('view_clashes') }}" class="btn btn-sm btn-primary">View All</a>
+    </div>
+    
+    <div class="table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Details</th>
+                    <th>Detected</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for clash in recent_clashes[:5] %}
+                <tr>
+                    <td>
+                        <span class="badge badge-danger">{{ clash.clash_type|upper }}</span>
+                    </td>
+                    <td>{{ clash.get_details().get('faculty_name', 'N/A') }}</td>
+                    <td>{{ clash.detected_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('resolve_clash', clash_id=clash.id) }}" style="display: inline;">
+                            <button type="submit" class="btn btn-sm btn-success">Resolve</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">
+            <i class="fas fa-chart-pie"></i> Division Status Overview
+        </h2>
+    </div>
+    
+    {% for branch_id, branch_data in division_summary.items() %}
+    <h3 style="margin-top: 1.5rem; color: #667eea;">
+        <i class="fas fa-building"></i> {{ branch_data.branch_name }}
+    </h3>
+    
+    <div class="division-grid">
+        {% for division in branch_data.divisions %}
+        <div class="division-card {% if division.clash_count > 0 %}has-error{% else %}ok{% endif %}">
+            <h4 style="margin-bottom: 0.5rem;">{{ division.name }}</h4>
+            <p style="color: #718096; font-size: 0.9rem;">Semester {{ division.semester }}</p>
+            <div style="margin-top: 1rem; display: flex; justify-content: space-between;">
+                <span>
+                    <i class="fas fa-calendar-check"></i> {{ division.entry_count }} entries
+                </span>
+                <span>
+                    {% if division.clash_count > 0 %}
+                        <i class="fas fa-exclamation-circle"></i> {{ division.clash_count }} clashes
+                    {% else %}
+                        <i class="fas fa-check-circle"></i> No clashes
+                    {% endif %}
+                </span>
+            </div>
+            <a href="{{ url_for('final_timetable_view', division_id=division.id) }}" class="btn btn-sm btn-primary" style="margin-top: 1rem; width: 100%;">
+                View Timetable
+            </a>
+        </div>
+        {% else %}
+        <p style="color: #718096;">No divisions created yet</p>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

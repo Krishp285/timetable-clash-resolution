@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% block title %}Manage Subjects{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">
+            <i class="fas fa-book"></i> Manage Subjects
+        </h1>
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <form method="GET" style="display: inline;">
+                <input type="text" name="search" class="form-control" placeholder="Search subjects..." value="{{ search }}">
+            </form>
+        </div>
+    </div>
+    
+    <form method="POST" action="{{ url_for('add_subject') }}" style="background: #f7fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+        <h3 style="margin-bottom: 1rem;"><i class="fas fa-plus-circle"></i> Add New Subject</h3>
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 1rem; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Subject Name</label>
+                <input type="text" name="name" class="form-control" placeholder="e.g., Data Structures" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Subject Code</label>
+                <input type="text" name="code" class="form-control" placeholder="e.g., CS301" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Credits</label>
+                <input type="number" name="credits" class="form-control" value="3" min="1" max="10">
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add
+            </button>
+        </div>
+    </form>
+    
+    <div class="table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Subject Code</th>
+                    <th>Subject Name</th>
+                    <th>Credits</th>
+                    <th>Created Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for subject in subjects %}
+                <tr>
+                    <td><span class="badge badge-info">{{ subject.code }}</span></td>
+                    <td>{{ subject.name }}</td>
+                    <td>{{ subject.credits }}</td>
+                    <td>{{ subject.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td>
+                        <button
+        class="btn btn-sm btn-warning"
+        onclick="openEditSubjectModal(
+            '{{ subject.id }}',
+            '{{ subject.name }}',
+            '{{ subject.code }}',
+            '{{ subject.credits }}'
+        )">
+        <i class="fas fa-edit"></i>
+    </button>
+                        <form method="POST" action="{{ url_for('delete_subject', subject_id=subject.id) }}" style="display: inline;" onsubmit="return confirm('Delete this subject?');">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #718096;">No subjects found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Edit Subject Modal -->
+ <div class="card">
+    <div id="editSubjectModal" class="modal" style="display:none;">
+        <div class="modal-content" style="max-width:600px;">
+            <h3><i class="fas fa-edit"></i> Edit Subject</h3>
+
+            <form method="POST" action="{{ url_for('edit_subject') }}">
+                <input type="hidden" name="subject_id" id="edit_subject_id">
+
+                <div class="form-group">
+                    <label class="form-label">Subject Name</label>
+                    <input type="text" name="name" id="edit_subject_name" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Subject Code</label>
+                    <input type="text" name="code" id="edit_subject_code" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Credits</label>
+                    <input type="number" name="credits" id="edit_subject_credits" class="form-control" min="1" max="10">
+                </div>
+
+                <div style="display:flex; gap:1rem; justify-content:flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditSubjectModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% block extra_js %}
+<script>
+function openEditSubjectModal(id, name, code, credits) {
+    document.getElementById('edit_subject_id').value = id;
+    document.getElementById('edit_subject_name').value = name;
+    document.getElementById('edit_subject_code').value = code;
+    document.getElementById('edit_subject_credits').value = credits;
+
+    document.getElementById('editSubjectModal').style.display = 'block';
+}
+
+function closeEditSubjectModal() {
+    document.getElementById('editSubjectModal').style.display = 'none';
+}
+</script>
+{% endblock %}
+
+{% endblock %}

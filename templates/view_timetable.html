@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Timetable - {{ division.full_name }}{% endblock %}
+
+{% block content %}
+<h2>
+    <i class="fas fa-calendar"></i>
+    Timetable – {{ division.full_name }}
+</h2>
+
+<table class="table table-bordered table-striped mt-3">
+    <thead>
+        <tr>
+            <th>Day / Time</th>
+            {% for slot in timeslots %}
+                <th>{{ slot.time_range }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for day in days %}
+        <tr>
+            <th>{{ day }}</th>
+            {% for slot in timeslots %}
+                {% set entry = grid[day][slot.id] %}
+                <td>
+                    {% if entry %}
+                        <strong>{{ entry.subject.name }}</strong><br>
+                        {{ entry.faculty.user.full_name }}<br>
+                        Room: {{ entry.room_number }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mt-3">
+    ← Back to Dashboard
+</a>
+{% endblock %}

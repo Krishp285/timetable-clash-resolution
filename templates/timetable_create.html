@@ -1,0 +1,329 @@
+{% extends 'base.html' %}
+{% block title %}Create Timetable - {{ division.full_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .timetable-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+    
+    @media (max-width: 1200px) {
+        .timetable-container {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .day-tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .day-tab {
+        padding: 0.75rem 1.5rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        color: #2d3748;
+    }
+    
+    .day-tab.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-color: #667eea;
+    }
+    
+    .time-slot-card {
+        background: #f7fafc;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        border: 2px solid #e2e8f0;
+    }
+    
+    .time-slot-card.filled {
+        background: linear-gradient(135deg, #c6f6d5 0%, #bee3f8 100%);
+        border-color: #48bb78;
+    }
+    
+    .time-header {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+    
+    .faculty-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .faculty-card {
+        background: white;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 0.75rem;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s;
+    }
+    
+    .faculty-card.available {
+        cursor: pointer;
+    }
+    
+    .faculty-card.available:hover {
+        border-color: #48bb78;
+        box-shadow: 0 4px 12px rgba(72, 187, 120, 0.2);
+    }
+    
+    .faculty-card.busy {
+        opacity: 0.6;
+        background: #f7fafc;
+    }
+    
+    .faculty-name {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    .faculty-subjects {
+        font-size: 0.9rem;
+        color: #718096;
+    }
+    
+    .add-entry-form {
+        background: #f7fafc;
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 2px dashed #cbd5e0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h1 class="card-title">
+                <i class="fas fa-calendar-alt"></i> {{ division.full_name }} Timetable
+            </h1>
+            <p style="color: #718096; margin-top: 0.5rem;">Semester {{ division.semester }} | {{ division.academic_year }}</p>
+        </div>
+        <a href="{{ url_for('view_timetable', division_id=division.id) }}" class="btn btn-outline">
+            <i class="fas fa-eye"></i> View Full Timetable
+        </a>
+    </div>
+    
+    <div class="day-tabs">
+        {% for day in days %}
+        <a href="{{ url_for('timetable_create', division_id=division.id, day=day) }}" 
+           class="day-tab {% if day == current_day %}active{% endif %}">
+            {{ day }}
+        </a>
+        {% endfor %}
+    </div>
+    
+    <h2 style="margin-bottom: 1.5rem; color: #667eea;">
+        <i class="fas fa-calendar-day"></i> {{ current_day }}
+    </h2>
+    
+    <div class="timetable-container">
+        <!-- LEFT SIDE: Time Slots -->
+        <div>
+            <h3 style="margin-bottom: 1rem;"><i class="fas fa-clock"></i> Time Slots</h3>
+            
+            {% for slot in timeslots %}
+            <div class="time-slot-card {% if timetable_map.get(slot.id) %}filled{% endif %}" id="slot-{{ slot.id }}">
+                <div class="time-header">
+                    <i class="fas fa-clock"></i> {{ slot.time_range }}
+                    {% if slot.slot_label %}
+                        <span style="font-size: 0.9rem; color: #718096;"> - {{ slot.slot_label }}</span>
+                    {% endif %}
+                </div>
+                
+                {% set entry = timetable_map.get(slot.id) %}
+                {% if entry %}
+                    <div style="background: white; padding: 1rem; border-radius: 8px;">
+                        <div style="font-weight: 600; margin-bottom: 0.5rem;">
+                            <i class="fas fa-book"></i> {{ entry.subject.name }}
+                        </div>
+                        <div style="color: #718096; font-size: 0.9rem;">
+                            <i class="fas fa-user"></i> {{ entry.faculty.user.full_name }}<br>
+                            <i class="fas fa-door-open"></i> Room {{ entry.room_number }}
+                        </div>
+                        <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
+                            <a href="{{ url_for('edit_timetable_entry', entry_id=entry.id) }}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <form method="POST" action="{{ url_for('delete_timetable_entry', entry_id=entry.id) }}" style="display: inline;" onsubmit="return confirm('Delete this entry?');">
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="add-entry-form">
+                        <form method="POST" action="{{ url_for('add_timetable_entry') }}" onsubmit="return validateForm(this);">
+                            <input type="hidden" name="division_id" value="{{ division.id }}">
+                            <input type="hidden" name="day" value="{{ current_day }}">
+                            <input type="hidden" name="time_slot_id" value="{{ slot.id }}">
+                            
+                            <div class="form-group">
+                                <label class="form-label">Subject</label>
+                                <select name="subject_id" class="form-control" required onchange="filterFaculty(this, '{{ slot.id }}')">
+                                    <option value="">-- Select Subject --</option>
+                                    {% for subject in subjects %}
+                                    <option value="{{ subject.id }}" data-name="{{ subject.name }}">{{ subject.name }} ({{ subject.code }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Faculty</label>
+                                <select name="faculty_id" class="form-control faculty-select-{{ slot.id }}" required>
+                                    <option value="">-- First select subject --</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Room Number</label>
+                                <input type="text" name="room_number" class="form-control" placeholder="e.g., 101, Lab-A" required>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-success" style="width: 100%;">
+                                <i class="fas fa-plus"></i> Add Entry
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- RIGHT SIDE: Faculty Availability -->
+        <div>
+            <h3 style="margin-bottom: 1rem;">
+                <i class="fas fa-users"></i> Faculty Availability for {{ current_day }}
+            </h3>
+            
+            {% for slot in timeslots %}
+            <div style="margin-bottom: 2rem;">
+                <h4 style="color: #667eea; margin-bottom: 1rem;">{{ slot.time_range }}</h4>
+                <div class="faculty-list">
+                    {% for faculty in faculty_availability[slot.id] %}
+                    <div class="faculty-card {% if faculty.is_available %}available{% else %}busy{% endif %}"onclick="{% if faculty.is_available %}selectFaculty({{ slot.id }}, {{ faculty.faculty_id }}, '{{ faculty.name|replace("'", "\\'") }}'){% endif %}">
+                        <div class="d-flex justify-between align-center">
+                            <div>
+                                <div class="faculty-name">
+                                    <i class="fas fa-user"></i> {{ faculty.name }}
+                                </div>
+                                <div class="faculty-subjects">
+                                    {% if faculty.subjects %}
+                                        {% for subject in faculty.subjects[:3] %}
+                                            <span class="badge badge-info">{{ subject }}</span>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div>
+                                {% if faculty.is_available %}
+                                    <span class="badge badge-success">
+                                        <i class="fas fa-check"></i> Available
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-danger">
+                                        <i class="fas fa-times"></i> Busy
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if not faculty.is_available and faculty.clash_details %}
+                        <div style="margin-top: 0.5rem; padding: 0.5rem; background: #fff; border-radius: 4px; font-size: 0.85rem; color: #742a2a;">
+                            {{ faculty.clash_details.subject }} - {{ faculty.clash_details.division }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+function selectFaculty(slotId, facultyId, facultyName) {
+    const select = document.querySelector('.faculty-select-' + slotId);
+    if (select) {
+        // Add option if not exists
+        let option = select.querySelector('option[value="' + facultyId + '"]');
+        if (!option) {
+            option = document.createElement('option');
+            option.value = facultyId;
+            option.textContent = facultyName;
+            select.appendChild(option);
+        }
+        select.value = facultyId;
+        
+        // Scroll to form
+        document.getElementById('slot-' + slotId).scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+function filterFaculty(selectElement, slotId) {
+    const subjectId = selectElement.value;
+    const subjectName = selectElement.options[selectElement.selectedIndex].getAttribute('data-name');
+    const facultySelect = document.querySelector('.faculty-select-' + slotId);
+    
+    if (!subjectName) {
+        facultySelect.innerHTML = '<option value="">-- First select subject --</option>';
+        return;
+    }
+    
+    facultySelect.innerHTML = '<option value="">-- Loading... --</option>';
+    
+    // Get faculty who teach this subject from the faculty availability data
+    const facultyCards = document.querySelectorAll('.faculty-card.available');
+    facultySelect.innerHTML = '<option value="">-- Select Faculty --</option>';
+    
+    facultyCards.forEach(card => {
+        const badges = card.querySelectorAll('.badge-info');
+        let hasSubject = false;
+        
+        badges.forEach(badge => {
+            if (badge.textContent.trim() === subjectName) {
+                hasSubject = true;
+            }
+        });
+        
+        if (hasSubject) {
+            const facultyName = card.querySelector('.faculty-name').textContent.trim().replace('👤 ', '').replace('✓ ', '');
+            const option = document.createElement('option');
+            option.value = card.getAttribute('onclick').match(/\d+/g)[1];
+            option.textContent = facultyName;
+            facultySelect.appendChild(option);
+        }
+    });
+    
+    if (facultySelect.options.length === 1) {
+        facultySelect.innerHTML = '<option value="">-- No faculty available for this subject --</option>';
+    }
+}
+
+function validateForm(form) {
+    const faculty = form.querySelector('select[name="faculty_id"]').value;
+    if (!faculty) {
+        alert('Please select a faculty member');
+        return false;
+    }
+    return true;
+}
+</script>
+{% endblock %}

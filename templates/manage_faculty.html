@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}Manage Faculty{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">
+            <i class="fas fa-chalkboard-teacher"></i> Faculty Directory
+        </h1>
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <form method="GET" style="display: inline;">
+                <input type="text" name="search" class="form-control"
+                       placeholder="Search faculty..." value="{{ search }}">
+            </form>
+        </div>
+    </div>
+
+    <div class="table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Designation</th>
+                    <th>Subjects</th>
+                    <th>Working Hours</th>
+                    <th>Status</th>
+                    <th>Action</th>   <!-- ONLY DELETE -->
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for faculty in faculty_list %}
+                <tr>
+                    <td><strong>{{ faculty.user.full_name }}</strong></td>
+                    <td>{{ faculty.user.email }}</td>
+                    <td>{{ faculty.department or '-' }}</td>
+                    <td>{{ faculty.designation or '-' }}</td>
+
+                    <td>
+                        {% if faculty.get_subjects() %}
+                            {% for subject in faculty.get_subjects()[:3] %}
+                                <span class="badge badge-info">{{ subject }}</span>
+                            {% endfor %}
+                            {% if faculty.get_subjects()|length > 3 %}
+                                <span class="badge badge-info">
+                                    +{{ faculty.get_subjects()|length - 3 }}
+                                </span>
+                            {% endif %}
+                        {% else %}
+                            <span style="color:#718096;">Not set</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if faculty.get_working_hours() %}
+                            {{ faculty.get_working_hours()['start'] }}
+                            -
+                            {{ faculty.get_working_hours()['end'] }}
+                        {% else %}
+                            <span style="color:#718096;">Not set</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if faculty.is_available %}
+                            <span class="badge badge-success">Active</span>
+                        {% else %}
+                            <span class="badge badge-danger">Inactive</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- DELETE ONLY -->
+                    <td>
+                        <form method="POST"
+                              action="{{ url_for('delete_faculty', faculty_id=faculty.id) }}"
+                              onsubmit="return confirm('Delete this faculty account? This cannot be undone.');"
+                              style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" style="text-align:center; color:#718096;">
+                        No faculty found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

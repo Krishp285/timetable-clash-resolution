@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% block title %}Manage Divisions{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">
+            <i class="fas fa-users"></i> Manage Divisions
+        </h1>
+    </div>
+
+    <form method="POST" action="{{ url_for('add_division') }}"
+        style="background: #f7fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+        <h3 style="margin-bottom: 1rem;"><i class="fas fa-plus-circle"></i> Add New Division</h3>
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 1rem; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Branch</label>
+                <select name="branch_id" class="form-control" required>
+                    <option value="">-- Select Branch --</option>
+                    {% for branch in branches %}
+                    <option value="{{ branch.id }}">{{ branch.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Division Name</label>
+                <input type="text" name="name" class="form-control" placeholder="A, B, C" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Semester</label>
+                <input type="number" name="semester" class="form-control" min="1" max="8" placeholder="1-8" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Academic Year</label>
+                <input type="text" name="academic_year" class="form-control" placeholder="2024-2025" required>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add
+            </button>
+        </div>
+    </form>
+
+    <h3><i class="fas fa-list"></i> All Divisions</h3>
+    <div class="table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Division</th>
+                    <th>Branch</th>
+                    <th>Semester</th>
+                    <th>Academic Year</th>
+                    <th>Created Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for division in divisions %}
+                <tr>
+                    <td><span class="badge badge-success">{{ division.full_name }}</span></td>
+                    <td>{{ division.branch.name }}</td>
+                    <td>{{ division.semester }}</td>
+                    <td>{{ division.academic_year }}</td>
+                    <td>{{ division.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td>
+                        <a href="{{ url_for('view_timetable', division_id=division.id) }}"
+                            class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        <button class="btn btn-sm btn-warning" onclick="openEditDivisionModal(
+                                '{{ division.id }}',
+                                '{{ division.branch_id }}',
+                                '{{ division.name }}',
+                                '{{ division.semester }}',
+                                '{{ division.academic_year }}'
+                            )">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <form method="POST" action="{{ url_for('delete_division', division_id=division.id) }}"
+                            style="display: inline;" onsubmit="return confirm('Delete this division?');">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: #718096;">No divisions added yet</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Edit Division Modal -->
+<div class="card">
+<div id="editDivisionModal" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width:600px;">
+        <h3><i class="fas fa-edit"></i> Edit Division</h3>
+
+        <form method="POST" action="{{ url_for('edit_division') }}">
+            <input type="hidden" name="division_id" id="edit_division_id">
+
+            <div class="form-group">
+                <label class="form-label">Branch</label>
+                <select name="branch_id" id="edit_branch_id" class="form-control" required>
+                    {% for branch in branches %}
+                    <option value="{{ branch.id }}">{{ branch.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Division Name</label>
+                <input type="text" name="name" id="edit_division_name" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Semester</label>
+                <input type="number" name="semester" id="edit_semester" class="form-control" min="1" max="8" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Academic Year</label>
+                <input type="text" name="academic_year" id="edit_academic_year" class="form-control" required>
+            </div>
+
+            <div style="display:flex; gap:1rem; justify-content:flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="closeEditDivisionModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+</div>
+{% block extra_js %}
+<script>
+function openEditDivisionModal(id, branchId, name, semester, academicYear) {
+    document.getElementById('edit_division_id').value = id;
+    document.getElementById('edit_branch_id').value = branchId;
+    document.getElementById('edit_division_name').value = name;
+    document.getElementById('edit_semester').value = semester;
+    document.getElementById('edit_academic_year').value = academicYear;
+
+    document.getElementById('editDivisionModal').style.display = 'block';
+}
+
+function closeEditDivisionModal() {
+    document.getElementById('editDivisionModal').style.display = 'none';
+}
+</script>
+{% endblock %}
+
+{% endblock %}

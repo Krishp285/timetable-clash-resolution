@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block title %}Faculty Dashboard{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">
+            <i class="fas fa-chalkboard-teacher"></i> Welcome, {{ current_user.full_name }}
+
+        </h1>
+        <a href="{{ url_for('faculty_profile') }}" class="btn btn-primary">
+            <i class="fas fa-user-edit"></i> Edit Profile
+        </a>
+    </div>
+    
+    {% if faculty.get_subjects() %}
+    <div style="margin-bottom: 2rem;">
+        <h3 style="margin-bottom: 1rem;"><i class="fas fa-book"></i> Subjects I Teach</h3>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            {% for subject in faculty.get_subjects() %}
+            <span class="badge badge-info" style="padding: 0.5rem 1rem; font-size: 0.9rem;">{{ subject }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if faculty.get_working_hours() %}
+    <div style="margin-bottom: 2rem;">
+        <h3 style="margin-bottom: 0.5rem;"><i class="fas fa-clock"></i> Working Hours</h3>
+        <p style="font-size: 1.1rem; color: #718096;">
+            {{ faculty.get_working_hours()['start'] }} - {{ faculty.get_working_hours()['end'] }}
+        </p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">
+            <i class="fas fa-calendar-alt"></i> My Teaching Schedule
+        </h2>
+    </div>
+    
+    {% if schedule %}
+    {% for day, classes in schedule.items() %}
+    <h3 style="margin-top: 1.5rem; color: #667eea;">{{ day }}</h3>
+    <div class="table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Subject</th>
+                    <th>Division</th>
+                    <th>Room</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in classes %}
+                <tr>
+                    <td>{{ entry.time_slot.time_range }}</td>
+                    <td>{{ entry.subject.name }}</td>
+                    <td>{{ entry.division.full_name }}</td>
+                    <td>{{ entry.room_number }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+    {% else %}
+    {% if timetable_entries %}
+    {% set days = timetable_entries | map(attribute='day') | unique | list %}
+    {% set times = timetable_entries | map(attribute='time_slot.time_range') | unique | list %}
+
+    <div class="table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Day / Time</th>
+                    {% for time in times %}
+                    <th>{{ time }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for day in days %}
+                <tr>
+                    <td>{{ day }}</td>
+                    {% for time in times %}
+                        {% set cell_entries = timetable_entries
+                            | selectattr('day', 'equalto', day)
+                            | selectattr('time_slot.time_range', 'equalto', time)
+                            | list %}
+                        <td>
+                            {% if cell_entries %}
+                                {% set cell = cell_entries[0] %}
+                                <strong>{{ cell.subject.name }}</strong><br>
+                                {{ cell.division.full_name }}<br>
+                                Room: {{ cell.room_number or '—' }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p class="text-muted" style="padding: 1rem;">
+            No lectures assigned yet.
+        </p>
+    {% endif %}
+</div>
+
+    {% endif %}
+</div>
+{% endblock %}

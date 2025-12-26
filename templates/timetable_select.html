@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Select Division{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 700px; margin: 3rem auto;">
+    <div class="card-header">
+        <h1 class="card-title">
+            <i class="fas fa-calendar-plus"></i> Create Timetable
+        </h1>
+    </div>
+    
+    <form method="GET" action="{{ url_for('timetable_create') }}" id="divisionForm">
+        <div class="form-group">
+            <label class="form-label">Select Branch</label>
+            <select name="branch_id" id="branchSelect" class="form-control" required onchange="loadDivisions()">
+                <option value="">-- Select Branch --</option>
+                
+                {% for branch in branches %}
+                <option value="{{ branch.id }}">{{ branch.name }} ({{ branch.short_name }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Select Division</label>
+            <select name="division_id" id="divisionSelect" class="form-control" required>
+                <option value="">-- First select a branch --</option>
+            </select>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+            <i class="fas fa-arrow-right"></i> Continue to Timetable Creation
+        </button>
+    </form>
+</div>
+
+<script>
+function loadDivisions() {
+    const branchId = document.getElementById('branchSelect').value;
+    const divisionSelect = document.getElementById('divisionSelect');
+    
+    divisionSelect.innerHTML = '<option value="">-- Loading... --</option>';
+    
+    if (!branchId) {
+        divisionSelect.innerHTML = '<option value="">-- First select a branch --</option>';
+        return;
+    }
+    
+    fetch(`/api/divisions/${branchId}`)
+        .then(response => response.json())
+        .then(data => {
+            divisionSelect.innerHTML = '<option value="">-- Select Division --</option>';
+            data.divisions.forEach(division => {
+                const option = document.createElement('option');
+                option.value = division.id;
+                option.textContent = `${division.name} (Semester ${division.semester} - ${division.academic_year})`;
+                divisionSelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            divisionSelect.innerHTML = '<option value="">-- Error loading divisions --</option>';
+        });
+}
+</script>
+{% endblock %}

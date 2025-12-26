@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Edit Entry{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 700px; margin: 0 auto;">
+    <div class="card-header">
+        <h1 class="card-title">
+            <i class="fas fa-edit"></i> Edit Timetable Entry
+        </h1>
+    </div>
+    
+    <div style="background: #f7fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+        <h3 style="margin-bottom: 1rem;">Current Entry Details</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+                <strong>Subject:</strong><br>
+                {{ entry.subject.name }}
+            </div>
+            <div>
+                <strong>Day:</strong><br>
+                {{ entry.day }}
+            </div>
+            <div>
+                <strong>Time:</strong><br>
+                {{ entry.time_slot.time_range }}
+            </div>
+            <div>
+                <strong>Division:</strong><br>
+                {{ entry.division.full_name }}
+            </div>
+        </div>
+    </div>
+    
+    <form method="POST">
+        <div class="form-group">
+            <label class="form-label">Faculty</label>
+            <select name="faculty_id" class="form-control" required>
+                {% for faculty in faculty_list %}
+                <option value="{{ faculty.faculty_id }}" 
+                        {% if faculty.faculty_id == entry.faculty_id %}selected{% endif %}
+                        {% if not faculty.is_available and faculty.faculty_id != entry.faculty_id %}disabled{% endif %}>
+                    {{ faculty.name }}
+                    {% if not faculty.is_available and faculty.faculty_id != entry.faculty_id %}
+                        (Busy)
+                    {% elif faculty.is_available %}
+                        (Available)
+                    {% endif %}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Room Number</label>
+            <input type="text" name="room_number" class="form-control" value="{{ entry.room_number }}" required>
+        </div>
+        
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save"></i> Update Entry
+            </button>
+            <a href="{{ url_for('timetable_create', division_id=entry.division_id, day=entry.day) }}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

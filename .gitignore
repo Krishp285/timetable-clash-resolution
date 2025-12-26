@@ -1,0 +1,23 @@
+# ============================================
+# .gitignore
+# ============================================
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.env
+.venv
+instance/
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+*.db
+*.sqlite

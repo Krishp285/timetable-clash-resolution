@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% block title %}Clash Management{% endblock %}
+
+{% block extra_css %}
+<style>
+    .clash-card {
+        background: #fff;
+        border-left: 4px solid #f56565;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    .clash-card.resolved {
+        border-left-color: #48bb78;
+        opacity: 0.7;
+    }
+    
+    .clash-type {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .clash-type.faculty {
+        background: #fed7d7;
+        color: #742a2a;
+    }
+    
+    .clash-type.room {
+        background: #feebc8;
+        color: #7c2d12;
+    }
+    
+    .clash-type.division {
+        background: #e9d8fd;
+        color: #44337a;
+    }
+    
+    .clash-details {
+        background: #f7fafc;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        font-size: 0.95rem;
+    }
+    
+    .clash-details strong {
+        color: #2d3748;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">
+            <i class="fas fa-exclamation-triangle"></i> Clash Management
+        </h1>
+        <div>
+            <span class="badge badge-danger" style="padding: 0.5rem 1rem; font-size: 1rem;">
+                {{ clashes|length }} Active Clashes
+            </span>
+        </div>
+    </div>
+    
+    {% if clashes %}
+    <h3 style="margin-bottom: 1rem;"><i class="fas fa-exclamation-circle"></i> Active Clashes</h3>
+    
+    {% for clash in clashes %}
+    <div class="clash-card">
+        <div class="d-flex justify-between align-center">
+            <div>
+                <span class="clash-type {{ clash.clash_type }}">
+                    <i class="fas fa-{% if clash.clash_type == 'faculty' %}user{% elif clash.clash_type == 'room' %}door-open{% else %}users{% endif %}"></i>
+                    {{ clash.clash_type|upper }} CLASH
+                </span>
+                <div style="margin-top: 0.5rem;">
+                    <span class="badge badge-warning">{{ clash.severity|upper }}</span>
+                    <span style="color: #718096; margin-left: 1rem;">
+                        <i class="fas fa-clock"></i> Detected: {{ clash.detected_at.strftime('%Y-%m-%d %H:%M') }}
+                    </span>
+                </div>
+            </div>
+            <form method="POST" action="{{ url_for('resolve_clash', clash_id=clash.id) }}">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-check"></i> Mark as Resolved
+                </button>
+            </form>
+        </div>
+        
+        <div class="clash-details">
+            {% set details = clash.get_details() %}
+            
+            {% if clash.clash_type == 'faculty' %}
+                <p><strong>Faculty:</strong> {{ details.faculty_name }}</p>
+                <p><strong>Subject:</strong> {{ details.subject }}</p>
+                <p><strong>Division:</strong> {{ details.division }}</p>
+                <p><strong>Room:</strong> {{ details.room }}</p>
+                <p><strong>Time:</strong> {{ details.day }} - {{ details.time }}</p>
+            {% elif clash.clash_type == 'room' %}
+                <p><strong>Room:</strong> {{ details.room }}</p>
+                <p><strong>Division:</strong> {{ details.division }}</p>
+                <p><strong>Subject:</strong> {{ details.subject }}</p>
+                <p><strong>Faculty:</strong> {{ details.faculty }}</p>
+                <p><strong>Time:</strong> {{ details.day }} - {{ details.time }}</p>
+            {% elif clash.clash_type == 'division' %}
+                <p><strong>Division:</strong> {{ details.division }}</p>
+                <p><strong>Subject:</strong> {{ details.subject }}</p>
+                <p><strong>Faculty:</strong> {{ details.faculty }}</p>
+                <p><strong>Room:</strong> {{ details.room }}</p>
+                <p><strong>Time:</strong> {{ details.day }} - {{ details.time }}</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div style="text-align: center; padding: 3rem; color: #718096;">
+        <i class="fas fa-check-circle" style="font-size: 4rem; color: #48bb78; margin-bottom: 1rem;"></i>
+        <h3 style="color: #48bb78;">No Active Clashes</h3>
+        <p>All timetable entries are conflict-free!</p>
+    </div>
+    {% endif %}
+    
+    {% if resolved_clashes %}
+    <h3 style="margin-top: 3rem; margin-bottom: 1rem;"><i class="fas fa-check-circle"></i> Resolved Clashes</h3>
+    
+    {% for clash in resolved_clashes[:10] %}
+    <div class="clash-card resolved">
+        <div class="d-flex justify-between align-center">
+            <div>
+                <span class="clash-type {{ clash.clash_type }}">
+                    <i class="fas fa-{% if clash.clash_type == 'faculty' %}user{% elif clash.clash_type == 'room' %}door-open{% else %}users{% endif %}"></i>
+                    {{ clash.clash_type|upper }} CLASH (RESOLVED)
+                </span>
+                <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #718096;">
+                    <i class="fas fa-clock"></i> Detected: {{ clash.detected_at.strftime('%Y-%m-%d %H:%M') }} | 
+                    <i class="fas fa-check"></i> Resolved: {{ clash.resolved_at.strftime('%Y-%m-%d %H:%M') if clash.resolved_at else 'N/A' }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}
