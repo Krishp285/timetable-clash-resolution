@@ -1,7 +1,3 @@
-# ============================================
-# README.md
-# ============================================
-
 # 🎓 College Timetable Management System
 
 A comprehensive, interactive timetable management system built with Flask, MySQL, and modern web technologies.
