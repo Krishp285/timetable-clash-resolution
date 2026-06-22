@@ -21,11 +21,14 @@ from flask_login import LoginManager, current_user, login_user, logout_user, log
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-change-in-production')
 
-# Database URI: use DATABASE_URL env var (Render sets this), fallback to SQLite
+# Database URI: use DATABASE_URL env var (Render/Aiven), fallback to SQLite
 database_url = os.environ.get('DATABASE_URL', 'sqlite:///timetable.db')
-# Render uses postgres:// but SQLAlchemy needs postgresql://
+# Render PostgreSQL uses postgres:// but SQLAlchemy needs postgresql://
 if database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
+# Aiven MySQL uses mysql:// but we need mysql+pymysql:// for PyMySQL driver
+if database_url.startswith('mysql://'):
+    database_url = database_url.replace('mysql://', 'mysql+pymysql://', 1)
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
