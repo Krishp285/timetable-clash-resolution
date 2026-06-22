@@ -2,6 +2,7 @@
 # 1️⃣ IMPORTS
 # ============================================
 
+import os
 from flask import Flask
 from extensions import db
 from models import ClashLog, User, Faculty, Branch, Division, Subject, TimeSlot, Timetable
@@ -18,8 +19,14 @@ from flask_login import LoginManager, current_user, login_user, logout_user, log
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key-change-in-production'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/timetable_system'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-change-in-production')
+
+# Database URI: use DATABASE_URL env var (Render sets this), fallback to SQLite
+database_url = os.environ.get('DATABASE_URL', 'sqlite:///timetable.db')
+# Render uses postgres:// but SQLAlchemy needs postgresql://
+if database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
@@ -1175,7 +1182,9 @@ def api_train_model():
 # 1️⃣2️⃣RUN APP (LAST LINE)
 # ============================================
 
+# Auto-create tables (needed for Render deployment)
+with app.app_context():
+    db.create_all()
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True, host='0.0.0.0', port=5000)

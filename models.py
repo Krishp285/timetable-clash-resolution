@@ -13,7 +13,7 @@ class User(UserMixin,db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
     full_name = db.Column(db.String(150), nullable=False)
-    role = db.Column(db.Enum('admin', 'faculty'), nullable=False)
+    role = db.Column(db.String(20), nullable=False)  # 'admin' or 'faculty'
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime)
@@ -169,7 +169,7 @@ class Timetable(db.Model):
     faculty_id = db.Column(db.Integer, db.ForeignKey('faculty.id'), nullable=False)
     time_slot_id = db.Column(db.Integer, db.ForeignKey('time_slots.id'), nullable=False)
     
-    day = db.Column(db.Enum('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'), nullable=False)
+    day = db.Column(db.String(20), nullable=False)  # Monday-Saturday
     room_number = db.Column(db.String(50), nullable=False)
     
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -189,8 +189,8 @@ class ClashLog(db.Model):
     __tablename__ = 'clash_logs'
     
     id = db.Column(db.Integer, primary_key=True)
-    clash_type = db.Column(db.Enum('faculty', 'room', 'division'), nullable=False)
-    severity = db.Column(db.Enum('warning', 'error'), default='warning')
+    clash_type = db.Column(db.String(20), nullable=False)  # faculty, room, division
+    severity = db.Column(db.String(20), default='warning')  # warning, error
     
     # Details stored as JSON
     clash_details = db.Column(db.Text)
