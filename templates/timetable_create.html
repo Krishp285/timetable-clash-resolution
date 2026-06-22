@@ -103,6 +103,82 @@
         border-radius: 12px;
         border: 2px dashed #cbd5e0;
     }
+
+    /* ML Risk Indicators */
+    .risk-low {
+        background: #c6f6d5;
+        border-color: #22543d;
+        color: #22543d;
+    }
+
+    .risk-medium {
+        background: #feebc8;
+        border-color: #7c2d12;
+        color: #7c2d12;
+    }
+
+    .risk-high {
+        background: #fed7d7;
+        border-color: #742a2a;
+        color: #742a2a;
+    }
+
+    .ml-badge {
+        display: inline-block;
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin: 0.25rem;
+    }
+
+    .recommendations-panel {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+    }
+
+    .recommendations-panel h3 {
+        color: white;
+        margin-bottom: 1rem;
+    }
+
+    .recommendation-item {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .recommendation-item:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateX(4px);
+    }
+
+    .ml-loading {
+        text-align: center;
+        padding: 1rem;
+    }
+
+    .spinner {
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top: 3px solid white;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 </style>
 {% endblock %}
 
@@ -207,18 +283,50 @@
             {% endfor %}
         </div>
         
-        <!-- RIGHT SIDE: Faculty Availability -->
+        <!-- RIGHT SIDE: Faculty Availability + ML Recommendations -->
         <div>
+            <!-- ML Recommendations Panel -->
+            <div class="recommendations-panel" id="recommendationsPanel" style="display: none;">
+                <h3>
+                    <i class="fas fa-lightbulb"></i> 🤖 ML Recommendations
+                </h3>
+                
+                <!-- Slot Recommendations -->
+                <div id="slotRecommendations" style="margin-bottom: 1rem;">
+                    <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem;">
+                        <i class="fas fa-calendar"></i> Best Time Slots
+                    </h4>
+                    <div id="slotRecommendationsContent">
+                        <p style="color: #e2e8f0; font-size: 0.9rem;">Select a subject to see recommendations</p>
+                    </div>
+                </div>
+
+                <!-- Faculty Recommendations -->
+                <div id="facultyRecommendations">
+                    <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem;">
+                        <i class="fas fa-user-check"></i> Recommended Faculty
+                    </h4>
+                    <div id="facultyRecommendationsContent">
+                        <p style="color: #e2e8f0; font-size: 0.9rem;">Select a subject to see recommendations</p>
+                    </div>
+                </div>
+            </div>
+
             <h3 style="margin-bottom: 1rem;">
                 <i class="fas fa-users"></i> Faculty Availability for {{ current_day }}
             </h3>
             
             {% for slot in timeslots %}
             <div style="margin-bottom: 2rem;">
-                <h4 style="color: #667eea; margin-bottom: 1rem;">{{ slot.time_range }}</h4>
+                <h4 style="color: #667eea; margin-bottom: 1rem;">
+                    {{ slot.time_range }}
+                    <button type="button" class="btn btn-sm btn-primary" onclick="showMLRecommendations({{ slot.id }}, '{{ current_day }}')" style="float: right;">
+                        <i class="fas fa-magic"></i> ML Suggestions
+                    </button>
+                </h4>
                 <div class="faculty-list">
                     {% for faculty in faculty_availability[slot.id] %}
-                    <div class="faculty-card {% if faculty.is_available %}available{% else %}busy{% endif %}"onclick="{% if faculty.is_available %}selectFaculty({{ slot.id }}, {{ faculty.faculty_id }}, '{{ faculty.name|replace("'", "\\'") }}'){% endif %}">
+                    <div class="faculty-card {% if faculty.is_available %}available{% else %}busy{% endif %}" onclick="{% if faculty.is_available %}selectFacultyWithRisk({{ slot.id }}, {{ faculty.faculty_id }}, '{{ faculty.name|replace("'", "\\'") }}', '{{ division.id }}'){% endif %}" id="faculty-{{ slot.id }}-{{ faculty.faculty_id }}">
                         <div class="d-flex justify-between align-center">
                             <div>
                                 <div class="faculty-name">
@@ -231,6 +339,7 @@
                                         {% endfor %}
                                     {% endif %}
                                 </div>
+                                <div id="risk-{{ slot.id }}-{{ faculty.faculty_id }}" style="margin-top: 0.25rem;"></div>
                             </div>
                             <div>
                                 {% if faculty.is_available %}
@@ -259,6 +368,25 @@
 </div>
 
 <script>
+let divisionId = {{ division.id }};
+let currentDay = "{{ current_day }}";
+let currentSlotId = null;
+let currentSubjectId = null;
+
+// Enhanced selectFaculty with ML risk prediction
+function selectFacultyWithRisk(slotId, facultyId, facultyName, divId) {
+    selectFaculty(slotId, facultyId, facultyName);
+    
+    // Get subject from form
+    const subjectSelect = document.querySelector(`form input[name="subject_id"]`);
+    
+    // Predict risk for this combination
+    if (currentSubjectId) {
+        predictClashRisk(slotId, facultyId, divId);
+    }
+}
+
+// Original selectFaculty function
 function selectFaculty(slotId, facultyId, facultyName) {
     const select = document.querySelector('.faculty-select-' + slotId);
     if (select) {
@@ -281,6 +409,10 @@ function filterFaculty(selectElement, slotId) {
     const subjectId = selectElement.value;
     const subjectName = selectElement.options[selectElement.selectedIndex].getAttribute('data-name');
     const facultySelect = document.querySelector('.faculty-select-' + slotId);
+    
+    // Store current subject for risk prediction
+    currentSubjectId = subjectId;
+    currentSlotId = slotId;
     
     if (!subjectName) {
         facultySelect.innerHTML = '<option value="">-- First select subject --</option>';
@@ -315,6 +447,11 @@ function filterFaculty(selectElement, slotId) {
     if (facultySelect.options.length === 1) {
         facultySelect.innerHTML = '<option value="">-- No faculty available for this subject --</option>';
     }
+
+    // AUTO-TRIGGER ML Recommendations when subject is selected
+    if (subjectId) {
+        showMLRecommendations(slotId, currentDay);
+    }
 }
 
 function validateForm(form) {
@@ -324,6 +461,207 @@ function validateForm(form) {
         return false;
     }
     return true;
+}
+
+// ============ ML FUNCTIONS ============
+
+// Predict clash risk for faculty-slot-subject combo
+function predictClashRisk(slotId, facultyId, divisionId) {
+    if (!currentSubjectId) return;
+    
+    fetch('/api/ml/predict-clash-risk', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            faculty_id: facultyId,
+            division_id: divisionId,
+            subject_id: currentSubjectId,
+            time_slot_id: slotId,
+            day: currentDay,
+            room_number: '101'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.risk) {
+            const risk = data.risk;
+            const riskElement = document.getElementById(`risk-${slotId}-${facultyId}`);
+            if (riskElement) {
+                let riskClass = 'risk-low';
+                let riskIcon = '✓';
+                if (risk.risk_level === 'high') {
+                    riskClass = 'risk-high';
+                    riskIcon = '⚠️';
+                } else if (risk.risk_level === 'medium') {
+                    riskClass = 'risk-medium';
+                    riskIcon = '!';
+                }
+                
+                riskElement.innerHTML = `<span class="ml-badge ${riskClass}">${riskIcon} ${risk.risk_level.toUpperCase()} (${(risk.risk_score * 100).toFixed(0)}%)</span>`;
+            }
+        }
+    })
+    .catch(err => console.error('Risk prediction error:', err));
+}
+
+// Show ML recommendations for a time slot
+function showMLRecommendations(slotId, day) {
+    const panel = document.getElementById('recommendationsPanel');
+    currentSlotId = slotId;
+    
+    panel.style.display = 'block';
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
+    // Always load faculty recommendations when subject is selected
+    if (currentSubjectId) {
+        loadFacultyRecommendations(slotId, day);
+        loadSlotRecommendations(slotId, day);
+    } else {
+        document.getElementById('facultyRecommendationsContent').innerHTML = '<p style="color: #e2e8f0; font-size: 0.9rem;"><i class="fas fa-info-circle"></i> Select a subject first to see faculty recommendations</p>';
+        document.getElementById('slotRecommendationsContent').innerHTML = '<p style="color: #e2e8f0; font-size: 0.9rem;"><i class="fas fa-info-circle"></i> Select a subject first to see slot recommendations</p>';
+    }
+}
+
+// Load and display slot recommendations
+function loadSlotRecommendations(slotId, day) {
+    const container = document.getElementById('slotRecommendationsContent');
+    container.innerHTML = '<div style="text-align: center; padding: 1rem;"><div class="spinner"></div><div style="margin-top: 0.5rem; font-size: 0.85rem; opacity: 0.8;">Analyzing time slots...</div></div>';
+    
+    if (!currentSubjectId) {
+        container.innerHTML = '<p style="color: #e2e8f0; font-size: 0.9rem;"><i class="fas fa-info-circle"></i> Select a subject to get slot recommendations</p>';
+        return;
+    }
+    
+    // Try to find faculty from the form dropdown, or use first available faculty
+    const facultySelect = document.querySelector(`.faculty-select-${slotId}`);
+    let facultyId = null;
+    
+    if (facultySelect) {
+        // Check if a faculty is currently selected
+        if (facultySelect.value) {
+            facultyId = facultySelect.value;
+        } else {
+            // Auto-pick the first available faculty option
+            const options = facultySelect.querySelectorAll('option');
+            for (let i = 0; i < options.length; i++) {
+                if (options[i].value && options[i].value !== '') {
+                    facultyId = options[i].value;
+                    break;
+                }
+            }
+        }
+    }
+    
+    // If still no faculty, try to find any available faculty from the page
+    if (!facultyId) {
+        const availableCards = document.querySelectorAll('.faculty-card.available');
+        if (availableCards.length > 0) {
+            const onclickAttr = availableCards[0].getAttribute('onclick');
+            if (onclickAttr) {
+                const matches = onclickAttr.match(/\d+/g);
+                if (matches && matches.length > 1) {
+                    facultyId = matches[1];
+                }
+            }
+        }
+    }
+    
+    if (!facultyId) {
+        container.innerHTML = '<p style="color: #e2e8f0; font-size: 0.9rem;"><i class="fas fa-info-circle"></i> No faculty available to analyze slots</p>';
+        return;
+    }
+    
+    fetch(`/api/ml/slot-recommendations?faculty_id=${facultyId}&division_id=${divisionId}&subject_id=${currentSubjectId}&preferred_day=${day}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.recommendations && data.recommendations.length > 0) {
+                let html = '';
+                data.recommendations.slice(0, 5).forEach((rec, idx) => {
+                    let statusColor = rec.clash_risk < 0.3 ? '#48bb78' : (rec.clash_risk < 0.7 ? '#f6ad55' : '#f56565');
+                    let statusIcon = rec.clash_risk < 0.3 ? '✓' : (rec.clash_risk < 0.7 ? '⚠' : '✗');
+                    let bestTag = idx === 0 ? ' <span style="background: rgba(72,187,120,0.3); padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.7rem;">★ BEST</span>' : '';
+                    html += `
+                        <div class="recommendation-item">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span><strong>${rec.day}</strong> — ${rec.time_range}${bestTag}</span>
+                                <span style="background-color: ${statusColor}; padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">
+                                    ${statusIcon} ${(rec.clash_risk * 100).toFixed(0)}% risk
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<p style="color: #e2e8f0; font-size: 0.9rem;"><i class="fas fa-check-circle"></i> All time slots have similar risk levels</p>';
+            }
+        })
+        .catch(err => {
+            console.error('Slot recommendations error:', err);
+            container.innerHTML = '<p style="color: #fed7d7; font-size: 0.9rem;"><i class="fas fa-exclamation-triangle"></i> Could not load slot recommendations</p>';
+        });
+}
+
+// Load and display faculty recommendations
+function loadFacultyRecommendations(slotId, day) {
+    const container = document.getElementById('facultyRecommendationsContent');
+    container.innerHTML = '<div style="text-align: center; padding: 1rem;"><div class="spinner"></div><div style="margin-top: 0.5rem; font-size: 0.85rem; opacity: 0.8;">Finding best faculty...</div></div>';
+    
+    if (!currentSubjectId) {
+        container.innerHTML = '<p style="color: #e2e8f0; font-size: 0.9rem;"><i class="fas fa-info-circle"></i> Select a subject to get faculty recommendations</p>';
+        return;
+    }
+    
+    fetch(`/api/ml/recommend-faculty?subject_id=${currentSubjectId}&division_id=${divisionId}&preferred_day=${day}&preferred_time_slot_id=${slotId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.recommendations && data.recommendations.length > 0) {
+                let html = '';
+                data.recommendations.slice(0, 5).forEach((rec, idx) => {
+                    const scorePercent = (rec.overall_score * 100).toFixed(0);
+                    let scoreColor = scorePercent >= 80 ? '#48bb78' : (scorePercent >= 60 ? '#f6ad55' : '#f56565');
+                    let availTag = rec.availability_score > 0 ? '<span style="color: #48bb78;">✓ Free</span>' : '<span style="color: #f56565;">✗ Busy</span>';
+                    let expertTag = rec.subject_match >= 0.8 ? '<span style="background: rgba(72,187,120,0.3); padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.7rem;">EXPERT</span>' : '';
+                    let bestTag = idx === 0 ? ' <span style="background: rgba(72,187,120,0.3); padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.7rem;">★ TOP PICK</span>' : '';
+                    html += `
+                        <div class="recommendation-item" onclick="recommendFacultyToForm(${slotId}, ${rec.faculty_id}, '${rec.faculty_name.replace(/'/g, "\\'")}')"
+                             style="cursor: pointer;" title="Click to assign this faculty">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>${rec.faculty_name}</strong>${bestTag} ${expertTag}<br>
+                                    <small>${availTag} | Workload: ${rec.current_workload || 0} classes | Match: ${(rec.subject_match * 100).toFixed(0)}%</small>
+                                </div>
+                                <span style="background-color: ${scoreColor}; padding: 0.4rem 0.6rem; border-radius: 8px; font-weight: bold; color: white; min-width: 45px; text-align: center;">
+                                    ${scorePercent}%
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '<p style="font-size: 0.75rem; opacity: 0.6; margin-top: 0.5rem; text-align: center;"><i class="fas fa-mouse-pointer"></i> Click a faculty to auto-fill the form</p>';
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<p style="color: #e2e8f0; font-size: 0.9rem;"><i class="fas fa-info-circle"></i> No faculty recommendations available for this subject</p>';
+            }
+        })
+        .catch(err => {
+            console.error('Faculty recommendations error:', err);
+            container.innerHTML = '<p style="color: #fed7d7; font-size: 0.9rem;"><i class="fas fa-exclamation-triangle"></i> Could not load faculty recommendations</p>';
+        });
+}
+
+// Populate faculty field from recommendation click
+function recommendFacultyToForm(slotId, facultyId, facultyName) {
+    selectFaculty(slotId, facultyId, facultyName);
+    
+    // Also refresh slot recommendations now that we have a faculty
+    loadSlotRecommendations(slotId, currentDay);
+    
+    setTimeout(() => {
+        document.getElementById(`slot-${slotId}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
 }
 </script>
 {% endblock %}

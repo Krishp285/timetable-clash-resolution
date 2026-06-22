@@ -8,8 +8,14 @@
         border-left: 4px solid #f56565;
         padding: 1.5rem;
         border-radius: 12px;
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+    
+    .clash-card:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        transform: translateY(-1px);
     }
     
     .clash-card.resolved {
@@ -22,7 +28,8 @@
         padding: 0.5rem 1rem;
         border-radius: 8px;
         font-weight: 600;
-        margin-bottom: 1rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
     }
     
     .clash-type.faculty {
@@ -51,6 +58,287 @@
     .clash-details strong {
         color: #2d3748;
     }
+
+    .clash-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    /* AI Suggestions Panel */
+    .ai-suggestions-panel {
+        margin-top: 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        padding: 1.25rem;
+        color: white;
+        animation: slideDown 0.4s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ai-suggestions-panel::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            max-height: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            max-height: 1000px;
+            transform: translateY(0);
+        }
+    }
+
+    .ai-suggestions-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        font-size: 1.05rem;
+        font-weight: 700;
+    }
+
+    .ai-suggestions-header .ai-icon {
+        background: rgba(255,255,255,0.2);
+        padding: 0.35rem 0.6rem;
+        border-radius: 6px;
+        font-size: 1rem;
+    }
+
+    .suggestion-item {
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        transition: all 0.25s ease;
+        backdrop-filter: blur(4px);
+    }
+
+    .suggestion-item:hover {
+        background: rgba(255, 255, 255, 0.22);
+        transform: translateX(4px);
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .suggestion-info {
+        flex: 1;
+    }
+
+    .suggestion-description {
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .suggestion-detail {
+        font-size: 0.82rem;
+        opacity: 0.85;
+    }
+
+    .suggestion-risk-badge {
+        display: inline-block;
+        padding: 0.3rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+
+    .risk-low {
+        background: rgba(72, 187, 120, 0.9);
+        color: white;
+    }
+
+    .risk-medium {
+        background: rgba(246, 173, 85, 0.9);
+        color: white;
+    }
+
+    .risk-high {
+        background: rgba(245, 101, 101, 0.9);
+        color: white;
+    }
+
+    .apply-btn {
+        background: rgba(255, 255, 255, 0.95);
+        color: #667eea;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.82rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .apply-btn:hover {
+        background: white;
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .ai-loading {
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .ai-spinner {
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top: 3px solid white;
+        width: 24px;
+        height: 24px;
+        animation: spin 0.8s linear infinite;
+        display: inline-block;
+        margin-bottom: 0.5rem;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .no-suggestions {
+        text-align: center;
+        padding: 1rem;
+        opacity: 0.8;
+        font-style: italic;
+    }
+
+    .btn-ai {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.9rem;
+    }
+
+    .btn-ai:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-ai:active {
+        transform: translateY(0);
+    }
+
+    .score-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        font-weight: 800;
+        font-size: 0.85rem;
+    }
+
+    /* Toast notification */
+    .toast-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        animation: toastSlide 0.4s ease-out;
+        max-width: 400px;
+    }
+
+    .toast-success {
+        background: linear-gradient(135deg, #48bb78, #38a169);
+        color: white;
+    }
+
+    .toast-error {
+        background: linear-gradient(135deg, #f56565, #e53e3e);
+        color: white;
+    }
+
+    @keyframes toastSlide {
+        from {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Stats bar */
+    .clash-stats {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .stat-card .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .stat-card .stat-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .stat-card .stat-label {
+        font-size: 0.8rem;
+        color: #718096;
+        margin-top: 0.15rem;
+    }
 </style>
 {% endblock %}
 
@@ -66,12 +354,58 @@
             </span>
         </div>
     </div>
+
+    <!-- Stats Overview -->
+    {% if clashes %}
+    <div class="clash-stats">
+        {% set room_clashes = clashes|selectattr('clash_type', 'equalto', 'room')|list|length %}
+        {% set faculty_clashes = clashes|selectattr('clash_type', 'equalto', 'faculty')|list|length %}
+        {% set division_clashes = clashes|selectattr('clash_type', 'equalto', 'division')|list|length %}
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #feebc8; color: #7c2d12;">
+                <i class="fas fa-door-open"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ room_clashes }}</div>
+                <div class="stat-label">Room Clashes</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #fed7d7; color: #742a2a;">
+                <i class="fas fa-user"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ faculty_clashes }}</div>
+                <div class="stat-label">Faculty Clashes</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #e9d8fd; color: #44337a;">
+                <i class="fas fa-users"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ division_clashes }}</div>
+                <div class="stat-label">Division Clashes</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #c6f6d5; color: #22543d;">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ resolved_clashes|length }}</div>
+                <div class="stat-label">Resolved</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     
     {% if clashes %}
     <h3 style="margin-bottom: 1rem;"><i class="fas fa-exclamation-circle"></i> Active Clashes</h3>
     
     {% for clash in clashes %}
-    <div class="clash-card">
+    <div class="clash-card" id="clash-card-{{ clash.id }}">
         <div class="d-flex justify-between align-center">
             <div>
                 <span class="clash-type {{ clash.clash_type }}">
@@ -85,11 +419,16 @@
                     </span>
                 </div>
             </div>
-            <form method="POST" action="{{ url_for('resolve_clash', clash_id=clash.id) }}">
-                <button type="submit" class="btn btn-success">
-                    <i class="fas fa-check"></i> Mark as Resolved
+            <div class="clash-actions">
+                <button type="button" class="btn-ai" onclick="getAISuggestions({{ clash.id }})">
+                    <i class="fas fa-magic"></i> 🤖 Get AI Suggestions
                 </button>
-            </form>
+                <form method="POST" action="{{ url_for('resolve_clash', clash_id=clash.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> Resolve
+                    </button>
+                </form>
+            </div>
         </div>
         
         <div class="clash-details">
@@ -115,6 +454,9 @@
                 <p><strong>Time:</strong> {{ details.day }} - {{ details.time }}</p>
             {% endif %}
         </div>
+
+        <!-- AI Suggestions Container (loaded dynamically) -->
+        <div id="suggestions-{{ clash.id }}"></div>
     </div>
     {% endfor %}
     {% else %}
@@ -146,4 +488,152 @@
     {% endfor %}
     {% endif %}
 </div>
+
+<script>
+// Track which clashes have suggestions loaded
+const loadedSuggestions = {};
+
+function getAISuggestions(clashId) {
+    const container = document.getElementById(`suggestions-${clashId}`);
+    
+    // Toggle if already loaded
+    if (loadedSuggestions[clashId]) {
+        container.innerHTML = '';
+        loadedSuggestions[clashId] = false;
+        return;
+    }
+    
+    // Show loading state
+    container.innerHTML = `
+        <div class="ai-suggestions-panel">
+            <div class="ai-loading">
+                <div class="ai-spinner"></div>
+                <div style="margin-top: 0.5rem; font-size: 0.9rem;">Analyzing clash & generating AI suggestions...</div>
+            </div>
+        </div>
+    `;
+    
+    // Fetch suggestions from API
+    fetch(`/api/ml/clash-suggestions/${clashId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.suggestions && data.suggestions.length > 0) {
+                renderSuggestions(clashId, data);
+                loadedSuggestions[clashId] = true;
+            } else {
+                container.innerHTML = `
+                    <div class="ai-suggestions-panel">
+                        <div class="ai-suggestions-header">
+                            <span class="ai-icon">🤖</span>
+                            AI Resolution Suggestions
+                        </div>
+                        <div class="no-suggestions">
+                            <i class="fas fa-info-circle"></i> No alternative suggestions found for this clash. 
+                            You may need to manually adjust the timetable or add more resources.
+                        </div>
+                    </div>
+                `;
+                loadedSuggestions[clashId] = true;
+            }
+        })
+        .catch(err => {
+            console.error('Error fetching suggestions:', err);
+            container.innerHTML = `
+                <div class="ai-suggestions-panel">
+                    <div class="ai-suggestions-header">
+                        <span class="ai-icon">🤖</span>
+                        AI Resolution Suggestions
+                    </div>
+                    <div class="no-suggestions">
+                        <i class="fas fa-exclamation-triangle"></i> Error loading suggestions. Please try again.
+                    </div>
+                </div>
+            `;
+        });
+}
+
+function renderSuggestions(clashId, data) {
+    const container = document.getElementById(`suggestions-${clashId}`);
+    
+    let clashTypeLabel = '';
+    let clashIcon = '';
+    
+    switch(data.clash_type) {
+        case 'room':
+            clashTypeLabel = 'Alternative Rooms Available';
+            clashIcon = '🏫';
+            break;
+        case 'faculty':
+            clashTypeLabel = 'Alternative Faculty Available';
+            clashIcon = '👨‍🏫';
+            break;
+        case 'division':
+            clashTypeLabel = 'Alternative Time Slots Available';
+            clashIcon = '📅';
+            break;
+    }
+    
+    let suggestionsHtml = '';
+    
+    data.suggestions.forEach((suggestion, index) => {
+        const riskClass = suggestion.risk_level === 'low' ? 'risk-low' : 
+                          (suggestion.risk_level === 'medium' ? 'risk-medium' : 'risk-high');
+        
+        const riskLabel = suggestion.risk_level === 'low' ? '✓ Low Risk' : 
+                          (suggestion.risk_level === 'medium' ? '⚠ Medium' : '⚠ High Risk');
+        
+        const riskPercent = Math.round(suggestion.risk_score * 100);
+        
+        const bestLabel = index === 0 ? '<span style="background: rgba(72,187,120,0.3); padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.72rem; margin-left: 0.5rem; font-weight: 700;">★ BEST MATCH</span>' : '';
+
+        let scoreHtml = '';
+        if (suggestion.score !== undefined) {
+            const scoreColor = suggestion.score >= 80 ? 'rgba(72,187,120,0.9)' : 
+                              (suggestion.score >= 60 ? 'rgba(246,173,85,0.9)' : 'rgba(245,101,101,0.9)');
+            scoreHtml = `<div class="score-badge" style="background: ${scoreColor}; color: white;">${suggestion.score}%</div>`;
+        }
+        
+        suggestionsHtml += `
+            <div class="suggestion-item">
+                <div style="font-size: 1.3rem; flex-shrink: 0;">${suggestion.icon || clashIcon}</div>
+                <div class="suggestion-info">
+                    <div class="suggestion-description">
+                        ${suggestion.description}${bestLabel}
+                    </div>
+                    <div class="suggestion-detail">
+                        ${suggestion.detail}
+                    </div>
+                </div>
+                ${scoreHtml}
+                <span class="suggestion-risk-badge ${riskClass}">
+                    ${riskLabel} (${riskPercent}%)
+                </span>
+                <form method="POST" action="/admin/clashes/auto-resolve/${clashId}" style="display: inline; flex-shrink: 0;">
+                    <input type="hidden" name="action_type" value="${suggestion.action_type}">
+                    <input type="hidden" name="action_value" value="${suggestion.action_value}">
+                    <button type="submit" class="apply-btn" onclick="this.innerHTML='<i class=\\'fas fa-spinner fa-spin\\'></i> Applying...'; this.disabled=true; this.form.submit();">
+                        <i class="fas fa-check-circle"></i> Apply Fix
+                    </button>
+                </form>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = `
+        <div class="ai-suggestions-panel">
+            <div class="ai-suggestions-header">
+                <span class="ai-icon">🤖</span>
+                AI Resolution Suggestions — ${clashTypeLabel}
+                <span style="margin-left: auto; font-size: 0.8rem; opacity: 0.7; font-weight: 400;">
+                    ${data.total_suggestions} suggestion${data.total_suggestions !== 1 ? 's' : ''} found
+                </span>
+            </div>
+            ${suggestionsHtml}
+            <div style="font-size: 0.75rem; opacity: 0.6; margin-top: 0.5rem; text-align: center;">
+                <i class="fas fa-info-circle"></i> Click "Apply Fix" to auto-update the timetable and resolve this clash
+            </div>
+        </div>
+    `;
+}
+</script>
 {% endblock %}

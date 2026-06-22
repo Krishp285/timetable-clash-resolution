@@ -19,7 +19,7 @@ from flask_login import LoginManager, current_user, login_user, logout_user, log
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-change-in-production'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://username:password@localhost/timetable_system'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/timetable_system'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
@@ -968,6 +968,207 @@ def resolve_clash(clash_id):
     flash('Clash marked as resolved', 'success')
     return redirect(url_for('view_clashes'))
 
+@app.route('/api/ml/clash-suggestions/<int:clash_id>', methods=['GET'])
+@admin_required
+def api_clash_suggestions(clash_id):
+    """Get ML-powered resolution suggestions for a specific clash"""
+    try:
+        result = ClashService.generate_resolution_suggestions(clash_id)
+        return jsonify({
+            'success': True,
+            **result
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'suggestions': []
+        }), 400
+
+@app.route('/admin/clashes/auto-resolve/<int:clash_id>', methods=['POST'])
+@admin_required
+def auto_resolve_clash(clash_id):
+    """Apply an ML suggestion to auto-resolve a clash"""
+    action_type = request.form.get('action_type')
+    action_value = request.form.get('action_value')
+    
+    if not action_type or not action_value:
+        flash('Missing action details', 'danger')
+        return redirect(url_for('view_clashes'))
+    
+    success, message = ClashService.apply_suggestion(clash_id, action_type, action_value)
+    
+    if success:
+        flash(f'✅ Clash auto-resolved: {message}', 'success')
+    else:
+        flash(f'❌ Could not resolve: {message}', 'danger')
+    
+    return redirect(url_for('view_clashes'))
+
+
+# ============================================
+# 🤖 ML-ENHANCED API ROUTES
+# ============================================
+
+@app.route('/api/ml/predict-clash-risk', methods=['POST'])
+@admin_required
+def api_predict_clash_risk():
+    """Predict clash risk for a proposed timetable entry"""
+    data = request.json
+    
+    try:
+        risk = ClashService.predict_clash_risk(
+            faculty_id=data.get('faculty_id'),
+            division_id=data.get('division_id'),
+            subject_id=data.get('subject_id'),
+            time_slot_id=data.get('time_slot_id'),
+            day=data.get('day'),
+            room_number=data.get('room_number', '101')
+        )
+        
+        return jsonify({
+            'success': True,
+            'risk': risk
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
+@app.route('/api/ml/slot-recommendations', methods=['GET', 'POST'])
+@admin_required
+def api_slot_recommendations():
+    """Get smart slot recommendations for a faculty"""
+    if request.method == 'POST':
+        data = request.json
+        faculty_id = data.get('faculty_id')
+        division_id = data.get('division_id')
+        subject_id = data.get('subject_id')
+        preferred_day = data.get('preferred_day', 'Monday')
+    else:
+        faculty_id = request.args.get('faculty_id', type=int)
+        division_id = request.args.get('division_id', type=int)
+        subject_id = request.args.get('subject_id', type=int)
+        preferred_day = request.args.get('preferred_day', 'Monday')
+    
+    try:
+        recommendations = ClashService.get_smart_slot_recommendations(
+            faculty_id, division_id, subject_id, preferred_day
+        )
+        
+        return jsonify({
+            'success': True,
+            'recommendations': recommendations
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
+@app.route('/api/ml/recommend-faculty', methods=['GET', 'POST'])
+@admin_required
+def api_recommend_faculty():
+    """Get ML-based faculty recommendations"""
+    if request.method == 'POST':
+        data = request.json
+        subject_id = data.get('subject_id')
+        division_id = data.get('division_id')
+        preferred_day = data.get('preferred_day', 'Monday')
+        preferred_time_slot_id = data.get('preferred_time_slot_id')
+    else:
+        subject_id = request.args.get('subject_id', type=int)
+        division_id = request.args.get('division_id', type=int)
+        preferred_day = request.args.get('preferred_day', 'Monday')
+        preferred_time_slot_id = request.args.get('preferred_time_slot_id', type=int)
+    
+    try:
+        recommendations = ClashService.recommend_best_faculty(
+            subject_id, division_id, preferred_day, preferred_time_slot_id
+        )
+        
+        return jsonify({
+            'success': True,
+            'recommendations': recommendations
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
+@app.route('/api/ml/evaluate-timetable', methods=['POST'])
+@admin_required
+def api_evaluate_timetable():
+    """Evaluate quality of entire timetable"""
+    data = request.json
+    timetable_entries = data.get('entries', [])
+    division_id = data.get('division_id')
+    
+    try:
+        if division_id and not timetable_entries:
+            # Get all entries for division
+            entries = Timetable.query.filter_by(division_id=division_id).all()
+            timetable_entries = [
+                {
+                    'faculty_id': e.faculty_id,
+                    'division_id': e.division_id,
+                    'subject_id': e.subject_id,
+                    'time_slot_id': e.time_slot_id,
+                    'day': e.day,
+                    'room_number': e.room_number
+                }
+                for e in entries
+            ]
+        
+        quality = ClashService.evaluate_timetable_quality(timetable_entries)
+        
+        return jsonify({
+            'success': True,
+            'quality': quality
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
+@app.route('/api/ml/clash-risk-summary', methods=['GET'])
+@admin_required
+def api_clash_risk_summary():
+    """Get clash risk summary for divisions"""
+    division_id = request.args.get('division_id', type=int)
+    
+    try:
+        summary = ClashService.get_clash_risk_summary(division_id)
+        
+        return jsonify({
+            'success': True,
+            'summary': summary
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
+@app.route('/api/ml/train-model', methods=['POST'])
+@admin_required
+def api_train_model():
+    """Train/retrain the ML clash prediction model"""
+    try:
+        success = ClashService.train_clash_prediction_model()
+        
+        return jsonify({
+            'success': success,
+            'message': 'Model trained successfully' if success else 'Model training failed'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
 
 
 # ============================================
