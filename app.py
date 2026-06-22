@@ -68,31 +68,6 @@ def admin_required(f):
     return decorated_function
 
 # ============================================
-# 🔍 DEBUG ROUTE (remove after verifying)
-# ============================================
-@app.route('/debug/db')
-def debug_db():
-    db_uri = app.config['SQLALCHEMY_DATABASE_URI']
-    # Mask password for safety
-    import re
-    masked = re.sub(r'://([^:]+):([^@]+)@', r'://\1:****@', db_uri)
-    try:
-        user_count = User.query.count()
-        return jsonify({
-            'database_url': masked,
-            'status': 'connected',
-            'user_count': user_count,
-            'env_var_set': bool(os.environ.get('DATABASE_URL'))
-        })
-    except Exception as e:
-        return jsonify({
-            'database_url': masked,
-            'status': 'error',
-            'error': str(e),
-            'env_var_set': bool(os.environ.get('DATABASE_URL'))
-        })
-
-# ============================================
 # 4️⃣ AUTH ROUTES (LOGIN / SIGNUP / LOGOUT)
 # ============================================
 
