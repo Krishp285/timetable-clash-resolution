@@ -30,14 +30,21 @@ if database_url.startswith('postgres://'):
 if database_url.startswith('mysql://'):
     database_url = database_url.replace('mysql://', 'mysql+pymysql://', 1)
 # Strip ssl-mode param (PyMySQL doesn't support it as URL param)
+needs_ssl = False
 if 'ssl-mode' in database_url:
-    # Remove ?ssl-mode=... or &ssl-mode=...
+    needs_ssl = True
     import re
     database_url = re.sub(r'[?&]ssl-mode=[^&]*', '', database_url)
-    # Fix URL if we removed the first param and left a dangling &
     database_url = database_url.replace('?&', '?').rstrip('?')
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Configure SSL for Aiven MySQL (required for remote MySQL connections)
+if needs_ssl or 'aivencloud.com' in database_url:
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'connect_args': {
+            'ssl': {'ssl_mode': 'REQUIRED'}
+        }
+    }
 db.init_app(app)
 
 # ============================================
