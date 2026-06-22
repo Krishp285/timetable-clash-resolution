@@ -29,6 +29,13 @@ if database_url.startswith('postgres://'):
 # Aiven MySQL uses mysql:// but we need mysql+pymysql:// for PyMySQL driver
 if database_url.startswith('mysql://'):
     database_url = database_url.replace('mysql://', 'mysql+pymysql://', 1)
+# Strip ssl-mode param (PyMySQL doesn't support it as URL param)
+if 'ssl-mode' in database_url:
+    # Remove ?ssl-mode=... or &ssl-mode=...
+    import re
+    database_url = re.sub(r'[?&]ssl-mode=[^&]*', '', database_url)
+    # Fix URL if we removed the first param and left a dangling &
+    database_url = database_url.replace('?&', '?').rstrip('?')
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
