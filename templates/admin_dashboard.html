@@ -10,20 +10,54 @@
         margin-bottom: 2rem;
     }
     .stat-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(12px);
         color: white;
         padding: 2rem;
         border-radius: 16px;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary), var(--accent));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .stat-card:hover::before { opacity: 1; }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(6, 214, 160, 0.2);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3), 0 0 30px rgba(6, 214, 160, 0.05);
+    }
+    .stat-card.green { border-top: 3px solid #22c55e; }
+    .stat-card.orange { border-top: 3px solid #f59e0b; }
+    .stat-card.blue { border-top: 3px solid #38bdf8; }
+    .stat-card.purple { border-top: 3px solid #7c3aed; }
     .stat-number {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
+        font-size: 2.8rem;
+        font-weight: 900;
+        margin-bottom: 0.25rem;
+        background: linear-gradient(135deg, #f1f5f9, #94a3b8);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.03em;
     }
     .stat-label {
-        font-size: 1rem;
-        opacity: 0.9;
+        font-size: 0.9rem;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+    .stat-label i {
+        margin-right: 0.35rem;
+        opacity: 0.7;
     }
     .quick-actions {
         display: grid;
@@ -34,23 +68,62 @@
     .action-btn {
         padding: 1.5rem;
         text-align: center;
-        background: white;
-        border: 2px solid #e2e8f0;
-        border-radius: 12px;
+        background: rgba(30, 41, 59, 0.5);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: 14px;
         text-decoration: none;
-        color: #2d3748;
-        transition: all 0.3s;
+        color: #f1f5f9;
+        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        backdrop-filter: blur(8px);
+        position: relative;
+        overflow: hidden;
     }
+    .action-btn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(6, 214, 160, 0.06), rgba(124, 58, 237, 0.04));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .action-btn:hover::before { opacity: 1; }
     .action-btn:hover {
-        border-color: #667eea;
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        border-color: rgba(6, 214, 160, 0.3);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2), 0 0 25px rgba(6, 214, 160, 0.06);
     }
     .action-btn i {
         font-size: 2rem;
-        color: #667eea;
+        background: linear-gradient(135deg, #06d6a0, #38bdf8);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
         margin-bottom: 0.5rem;
+        transition: transform 0.3s ease;
     }
+    .action-step {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #0a0e1a;
+        background: linear-gradient(135deg, #06d6a0, #38bdf8);
+        box-shadow: 0 0 20px rgba(6, 214, 160, 0.18);
+    }
+    .action-btn:hover i {
+        transform: scale(1.15);
+    }
+    .action-btn div:last-child {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #94a3b8;
+    }
+    .action-btn:hover div:last-child { color: #f1f5f9; }
     .division-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -59,18 +132,27 @@
     }
     .division-card {
         padding: 1.5rem;
-        border-radius: 12px;
-        border: 2px solid #e2e8f0;
-        transition: all 0.3s;
+        border-radius: 14px;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        background: rgba(30, 41, 59, 0.4);
+        backdrop-filter: blur(8px);
+        transition: all 0.3s ease;
     }
+    .division-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+    .division-card h4 { color: #f1f5f9; }
     .division-card.has-error {
-        border-color: #f56565;
-        background: #fed7d7;
+        border-color: rgba(239, 68, 68, 0.35);
+        background: rgba(239, 68, 68, 0.06);
     }
+    .division-card.has-error h4 { color: #fca5a5; }
     .division-card.ok {
-        border-color: #48bb78;
-        background: #c6f6d5;
+        border-color: rgba(34, 197, 94, 0.3);
+        background: rgba(34, 197, 94, 0.05);
     }
+    .division-card.ok h4 { color: #86efac; }
 </style>
 {% endblock %}
 
@@ -81,27 +163,52 @@
             <i class="fas fa-tachometer-alt"></i> Admin Dashboard
         </h1>
     </div>
+
+    <div class="card" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(6,214,160,0.08), rgba(124,58,237,0.08)); border: 1px solid rgba(148,163,184,0.12);">
+        <div class="card-header">
+            <h2 class="card-title" style="font-size: 1.3rem;">
+                <i class="fas fa-route"></i> Guided Flow
+            </h2>
+        </div>
+        <div class="quick-actions" style="margin-top: 0;">
+            <a href="{{ url_for('timetable_select') }}" class="action-btn">
+                <div class="action-step">1</div>
+                <div>Create a timetable</div>
+                <div>Start with branch and division, then schedule entries.</div>
+            </a>
+            <a href="{{ url_for('final_timetable_view') }}" class="action-btn">
+                <div class="action-step">2</div>
+                <div>Review timetables</div>
+                <div>Inspect what is already scheduled across divisions.</div>
+            </a>
+            <a href="{{ url_for('view_clashes') }}" class="action-btn">
+                <div class="action-step">3</div>
+                <div>Solve clashes</div>
+                <div>Use AI fixes for room, faculty, and timing issues.</div>
+            </a>
+        </div>
+    </div>
     
     <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card purple">
             <div class="stat-number">{{ total_branches }}</div>
             <div class="stat-label">
                 <i class="fas fa-building"></i> Branches
             </div>
         </div>
-        <div class="stat-card" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);">
+        <div class="stat-card green">
             <div class="stat-number">{{ total_divisions }}</div>
             <div class="stat-label">
                 <i class="fas fa-users"></i> Divisions
             </div>
         </div>
-        <div class="stat-card" style="background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);">
+        <div class="stat-card orange">
             <div class="stat-number">{{ total_faculty }}</div>
             <div class="stat-label">
                 <i class="fas fa-chalkboard-teacher"></i> Faculty
             </div>
         </div>
-        <div class="stat-card" style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);">
+        <div class="stat-card blue">
             <div class="stat-number">{{ total_subjects }}</div>
             <div class="stat-label">
                 <i class="fas fa-book"></i> Subjects
@@ -109,7 +216,7 @@
         </div>
     </div>
     
-    <h3 style="margin-top: 2rem;">Quick Actions</h3>
+    <h3 style="margin-top: 2rem; color: #94a3b8; font-weight: 700;">Quick Actions</h3>
     <div class="quick-actions">
         <a href="{{ url_for('manage_branches') }}" class="action-btn">
             <div><i class="fas fa-building"></i></div>
@@ -134,6 +241,10 @@
         <a href="{{ url_for('timetable_select') }}" class="action-btn">
             <div><i class="fas fa-calendar-plus"></i></div>
             <div>Create Timetable</div>
+        </a>
+        <a href="{{ url_for('view_clashes') }}" class="action-btn">
+            <div><i class="fas fa-exclamation-triangle"></i></div>
+            <div>Solve Clashes</div>
         </a>
     </div>
 </div>
@@ -186,7 +297,7 @@
     </div>
     
     {% for branch_id, branch_data in division_summary.items() %}
-    <h3 style="margin-top: 1.5rem; color: #667eea;">
+    <h3 style="margin-top: 1.5rem; color: #06d6a0; font-weight: 700;">
         <i class="fas fa-building"></i> {{ branch_data.branch_name }}
     </h3>
     
@@ -194,16 +305,16 @@
         {% for division in branch_data.divisions %}
         <div class="division-card {% if division.clash_count > 0 %}has-error{% else %}ok{% endif %}">
             <h4 style="margin-bottom: 0.5rem;">{{ division.name }}</h4>
-            <p style="color: #718096; font-size: 0.9rem;">Semester {{ division.semester }}</p>
-            <div style="margin-top: 1rem; display: flex; justify-content: space-between;">
+            <p style="color: #64748b; font-size: 0.9rem;">Semester {{ division.semester }}</p>
+            <div style="margin-top: 1rem; display: flex; justify-content: space-between; color: #94a3b8; font-size: 0.9rem;">
                 <span>
                     <i class="fas fa-calendar-check"></i> {{ division.entry_count }} entries
                 </span>
                 <span>
                     {% if division.clash_count > 0 %}
-                        <i class="fas fa-exclamation-circle"></i> {{ division.clash_count }} clashes
+                        <i class="fas fa-exclamation-circle" style="color: #fca5a5;"></i> <span style="color: #fca5a5;">{{ division.clash_count }} clashes</span>
                     {% else %}
-                        <i class="fas fa-check-circle"></i> No clashes
+                        <i class="fas fa-check-circle" style="color: #86efac;"></i> <span style="color: #86efac;">No clashes</span>
                     {% endif %}
                 </span>
             </div>
@@ -212,7 +323,7 @@
             </a>
         </div>
         {% else %}
-        <p style="color: #718096;">No divisions created yet</p>
+        <p style="color: #64748b;">No divisions created yet</p>
         {% endfor %}
     </div>
     {% endfor %}

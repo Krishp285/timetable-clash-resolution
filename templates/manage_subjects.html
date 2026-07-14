@@ -15,8 +15,8 @@
         </div>
     </div>
     
-    <form method="POST" action="{{ url_for('add_subject') }}" style="background: #f7fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
-        <h3 style="margin-bottom: 1rem;"><i class="fas fa-plus-circle"></i> Add New Subject</h3>
+    <form method="POST" action="{{ url_for('add_subject') }}" style="background: rgba(30, 41, 59, 0.5); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid rgba(148, 163, 184, 0.08);">
+        <h3 style="margin-bottom: 1rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-plus-circle"></i> Add New Subject</h3>
         <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 1rem; align-items: end;">
             <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Subject Name</label>
@@ -74,7 +74,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="5" style="text-align: center; color: #718096;">No subjects found</td>
+                    <td colspan="5" style="text-align: center; color: #64748b;">No subjects found</td>
                 </tr>
                 {% endfor %}
             </tbody>

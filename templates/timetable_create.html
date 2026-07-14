@@ -24,38 +24,50 @@
     
     .day-tab {
         padding: 0.75rem 1.5rem;
-        border: 2px solid #e2e8f0;
+        border: 1px solid rgba(148, 163, 184, 0.15);
         border-radius: 10px;
-        background: white;
+        background: rgba(30, 41, 59, 0.5);
         cursor: pointer;
-        transition: all 0.3s;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         text-decoration: none;
-        color: #2d3748;
+        color: #94a3b8;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .day-tab:hover {
+        border-color: rgba(6, 214, 160, 0.3);
+        color: #f1f5f9;
+        background: rgba(6, 214, 160, 0.08);
     }
     
     .day-tab.active {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-color: #667eea;
+        background: linear-gradient(135deg, var(--primary) 0%, #0ea5e9 100%);
+        color: #0a0e1a;
+        border-color: var(--primary);
+        box-shadow: 0 4px 15px var(--primary-glow);
+        font-weight: 700;
     }
     
     .time-slot-card {
-        background: #f7fafc;
+        background: rgba(30, 41, 59, 0.5);
         padding: 1.5rem;
-        border-radius: 12px;
+        border-radius: 14px;
         margin-bottom: 1rem;
-        border: 2px solid #e2e8f0;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        transition: all 0.3s ease;
     }
     
     .time-slot-card.filled {
-        background: linear-gradient(135deg, #c6f6d5 0%, #bee3f8 100%);
-        border-color: #48bb78;
+        background: rgba(6, 214, 160, 0.06);
+        border-color: rgba(34, 197, 94, 0.25);
+        box-shadow: 0 0 20px rgba(34, 197, 94, 0.05);
     }
     
     .time-header {
-        font-size: 1.1rem;
+        font-size: 1.05rem;
         font-weight: 700;
-        color: #667eea;
+        color: var(--primary);
         margin-bottom: 1rem;
     }
     
@@ -65,12 +77,12 @@
     }
     
     .faculty-card {
-        background: white;
+        background: rgba(30, 41, 59, 0.6);
         padding: 1rem;
         border-radius: 10px;
         margin-bottom: 0.75rem;
-        border: 2px solid #e2e8f0;
-        transition: all 0.3s;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        transition: all 0.3s ease;
     }
     
     .faculty-card.available {
@@ -78,49 +90,51 @@
     }
     
     .faculty-card.available:hover {
-        border-color: #48bb78;
-        box-shadow: 0 4px 12px rgba(72, 187, 120, 0.2);
+        border-color: rgba(34, 197, 94, 0.4);
+        box-shadow: 0 4px 15px rgba(34, 197, 94, 0.1);
+        background: rgba(34, 197, 94, 0.06);
     }
     
     .faculty-card.busy {
-        opacity: 0.6;
-        background: #f7fafc;
+        opacity: 0.5;
+        background: rgba(30, 41, 59, 0.3);
     }
     
     .faculty-name {
         font-weight: 600;
         margin-bottom: 0.25rem;
+        color: #f1f5f9;
     }
     
     .faculty-subjects {
         font-size: 0.9rem;
-        color: #718096;
+        color: #64748b;
     }
     
     .add-entry-form {
-        background: #f7fafc;
+        background: rgba(30, 41, 59, 0.4);
         padding: 1.5rem;
         border-radius: 12px;
-        border: 2px dashed #cbd5e0;
+        border: 2px dashed rgba(148, 163, 184, 0.15);
     }
 
     /* ML Risk Indicators */
     .risk-low {
-        background: #c6f6d5;
-        border-color: #22543d;
-        color: #22543d;
+        background: rgba(34, 197, 94, 0.15);
+        border-color: rgba(34, 197, 94, 0.3);
+        color: #86efac;
     }
 
     .risk-medium {
-        background: #feebc8;
-        border-color: #7c2d12;
-        color: #7c2d12;
+        background: rgba(245, 158, 11, 0.15);
+        border-color: rgba(245, 158, 11, 0.3);
+        color: #fcd34d;
     }
 
     .risk-high {
-        background: #fed7d7;
-        border-color: #742a2a;
-        color: #742a2a;
+        background: rgba(239, 68, 68, 0.15);
+        border-color: rgba(239, 68, 68, 0.3);
+        color: #fca5a5;
     }
 
     .ml-badge {
@@ -130,13 +144,16 @@
         font-weight: 600;
         font-size: 0.85rem;
         margin: 0.25rem;
+        border: 1px solid;
     }
 
     .recommendations-panel {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, rgba(124, 58, 237, 0.3) 0%, rgba(6, 214, 160, 0.15) 100%);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(148, 163, 184, 0.15);
         color: white;
         padding: 1.5rem;
-        border-radius: 12px;
+        border-radius: 14px;
         margin-bottom: 1.5rem;
     }
 
@@ -146,18 +163,19 @@
     }
 
     .recommendation-item {
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.08);
         padding: 1rem;
-        border-radius: 8px;
+        border-radius: 10px;
         margin-bottom: 0.75rem;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.12);
         cursor: pointer;
-        transition: all 0.3s;
+        transition: all 0.3s ease;
     }
 
     .recommendation-item:hover {
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.15);
         transform: translateX(4px);
+        border-color: rgba(6, 214, 160, 0.3);
     }
 
     .ml-loading {
@@ -166,9 +184,9 @@
     }
 
     .spinner {
-        border: 3px solid rgba(255, 255, 255, 0.3);
+        border: 3px solid rgba(255, 255, 255, 0.2);
         border-radius: 50%;
-        border-top: 3px solid white;
+        border-top: 3px solid var(--primary);
         width: 20px;
         height: 20px;
         animation: spin 1s linear infinite;
@@ -189,7 +207,7 @@
             <h1 class="card-title">
                 <i class="fas fa-calendar-alt"></i> {{ division.full_name }} Timetable
             </h1>
-            <p style="color: #718096; margin-top: 0.5rem;">Semester {{ division.semester }} | {{ division.academic_year }}</p>
+            <p style="color: #64748b; margin-top: 0.5rem;">Semester {{ division.semester }} | {{ division.academic_year }}</p>
         </div>
         <a href="{{ url_for('view_timetable', division_id=division.id) }}" class="btn btn-outline">
             <i class="fas fa-eye"></i> View Full Timetable
@@ -205,31 +223,31 @@
         {% endfor %}
     </div>
     
-    <h2 style="margin-bottom: 1.5rem; color: #667eea;">
+    <h2 style="margin-bottom: 1.5rem; color: var(--primary); font-weight: 800;">
         <i class="fas fa-calendar-day"></i> {{ current_day }}
     </h2>
     
     <div class="timetable-container">
         <!-- LEFT SIDE: Time Slots -->
         <div>
-            <h3 style="margin-bottom: 1rem;"><i class="fas fa-clock"></i> Time Slots</h3>
+            <h3 style="margin-bottom: 1rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-clock"></i> Time Slots</h3>
             
             {% for slot in timeslots %}
             <div class="time-slot-card {% if timetable_map.get(slot.id) %}filled{% endif %}" id="slot-{{ slot.id }}">
                 <div class="time-header">
                     <i class="fas fa-clock"></i> {{ slot.time_range }}
                     {% if slot.slot_label %}
-                        <span style="font-size: 0.9rem; color: #718096;"> - {{ slot.slot_label }}</span>
+                        <span style="font-size: 0.9rem; color: #64748b;"> - {{ slot.slot_label }}</span>
                     {% endif %}
                 </div>
                 
                 {% set entry = timetable_map.get(slot.id) %}
                 {% if entry %}
-                    <div style="background: white; padding: 1rem; border-radius: 8px;">
-                        <div style="font-weight: 600; margin-bottom: 0.5rem;">
+                    <div style="background: rgba(15, 23, 42, 0.5); padding: 1rem; border-radius: 10px; border: 1px solid rgba(148, 163, 184, 0.08);">
+                        <div style="font-weight: 600; margin-bottom: 0.5rem; color: #f1f5f9;">
                             <i class="fas fa-book"></i> {{ entry.subject.name }}
                         </div>
-                        <div style="color: #718096; font-size: 0.9rem;">
+                        <div style="color: #64748b; font-size: 0.9rem;">
                             <i class="fas fa-user"></i> {{ entry.faculty.user.full_name }}<br>
                             <i class="fas fa-door-open"></i> Room {{ entry.room_number }}
                         </div>
@@ -297,7 +315,7 @@
                         <i class="fas fa-calendar"></i> Best Time Slots
                     </h4>
                     <div id="slotRecommendationsContent">
-                        <p style="color: #e2e8f0; font-size: 0.9rem;">Select a subject to see recommendations</p>
+                        <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">Select a subject to see recommendations</p>
                     </div>
                 </div>
 
@@ -307,18 +325,18 @@
                         <i class="fas fa-user-check"></i> Recommended Faculty
                     </h4>
                     <div id="facultyRecommendationsContent">
-                        <p style="color: #e2e8f0; font-size: 0.9rem;">Select a subject to see recommendations</p>
+                        <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">Select a subject to see recommendations</p>
                     </div>
                 </div>
             </div>
 
-            <h3 style="margin-bottom: 1rem;">
+            <h3 style="margin-bottom: 1rem; color: #94a3b8; font-weight: 700;">
                 <i class="fas fa-users"></i> Faculty Availability for {{ current_day }}
             </h3>
             
             {% for slot in timeslots %}
             <div style="margin-bottom: 2rem;">
-                <h4 style="color: #667eea; margin-bottom: 1rem;">
+                <h4 style="color: var(--primary); margin-bottom: 1rem; font-weight: 700;">
                     {{ slot.time_range }}
                     <button type="button" class="btn btn-sm btn-primary" onclick="showMLRecommendations({{ slot.id }}, '{{ current_day }}')" style="float: right;">
                         <i class="fas fa-magic"></i> ML Suggestions
@@ -354,7 +372,7 @@
                             </div>
                         </div>
                         {% if not faculty.is_available and faculty.clash_details %}
-                        <div style="margin-top: 0.5rem; padding: 0.5rem; background: #fff; border-radius: 4px; font-size: 0.85rem; color: #742a2a;">
+                        <div style="margin-top: 0.5rem; padding: 0.5rem; background: rgba(239, 68, 68, 0.08); border-radius: 6px; font-size: 0.85rem; color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.15);">
                             {{ faculty.clash_details.subject }} - {{ faculty.clash_details.division }}
                         </div>
                         {% endif %}
@@ -368,7 +386,7 @@
 </div>
 
 <script>
-let divisionId = {{ division.id }};
+let divisionId   = {{ division.id }};
 let currentDay = "{{ current_day }}";
 let currentSlotId = null;
 let currentSubjectId = null;
@@ -376,9 +394,6 @@ let currentSubjectId = null;
 // Enhanced selectFaculty with ML risk prediction
 function selectFacultyWithRisk(slotId, facultyId, facultyName, divId) {
     selectFaculty(slotId, facultyId, facultyName);
-    
-    // Get subject from form
-    const subjectSelect = document.querySelector(`form input[name="subject_id"]`);
     
     // Predict risk for this combination
     if (currentSubjectId) {
@@ -400,8 +415,11 @@ function selectFaculty(slotId, facultyId, facultyName) {
         }
         select.value = facultyId;
         
-        // Scroll to form
-        document.getElementById('slot-' + slotId).scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Scroll to form with null check
+        const slotEl = document.getElementById('slot-' + slotId);
+        if (slotEl) {
+            slotEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     }
 }
 
@@ -519,8 +537,8 @@ function showMLRecommendations(slotId, day) {
         loadFacultyRecommendations(slotId, day);
         loadSlotRecommendations(slotId, day);
     } else {
-        document.getElementById('facultyRecommendationsContent').innerHTML = '<p style="color: #e2e8f0; font-size: 0.9rem;"><i class="fas fa-info-circle"></i> Select a subject first to see faculty recommendations</p>';
-        document.getElementById('slotRecommendationsContent').innerHTML = '<p style="color: #e2e8f0; font-size: 0.9rem;"><i class="fas fa-info-circle"></i> Select a subject first to see slot recommendations</p>';
+        document.getElementById('facultyRecommendationsContent').innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;"><i class="fas fa-info-circle"></i> Select a subject first to see faculty recommendations</p>';
+        document.getElementById('slotRecommendationsContent').innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;"><i class="fas fa-info-circle"></i> Select a subject first to see slot recommendations</p>';
     }
 }
 
@@ -530,7 +548,7 @@ function loadSlotRecommendations(slotId, day) {
     container.innerHTML = '<div style="text-align: center; padding: 1rem;"><div class="spinner"></div><div style="margin-top: 0.5rem; font-size: 0.85rem; opacity: 0.8;">Analyzing time slots...</div></div>';
     
     if (!currentSubjectId) {
-        container.innerHTML = '<p style="color: #e2e8f0; font-size: 0.9rem;"><i class="fas fa-info-circle"></i> Select a subject to get slot recommendations</p>';
+        container.innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;"><i class="fas fa-info-circle"></i> Select a subject to get slot recommendations</p>';
         return;
     }
     
@@ -569,7 +587,7 @@ function loadSlotRecommendations(slotId, day) {
     }
     
     if (!facultyId) {
-        container.innerHTML = '<p style="color: #e2e8f0; font-size: 0.9rem;"><i class="fas fa-info-circle"></i> No faculty available to analyze slots</p>';
+        container.innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;"><i class="fas fa-info-circle"></i> No faculty available to analyze slots</p>';
         return;
     }
     
@@ -595,12 +613,12 @@ function loadSlotRecommendations(slotId, day) {
                 });
                 container.innerHTML = html;
             } else {
-                container.innerHTML = '<p style="color: #e2e8f0; font-size: 0.9rem;"><i class="fas fa-check-circle"></i> All time slots have similar risk levels</p>';
+                container.innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;"><i class="fas fa-check-circle"></i> All time slots have similar risk levels</p>';
             }
         })
         .catch(err => {
             console.error('Slot recommendations error:', err);
-            container.innerHTML = '<p style="color: #fed7d7; font-size: 0.9rem;"><i class="fas fa-exclamation-triangle"></i> Could not load slot recommendations</p>';
+            container.innerHTML = '<p style="color: #fca5a5; font-size: 0.9rem;"><i class="fas fa-exclamation-triangle"></i> Could not load slot recommendations</p>';
         });
 }
 
@@ -610,7 +628,7 @@ function loadFacultyRecommendations(slotId, day) {
     container.innerHTML = '<div style="text-align: center; padding: 1rem;"><div class="spinner"></div><div style="margin-top: 0.5rem; font-size: 0.85rem; opacity: 0.8;">Finding best faculty...</div></div>';
     
     if (!currentSubjectId) {
-        container.innerHTML = '<p style="color: #e2e8f0; font-size: 0.9rem;"><i class="fas fa-info-circle"></i> Select a subject to get faculty recommendations</p>';
+        container.innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;"><i class="fas fa-info-circle"></i> Select a subject to get faculty recommendations</p>';
         return;
     }
     
@@ -643,12 +661,12 @@ function loadFacultyRecommendations(slotId, day) {
                 html += '<p style="font-size: 0.75rem; opacity: 0.6; margin-top: 0.5rem; text-align: center;"><i class="fas fa-mouse-pointer"></i> Click a faculty to auto-fill the form</p>';
                 container.innerHTML = html;
             } else {
-                container.innerHTML = '<p style="color: #e2e8f0; font-size: 0.9rem;"><i class="fas fa-info-circle"></i> No faculty recommendations available for this subject</p>';
+                container.innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;"><i class="fas fa-info-circle"></i> No faculty recommendations available for this subject</p>';
             }
         })
         .catch(err => {
             console.error('Faculty recommendations error:', err);
-            container.innerHTML = '<p style="color: #fed7d7; font-size: 0.9rem;"><i class="fas fa-exclamation-triangle"></i> Could not load faculty recommendations</p>';
+            container.innerHTML = '<p style="color: #fca5a5; font-size: 0.9rem;"><i class="fas fa-exclamation-triangle"></i> Could not load faculty recommendations</p>';
         });
 }
 
@@ -656,11 +674,19 @@ function loadFacultyRecommendations(slotId, day) {
 function recommendFacultyToForm(slotId, facultyId, facultyName) {
     selectFaculty(slotId, facultyId, facultyName);
     
+    // Predict clash risk for recommended faculty
+    if (currentSubjectId) {
+        predictClashRisk(slotId, facultyId, divisionId);
+    }
+    
     // Also refresh slot recommendations now that we have a faculty
     loadSlotRecommendations(slotId, currentDay);
     
     setTimeout(() => {
-        document.getElementById(`slot-${slotId}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const slotEl = document.getElementById(`slot-${slotId}`);
+        if (slotEl) {
+            slotEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     }, 300);
 }
 </script>

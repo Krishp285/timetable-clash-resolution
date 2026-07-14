@@ -9,24 +9,24 @@
         </h1>
     </div>
     
-    <div style="background: #f7fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
-        <h3 style="margin-bottom: 1rem;">Current Entry Details</h3>
+    <div style="background: rgba(30, 41, 59, 0.5); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid rgba(148, 163, 184, 0.08);">
+        <h3 style="margin-bottom: 1rem; color: #94a3b8; font-weight: 700;">Current Entry Details</h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div>
-                <strong>Subject:</strong><br>
-                {{ entry.subject.name }}
+                <strong style="color: #64748b;">Subject:</strong><br>
+                <span style="color: #f1f5f9;">{{ entry.subject.name }}</span>
             </div>
             <div>
-                <strong>Day:</strong><br>
-                {{ entry.day }}
+                <strong style="color: #64748b;">Day:</strong><br>
+                <span style="color: #f1f5f9;">{{ entry.day }}</span>
             </div>
             <div>
-                <strong>Time:</strong><br>
-                {{ entry.time_slot.time_range }}
+                <strong style="color: #64748b;">Time:</strong><br>
+                <span style="color: #f1f5f9;">{{ entry.time_slot.time_range }}</span>
             </div>
             <div>
-                <strong>Division:</strong><br>
-                {{ entry.division.full_name }}
+                <strong style="color: #64748b;">Division:</strong><br>
+                <span style="color: #f1f5f9;">{{ entry.division.full_name }}</span>
             </div>
         </div>
     </div>

@@ -4,23 +4,28 @@
 {% block extra_css %}
 <style>
     .clash-card {
-        background: #fff;
-        border-left: 4px solid #f56565;
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(12px);
+        border-left: 4px solid #ef4444;
         padding: 1.5rem;
         border-radius: 12px;
         margin-bottom: 1.5rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(148, 163, 184, 0.08);
+        border-left: 4px solid #ef4444;
         transition: all 0.3s ease;
     }
     
     .clash-card:hover {
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-        transform: translateY(-1px);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+        transform: translateY(-2px);
+        border-color: rgba(148, 163, 184, 0.15);
+        border-left-color: #ef4444;
     }
     
     .clash-card.resolved {
-        border-left-color: #48bb78;
-        opacity: 0.7;
+        border-left-color: #22c55e;
+        opacity: 0.6;
     }
     
     .clash-type {
@@ -33,30 +38,39 @@
     }
     
     .clash-type.faculty {
-        background: #fed7d7;
-        color: #742a2a;
+        background: rgba(239, 68, 68, 0.15);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, 0.25);
     }
     
     .clash-type.room {
-        background: #feebc8;
-        color: #7c2d12;
+        background: rgba(245, 158, 11, 0.15);
+        color: #fcd34d;
+        border: 1px solid rgba(245, 158, 11, 0.25);
     }
     
     .clash-type.division {
-        background: #e9d8fd;
-        color: #44337a;
+        background: rgba(124, 58, 237, 0.15);
+        color: #c4b5fd;
+        border: 1px solid rgba(124, 58, 237, 0.25);
     }
     
     .clash-details {
-        background: #f7fafc;
+        background: rgba(30, 41, 59, 0.6);
         padding: 1rem;
-        border-radius: 8px;
+        border-radius: 10px;
         margin-top: 1rem;
         font-size: 0.95rem;
+        border: 1px solid rgba(148, 163, 184, 0.08);
+        color: #94a3b8;
     }
     
     .clash-details strong {
-        color: #2d3748;
+        color: #f1f5f9;
+    }
+
+    .clash-details p {
+        margin-bottom: 0.35rem;
     }
 
     .clash-actions {
@@ -68,13 +82,15 @@
     /* AI Suggestions Panel */
     .ai-suggestions-panel {
         margin-top: 1rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(124, 58, 237, 0.3) 0%, rgba(6, 214, 160, 0.15) 100%);
+        backdrop-filter: blur(12px);
+        border-radius: 14px;
         padding: 1.25rem;
         color: white;
         animation: slideDown 0.4s ease-out;
         position: relative;
         overflow: hidden;
+        border: 1px solid rgba(148, 163, 184, 0.12);
     }
 
     .ai-suggestions-panel::before {
@@ -84,7 +100,7 @@
         right: -50%;
         width: 100%;
         height: 100%;
-        background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
         pointer-events: none;
     }
 
@@ -111,15 +127,15 @@
     }
 
     .ai-suggestions-header .ai-icon {
-        background: rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.15);
         padding: 0.35rem 0.6rem;
         border-radius: 6px;
         font-size: 1rem;
     }
 
     .suggestion-item {
-        background: rgba(255, 255, 255, 0.12);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 10px;
         padding: 1rem;
         margin-bottom: 0.75rem;
@@ -132,9 +148,9 @@
     }
 
     .suggestion-item:hover {
-        background: rgba(255, 255, 255, 0.22);
+        background: rgba(255, 255, 255, 0.15);
         transform: translateX(4px);
-        border-color: rgba(255, 255, 255, 0.4);
+        border-color: rgba(6, 214, 160, 0.3);
     }
 
     .suggestion-info {
@@ -180,7 +196,7 @@
 
     .apply-btn {
         background: rgba(255, 255, 255, 0.95);
-        color: #667eea;
+        color: #7c3aed;
         border: none;
         padding: 0.5rem 1rem;
         border-radius: 8px;
@@ -192,12 +208,13 @@
         display: inline-flex;
         align-items: center;
         gap: 0.3rem;
+        font-family: 'Inter', sans-serif;
     }
 
     .apply-btn:hover {
         background: white;
         transform: scale(1.05);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        box-shadow: 0 2px 12px rgba(0,0,0,0.2);
     }
 
     .ai-loading {
@@ -206,9 +223,9 @@
     }
 
     .ai-spinner {
-        border: 3px solid rgba(255, 255, 255, 0.3);
+        border: 3px solid rgba(255, 255, 255, 0.2);
         border-radius: 50%;
-        border-top: 3px solid white;
+        border-top: 3px solid var(--primary);
         width: 24px;
         height: 24px;
         animation: spin 0.8s linear infinite;
@@ -229,7 +246,7 @@
     }
 
     .btn-ai {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #7c3aed 0%, #06d6a0 100%);
         color: white;
         border: none;
         padding: 0.5rem 1rem;
@@ -241,11 +258,12 @@
         align-items: center;
         gap: 0.4rem;
         font-size: 0.9rem;
+        font-family: 'Inter', sans-serif;
     }
 
     .btn-ai:hover {
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 4px 15px rgba(124, 58, 237, 0.35);
     }
 
     .btn-ai:active {
@@ -272,18 +290,18 @@
         padding: 1rem 1.5rem;
         border-radius: 10px;
         font-weight: 600;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         animation: toastSlide 0.4s ease-out;
         max-width: 400px;
     }
 
     .toast-success {
-        background: linear-gradient(135deg, #48bb78, #38a169);
+        background: linear-gradient(135deg, #22c55e, #16a34a);
         color: white;
     }
 
     .toast-error {
-        background: linear-gradient(135deg, #f56565, #e53e3e);
+        background: linear-gradient(135deg, #ef4444, #dc2626);
         color: white;
     }
 
@@ -307,15 +325,22 @@
     }
 
     .stat-card {
-        background: white;
+        background: rgba(30, 41, 59, 0.6);
+        backdrop-filter: blur(8px);
         padding: 1rem 1.5rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
         display: flex;
         align-items: center;
         gap: 0.75rem;
         flex: 1;
         min-width: 150px;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        border-color: rgba(6, 214, 160, 0.2);
     }
 
     .stat-card .stat-icon {
@@ -332,11 +357,12 @@
         font-size: 1.5rem;
         font-weight: 800;
         line-height: 1;
+        color: #f1f5f9;
     }
 
     .stat-card .stat-label {
         font-size: 0.8rem;
-        color: #718096;
+        color: #64748b;
         margin-top: 0.15rem;
     }
 </style>
@@ -363,7 +389,7 @@
         {% set division_clashes = clashes|selectattr('clash_type', 'equalto', 'division')|list|length %}
         
         <div class="stat-card">
-            <div class="stat-icon" style="background: #feebc8; color: #7c2d12;">
+            <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #fcd34d;">
                 <i class="fas fa-door-open"></i>
             </div>
             <div>
@@ -372,7 +398,7 @@
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #fed7d7; color: #742a2a;">
+            <div class="stat-icon" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5;">
                 <i class="fas fa-user"></i>
             </div>
             <div>
@@ -381,7 +407,7 @@
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #e9d8fd; color: #44337a;">
+            <div class="stat-icon" style="background: rgba(124, 58, 237, 0.15); color: #c4b5fd;">
                 <i class="fas fa-users"></i>
             </div>
             <div>
@@ -390,7 +416,7 @@
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #c6f6d5; color: #22543d;">
+            <div class="stat-icon" style="background: rgba(34, 197, 94, 0.15); color: #86efac;">
                 <i class="fas fa-check-circle"></i>
             </div>
             <div>
@@ -402,7 +428,7 @@
     {% endif %}
     
     {% if clashes %}
-    <h3 style="margin-bottom: 1rem;"><i class="fas fa-exclamation-circle"></i> Active Clashes</h3>
+    <h3 style="margin-bottom: 1rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-exclamation-circle"></i> Active Clashes</h3>
     
     {% for clash in clashes %}
     <div class="clash-card" id="clash-card-{{ clash.id }}">
@@ -414,7 +440,7 @@
                 </span>
                 <div style="margin-top: 0.5rem;">
                     <span class="badge badge-warning">{{ clash.severity|upper }}</span>
-                    <span style="color: #718096; margin-left: 1rem;">
+                    <span style="color: #64748b; margin-left: 1rem;">
                         <i class="fas fa-clock"></i> Detected: {{ clash.detected_at.strftime('%Y-%m-%d %H:%M') }}
                     </span>
                 </div>
@@ -460,15 +486,15 @@
     </div>
     {% endfor %}
     {% else %}
-    <div style="text-align: center; padding: 3rem; color: #718096;">
-        <i class="fas fa-check-circle" style="font-size: 4rem; color: #48bb78; margin-bottom: 1rem;"></i>
-        <h3 style="color: #48bb78;">No Active Clashes</h3>
+    <div style="text-align: center; padding: 3rem; color: #64748b;">
+        <i class="fas fa-check-circle" style="font-size: 4rem; color: #22c55e; margin-bottom: 1rem;"></i>
+        <h3 style="color: #86efac;">No Active Clashes</h3>
         <p>All timetable entries are conflict-free!</p>
     </div>
     {% endif %}
     
     {% if resolved_clashes %}
-    <h3 style="margin-top: 3rem; margin-bottom: 1rem;"><i class="fas fa-check-circle"></i> Resolved Clashes</h3>
+    <h3 style="margin-top: 3rem; margin-bottom: 1rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-check-circle"></i> Resolved Clashes</h3>
     
     {% for clash in resolved_clashes[:10] %}
     <div class="clash-card resolved">
@@ -478,7 +504,7 @@
                     <i class="fas fa-{% if clash.clash_type == 'faculty' %}user{% elif clash.clash_type == 'room' %}door-open{% else %}users{% endif %}"></i>
                     {{ clash.clash_type|upper }} CLASH (RESOLVED)
                 </span>
-                <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #718096;">
+                <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #64748b;">
                     <i class="fas fa-clock"></i> Detected: {{ clash.detected_at.strftime('%Y-%m-%d %H:%M') }} | 
                     <i class="fas fa-check"></i> Resolved: {{ clash.resolved_at.strftime('%Y-%m-%d %H:%M') if clash.resolved_at else 'N/A' }}
                 </div>

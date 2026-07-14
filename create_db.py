@@ -21,13 +21,13 @@ def create_database():
         # Drop all tables (CAUTION: Use only for fresh setup)
         print("Dropping existing tables (if any)...")
         db.drop_all()
-        print("✓ Tables dropped")
+        print("[OK] Tables dropped")
         print()
         
         # Create all tables
         print("Creating database tables...")
         db.create_all()
-        print("✓ All tables created successfully!")
+        print("[OK] All tables created successfully!")
         print()
         
         # Create default admin user
@@ -46,7 +46,7 @@ def create_database():
             db.session.add(admin)
             db.session.commit()
             
-            print("✓ Default admin user created!")
+            print("[OK] Default admin user created!")
         else:
             print("! Admin user already exists")
         
@@ -56,14 +56,14 @@ def create_database():
         print("=" * 60)
         print()
         print("Tables Created:")
-        print("  ✓ users              - User authentication")
-        print("  ✓ faculty            - Faculty profiles")
-        print("  ✓ branches           - Academic branches")
-        print("  ✓ divisions          - Division/sections")
-        print("  ✓ subjects           - Course subjects")
-        print("  ✓ time_slots         - Time slots")
-        print("  ✓ timetable          - Timetable entries")
-        print("  ✓ clash_logs         - Clash detection logs")
+        print("  [OK] users              - User authentication")
+        print("  [OK] faculty            - Faculty profiles")
+        print("  [OK] branches           - Academic branches")
+        print("  [OK] divisions          - Division/sections")
+        print("  [OK] subjects           - Course subjects")
+        print("  [OK] time_slots         - Time slots")
+        print("  [OK] timetable          - Timetable entries")
+        print("  [OK] clash_logs         - Clash detection logs")
         print()
         print("Default Login Credentials:")
         print("-" * 60)

@@ -9,8 +9,8 @@
         </h1>
     </div>
     
-    <form method="POST" action="{{ url_for('add_timeslot') }}" style="background: #f7fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
-        <h3 style="margin-bottom: 1rem;"><i class="fas fa-plus-circle"></i> Add New Time Slot</h3>
+    <form method="POST" action="{{ url_for('add_timeslot') }}" style="background: rgba(30, 41, 59, 0.5); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid rgba(148, 163, 184, 0.08);">
+        <h3 style="margin-bottom: 1rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-plus-circle"></i> Add New Time Slot</h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr 2fr auto; gap: 1rem; align-items: end;">
             <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Start Time</label>
@@ -72,7 +72,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="4" style="text-align: center; color: #718096;">No time slots added yet</td>
+                    <td colspan="4" style="text-align: center; color: #64748b;">No time slots added yet</td>
                 </tr>
                 {% endfor %}
             </tbody>

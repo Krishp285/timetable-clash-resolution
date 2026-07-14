@@ -10,6 +10,31 @@ from services.ml_clash_predictor import ml_predictor
 
 class ClashService:
     """Service to detect and manage timetable clashes"""
+
+    @staticmethod
+    def _get_room_candidates():
+        """Build a best-effort pool of room numbers from timetable data."""
+        raw_rooms = [room for (room,) in db.session.query(Timetable.room_number).distinct().all() if room]
+        room_candidates = set(raw_rooms)
+
+        for room in raw_rooms:
+            room_text = str(room).strip()
+            if room_text.isdigit():
+                room_number = int(room_text)
+                for offset in (-2, -1, 1, 2):
+                    candidate = str(room_number + offset)
+                    if candidate != room_text and room_number + offset > 0:
+                        room_candidates.add(candidate)
+            else:
+                prefix = ''.join(ch for ch in room_text if not ch.isdigit())
+                suffix = ''.join(ch for ch in room_text if ch.isdigit())
+                if suffix.isdigit():
+                    base_number = int(suffix)
+                    for offset in (-1, 1):
+                        candidate = f"{prefix}{base_number + offset}"
+                        room_candidates.add(candidate)
+
+        return sorted(room_candidates)
     
     @staticmethod
     def check_faculty_clash(faculty_id, day, time_slot_id, exclude_entry_id=None):
@@ -458,15 +483,8 @@ class ClashService:
         Returns:
             list: List of available room numbers
         """
-        # Get all distinct rooms used in the system
-        all_rooms_query = db.session.query(Timetable.room_number).distinct().all()
-        all_rooms = [r[0] for r in all_rooms_query]
-        
-        # Add some common default rooms if the system has few entries
-        default_rooms = ['101', '102', '103', '104', '105', '201', '202', '203', 'Lab-A', 'Lab-B', 'Lab-C']
-        for room in default_rooms:
-            if room not in all_rooms:
-                all_rooms.append(room)
+        # Get a best-effort pool of rooms seen in the system plus nearby candidates
+        all_rooms = ClashService._get_room_candidates()
         
         # Get rooms occupied at this day/time
         occupied_query = Timetable.query.filter(
@@ -474,8 +492,6 @@ class ClashService:
             Timetable.time_slot_id == time_slot_id
         ).all()
         occupied_rooms = [entry.room_number for entry in occupied_query]
-        
-        # Filter out occupied and excluded rooms
         available_rooms = [
             room for room in all_rooms
             if room not in occupied_rooms and room != exclude_room
@@ -527,36 +543,191 @@ class ClashService:
         if clash.clash_type == 'room':
             # ROOM CLASH: suggest alternative available rooms
             room = details.get('room', '')
-            available_rooms = ClashService.get_available_rooms_for_slot(
-                day, matching_slot.id if matching_slot else 1, exclude_room=room
-            )
+            subject_name = details.get('subject', '')
+            subject = Subject.query.filter_by(name=subject_name).first()
+            subject_id = subject.id if subject else 1
             
-            for idx, alt_room in enumerate(available_rooms[:5]):
-                # Calculate risk score for this room
-                risk_score = 0.05 + (idx * 0.04)  # Base low risk for available rooms
+            # Get all distinct rooms in the database
+            all_rooms_query = db.session.query(Timetable.room_number).distinct().all()
+            all_rooms = sorted([r[0] for r in all_rooms_query if r[0] != room])
+            
+            # Check occupancy map for rooms in this time slot
+            occupied_map = {}
+            if matching_slot:
+                occupied_entries = Timetable.query.filter(
+                    Timetable.day == day,
+                    Timetable.time_slot_id == matching_slot.id
+                ).all()
+                for entry in occupied_entries:
+                    occupied_map[entry.room_number] = entry.division.full_name
+            
+            # 1. Timeslot shift suggestions
+            if matching_slot and clash.faculty_id and clash.division_id:
+                try:
+                    alt_slots = ml_predictor.get_alternative_timeslots(
+                        clash.faculty_id,
+                        clash.division_id,
+                        subject_id,
+                        day,
+                        matching_slot.id
+                    )
+                    for slot_rec in alt_slots:
+                        if slot_rec['status'] != 'unavailable':
+                            suggestions.append({
+                                'type': 'timeslot_change',
+                                'description': f'Move lecture to {slot_rec["day"]} {slot_rec["time_range"]}',
+                                'detail': f'Keep the same class, but move it to a free slot | Risk: {int(slot_rec["clash_risk"] * 100)}%',
+                                'risk_score': round(slot_rec['clash_risk'], 2),
+                                'risk_level': 'low' if slot_rec['clash_risk'] < 0.3 else ('medium' if slot_rec['clash_risk'] < 0.7 else 'high'),
+                                'action_value': f'{slot_rec["slot_id"]}|{slot_rec["day"]}',
+                                'action_type': 'change_timeslot',
+                                'icon': '📅'
+                            })
+                except Exception:
+                    pass
+            
+            # 2. Room change suggestions (free rooms first, then occupied rooms)
+            room_count = 0
+            for alt_room in all_rooms:
+                if alt_room not in occupied_map:
+                    risk_score = 0.05
+                    if matching_slot and clash.faculty_id and clash.division_id:
+                        try:
+                            risk_pred = ml_predictor.predict_clash_risk(
+                                clash.faculty_id, clash.division_id,
+                                subject_id, matching_slot.id, day, alt_room
+                            )
+                            risk_score = risk_pred.get('risk_score', risk_score)
+                        except Exception:
+                            pass
+                    suggestions.append({
+                        'type': 'room_change',
+                        'description': f'Assign Room {alt_room} instead of Room {room}',
+                        'detail': f'Room {alt_room} is available at {day} {time_str}',
+                        'risk_score': round(risk_score, 2),
+                        'risk_level': 'low' if risk_score < 0.3 else ('medium' if risk_score < 0.7 else 'high'),
+                        'action_value': alt_room,
+                        'action_type': 'change_room',
+                        'icon': '🏫'
+                    })
+                    room_count += 1
+                    if room_count >= 5:
+                        break
+            
+            if room_count < 5:
+                for alt_room in all_rooms:
+                    if alt_room in occupied_map:
+                        occupier = occupied_map[alt_room]
+                        suggestions.append({
+                            'type': 'room_change',
+                            'description': f'Assign Room {alt_room} instead of Room {room} (Occupied)',
+                            'detail': f'Room {alt_room} is occupied by {occupier} at {day} {time_str}',
+                            'risk_score': 0.85,
+                            'risk_level': 'high',
+                            'action_value': alt_room,
+                            'action_type': 'change_room',
+                            'icon': '⚠️'
+                        })
+                        room_count += 1
+                        if room_count >= 5:
+                            break
+            
+            # 3. Faculty change suggestions (free faculty first, then busy faculty)
+            if matching_slot:
+                available_faculty = ClashService.get_all_faculty_availability(
+                    day, matching_slot.id, None
+                )
                 
-                # Try ML risk prediction if we have enough data
-                if matching_slot and clash.faculty_id and clash.division_id:
+                seen_ids = set()
+                faculty_count = 0
+                current_faculty_id = clash.faculty_id
+                
+                # ML recommendations
+                ml_recommendations = []
+                if subject and clash.division_id:
                     try:
-                        risk_pred = ml_predictor.predict_clash_risk(
-                            clash.faculty_id, clash.division_id,
-                            details.get('subject_id', 1),
-                            matching_slot.id, day, alt_room
+                        ml_recommendations = ml_predictor.recommend_faculty_for_subject(
+                            subject.id, clash.division_id, day, matching_slot.id
                         )
-                        risk_score = risk_pred.get('risk_score', risk_score)
                     except Exception:
                         pass
                 
-                suggestions.append({
-                    'type': 'room_change',
-                    'description': f'Assign Room {alt_room} instead of Room {room}',
-                    'detail': f'Room {alt_room} is available at {day} {time_str}',
-                    'risk_score': round(risk_score, 2),
-                    'risk_level': 'low' if risk_score < 0.3 else ('medium' if risk_score < 0.7 else 'high'),
-                    'action_value': alt_room,
-                    'action_type': 'change_room',
-                    'icon': '🏫'
-                })
+                for rec in ml_recommendations:
+                    if rec['faculty_id'] != current_faculty_id and rec['availability_score'] > 0:
+                        seen_ids.add(rec['faculty_id'])
+                        suggestions.append({
+                            'type': 'faculty_change',
+                            'description': f'Assign {rec["faculty_name"]} for {subject_name or "subject"}',
+                            'detail': f'Subject match: {int(rec["subject_match"]*100)}% | Available | Workload: {rec.get("current_workload", 0)} classes',
+                            'risk_score': round(1 - rec['overall_score'], 2),
+                            'risk_level': 'low' if rec['overall_score'] > 0.7 else ('medium' if rec['overall_score'] > 0.4 else 'high'),
+                            'action_value': str(rec['faculty_id']),
+                            'action_type': 'change_faculty',
+                            'icon': '👨‍🏫'
+                        })
+                        faculty_count += 1
+                        if faculty_count >= 3:
+                            break
+                
+                if faculty_count < 3:
+                    for fac in available_faculty:
+                        if fac['faculty_id'] != current_faculty_id and fac['faculty_id'] not in seen_ids and fac['is_available']:
+                            has_subject = subject_name in fac.get('subjects', []) if subject_name else False
+                            if has_subject:
+                                seen_ids.add(fac['faculty_id'])
+                                suggestions.append({
+                                    'type': 'faculty_change',
+                                    'description': f'Assign {fac["name"]} for {subject_name or "subject"}',
+                                    'detail': f'Teaches this subject | Faculty is Available',
+                                    'risk_score': 0.2,
+                                    'risk_level': 'low',
+                                    'action_value': str(fac['faculty_id']),
+                                    'action_type': 'change_faculty',
+                                    'icon': '👨‍🏫'
+                                })
+                                faculty_count += 1
+                                if faculty_count >= 3:
+                                    break
+                
+                if faculty_count < 3:
+                    for fac in available_faculty:
+                        if fac['faculty_id'] != current_faculty_id and fac['faculty_id'] not in seen_ids and fac['is_available']:
+                            seen_ids.add(fac['faculty_id'])
+                            suggestions.append({
+                                'type': 'faculty_change',
+                                'description': f'Assign {fac["name"]} for {subject_name or "subject"}',
+                                'detail': f'Available but does not teach {subject_name or "this subject"}',
+                                'risk_score': 0.5,
+                                'risk_level': 'medium',
+                                'action_value': str(fac['faculty_id']),
+                                'action_type': 'change_faculty',
+                                'icon': '👨‍🏫'
+                            })
+                            faculty_count += 1
+                            if faculty_count >= 3:
+                                break
+                
+                if faculty_count < 3:
+                    for fac in available_faculty:
+                        if fac['faculty_id'] != current_faculty_id and fac['faculty_id'] not in seen_ids and not fac['is_available']:
+                            has_subject = subject_name in fac.get('subjects', []) if subject_name else False
+                            if has_subject:
+                                seen_ids.add(fac['faculty_id'])
+                                clash_detail = fac.get('clash_details') or {}
+                                occupier = clash_detail.get('division', 'another class')
+                                suggestions.append({
+                                    'type': 'faculty_change',
+                                    'description': f'Assign {fac["name"]} for {subject_name or "subject"} (Busy)',
+                                    'detail': f'Teaches subject | Currently teaching {occupier} at this slot',
+                                    'risk_score': 0.8,
+                                    'risk_level': 'high',
+                                    'action_value': str(fac['faculty_id']),
+                                    'action_type': 'change_faculty',
+                                    'icon': '⚠️'
+                                })
+                                faculty_count += 1
+                                if faculty_count >= 3:
+                                    break
         
         elif clash.clash_type == 'faculty':
             # FACULTY CLASH: suggest alternative available faculty
@@ -620,6 +791,37 @@ class ClashService:
                         })
                 
                 suggestions = suggestions[:5]  # Limit to top 5
+                
+                # Also suggest alternative timeslots for the conflicting entry (always show both options!)
+                entry = Timetable.query.filter(
+                    Timetable.day == day,
+                    Timetable.time_slot_id == matching_slot.id,
+                    Timetable.faculty_id == clash.faculty_id
+                ).order_by(Timetable.created_at.desc()).first()
+                
+                if entry:
+                    try:
+                        alt_slots = ml_predictor.get_alternative_timeslots(
+                            entry.faculty_id,
+                            entry.division_id,
+                            entry.subject_id,
+                            day,
+                            matching_slot.id
+                        )
+                        for slot_rec in alt_slots:
+                            if slot_rec['status'] != 'unavailable':
+                                suggestions.append({
+                                    'type': 'timeslot_change',
+                                    'description': f'Move lecture to {slot_rec["day"]} {slot_rec["time_range"]}',
+                                    'detail': f'Faculty is free at this alternative slot | Risk: {int(slot_rec["clash_risk"]*100)}%',
+                                    'risk_score': round(slot_rec['clash_risk'], 2),
+                                    'risk_level': 'low' if slot_rec['clash_risk'] < 0.3 else ('medium' if slot_rec['clash_risk'] < 0.7 else 'high'),
+                                    'action_value': f'{slot_rec["slot_id"]}|{slot_rec["day"]}',
+                                    'action_type': 'change_timeslot',
+                                    'icon': '📅'
+                                })
+                    except Exception:
+                        pass
         
         elif clash.clash_type == 'division':
             # DIVISION CLASH: suggest alternative time slots
@@ -681,8 +883,12 @@ class ClashService:
                 
                 suggestions = suggestions[:5]
         
-        # Sort suggestions by risk score (lowest first)
-        suggestions.sort(key=lambda x: x.get('risk_score', 1))
+            priority = {
+                'room_change': 0,
+                'faculty_change': 1,
+                'timeslot_change': 2
+            }
+            suggestions.sort(key=lambda x: (priority.get(x.get('type'), 99), x.get('risk_score', 1)))
         
         return {
             'clash_id': clash_id,

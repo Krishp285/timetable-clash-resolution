@@ -15,7 +15,7 @@
     
     {% if faculty.get_subjects() %}
     <div style="margin-bottom: 2rem;">
-        <h3 style="margin-bottom: 1rem;"><i class="fas fa-book"></i> Subjects I Teach</h3>
+        <h3 style="margin-bottom: 1rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-book"></i> Subjects I Teach</h3>
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
             {% for subject in faculty.get_subjects() %}
             <span class="badge badge-info" style="padding: 0.5rem 1rem; font-size: 0.9rem;">{{ subject }}</span>
@@ -26,8 +26,8 @@
     
     {% if faculty.get_working_hours() %}
     <div style="margin-bottom: 2rem;">
-        <h3 style="margin-bottom: 0.5rem;"><i class="fas fa-clock"></i> Working Hours</h3>
-        <p style="font-size: 1.1rem; color: #718096;">
+        <h3 style="margin-bottom: 0.5rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-clock"></i> Working Hours</h3>
+        <p style="font-size: 1.1rem; color: #64748b;">
             {{ faculty.get_working_hours()['start'] }} - {{ faculty.get_working_hours()['end'] }}
         </p>
     </div>
@@ -43,7 +43,7 @@
     
     {% if schedule %}
     {% for day, classes in schedule.items() %}
-    <h3 style="margin-top: 1.5rem; color: #667eea;">{{ day }}</h3>
+    <h3 style="margin-top: 1.5rem; color: #06d6a0; font-weight: 700;">{{ day }}</h3>
     <div class="table">
         <table>
             <thead>
@@ -108,7 +108,7 @@
         </table>
     </div>
     {% else %}
-        <p class="text-muted" style="padding: 1rem;">
+        <p class="text-muted" style="padding: 1rem; color: #64748b;">
             No lectures assigned yet.
         </p>
     {% endif %}

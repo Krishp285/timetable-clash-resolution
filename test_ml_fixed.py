@@ -8,13 +8,13 @@ BASE_URL = "http://localhost:5000"
 # Create session with proper cookie handling
 session = requests.Session()
 
-print("📝 Logging in...")
+print("[INFO] Logging in...")
 # Follow redirects on login
 response = session.post(
     f"{BASE_URL}/login",
     data={
         "username": "admin",
-        "password": "Admin@123"
+        "password": "admin123"
     },
     allow_redirects=True  # Follow redirect to dashboard
 )
@@ -26,17 +26,17 @@ admin_check = session.get(f"{BASE_URL}/admin/dashboard")
 print(f"Admin Dashboard Access: {admin_check.status_code}")
 
 if "Dashboard" in admin_check.text:
-    print("✅ Successfully authenticated!\n")
+    print("[OK] Successfully authenticated!\n")
 else:
-    print("❌ Authentication may have failed\n")
+    print("[FAIL] Authentication may have failed\n")
 
 # Now test ML endpoints
 print("=" * 60)
-print("🤖 Testing ML API Endpoints")
+print("[ML] Testing ML API Endpoints")
 print("=" * 60)
 
 # Test 1: Clash Risk Prediction
-print("\n✅ Test 1: Clash Risk Prediction")
+print("\n[OK] Test 1: Clash Risk Prediction")
 response = session.post(
     f"{BASE_URL}/api/ml/predict-clash-risk",
     json={
@@ -55,7 +55,7 @@ if "application/json" in response.headers.get('Content-Type', ''):
     try:
         result = response.json()
         if result.get('success'):
-            print(f"✅ SUCCESS!")
+            print(f"[OK] SUCCESS!")
             risk = result.get('risk', {})
             print(f"   Risk Score: {risk.get('risk_score'):.2f}")
             print(f"   Risk Level: {risk.get('risk_level')}")
@@ -66,7 +66,7 @@ if "application/json" in response.headers.get('Content-Type', ''):
         print(f"JSON Parse Error: {e}")
         print(f"Response Preview: {response.text[:200]}")
 else:
-    print(f"❌ Not JSON response. First 300 chars:\n{response.text[:300]}")
+    print(f"[FAIL] Not JSON response. First 300 chars:\n{response.text[:300]}")
 
 print("\n" + "=" * 60)
 print("Testing Complete")

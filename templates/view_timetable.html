@@ -2,7 +2,7 @@
 {% block title %}Timetable - {{ division.full_name }}{% endblock %}
 
 {% block content %}
-<h2>
+<h2 style="color: var(--primary); font-weight: 800; margin-bottom: 0.5rem;">
     <i class="fas fa-calendar"></i>
     Timetable – {{ division.full_name }}
 </h2>
@@ -24,11 +24,11 @@
                 {% set entry = grid[day][slot.id] %}
                 <td>
                     {% if entry %}
-                        <strong>{{ entry.subject.name }}</strong><br>
-                        {{ entry.faculty.user.full_name }}<br>
-                        Room: {{ entry.room_number }}
+                        <strong style="color: #06d6a0;">{{ entry.subject.name }}</strong><br>
+                        <span style="color: #94a3b8;">{{ entry.faculty.user.full_name }}</span><br>
+                        <span style="color: #64748b;">Room: {{ entry.room_number }}</span>
                     {% else %}
-                        —
+                        <span style="color: #475569;">—</span>
                     {% endif %}
                 </td>
             {% endfor %}

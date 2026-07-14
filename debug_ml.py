@@ -9,7 +9,7 @@ session = requests.Session()
 # Login
 session.post(
     f"{BASE_URL}/login",
-    data={"username": "admin", "password": "Admin@123"},
+    data={"username": "admin", "password": "admin123"},
     allow_redirects=False
 )
 

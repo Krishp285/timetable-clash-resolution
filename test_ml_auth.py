@@ -9,23 +9,23 @@ BASE_URL = "http://localhost:5000"
 # Create a session to maintain cookies
 session = requests.Session()
 
-print("📝 Logging in as admin...")
+print("[INFO] Logging in as admin...")
 login_response = session.post(
     f"{BASE_URL}/login",
     data={
         "username": "admin",
-        "password": "Admin@123"
+        "password": "admin123"
     },
     allow_redirects=False
 )
 print(f"Login Status: {login_response.status_code}")
 
 print("\n" + "="*60)
-print("🤖 Testing ML API Endpoints")
+print("[ML] Testing ML API Endpoints")
 print("="*60)
 
 # Test 1: Clash Risk Prediction
-print("\n✅ Test 1: Clash Risk Prediction")
+print("\n[OK] Test 1: Clash Risk Prediction")
 try:
     response = session.post(
         f"{BASE_URL}/api/ml/predict-clash-risk",
@@ -50,7 +50,7 @@ except Exception as e:
     print(f"Error: {e}")
 
 # Test 2: Slot Recommendations
-print("\n✅ Test 2: Slot Recommendations")
+print("\n[OK] Test 2: Slot Recommendations")
 try:
     response = session.get(
         f"{BASE_URL}/api/ml/slot-recommendations",
@@ -74,7 +74,7 @@ except Exception as e:
     print(f"Error: {e}")
 
 # Test 3: Faculty Recommendations
-print("\n✅ Test 3: Faculty Recommendations")
+print("\n[OK] Test 3: Faculty Recommendations")
 try:
     response = session.get(
         f"{BASE_URL}/api/ml/recommend-faculty",
@@ -98,7 +98,7 @@ except Exception as e:
     print(f"Error: {e}")
 
 # Test 4: Clash Risk Summary
-print("\n✅ Test 4: Clash Risk Summary")
+print("\n[OK] Test 4: Clash Risk Summary")
 try:
     response = session.get(
         f"{BASE_URL}/api/ml/clash-risk-summary",
@@ -117,7 +117,7 @@ except Exception as e:
     print(f"Error: {e}")
 
 # Test 5: Evaluate Timetable Quality
-print("\n✅ Test 5: Timetable Quality Evaluation")
+print("\n[OK] Test 5: Timetable Quality Evaluation")
 try:
     response = session.post(
         f"{BASE_URL}/api/ml/evaluate-timetable",
@@ -140,5 +140,5 @@ except Exception as e:
     print(f"Error: {e}")
 
 print("\n" + "="*60)
-print("✅ ML API TESTING COMPLETE!")
+print("[OK] ML API TESTING COMPLETE!")
 print("="*60)

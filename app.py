@@ -21,8 +21,8 @@ from flask_login import LoginManager, current_user, login_user, logout_user, log
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-change-in-production')
 
-# Database URI: use DATABASE_URL env var (Render/Aiven), fallback to SQLite
-database_url = os.environ.get('DATABASE_URL', 'sqlite:///timetable.db')
+# Database URI: use DATABASE_URL env var (Render/Aiven), fallback to MySQL
+database_url = os.environ.get('DATABASE_URL', 'mysql+pymysql://root:root@localhost/timetable_system')
 # Render PostgreSQL uses postgres:// but SQLAlchemy needs postgresql://
 if database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
@@ -95,6 +95,7 @@ def login():
             session['user_id'] = user.id
             session['name'] = user.full_name
             session['role'] = user.role
+            flash('Login successful', 'success')
 
             # 🔥 ROLE BASED REDIRECT
             if user.role == 'admin':
@@ -714,8 +715,7 @@ def edit_timetable_entry(entry_id):
     # Get available faculty
     faculty_list = ClashService.get_all_faculty_availability(
         entry.day,
-        entry.time_slot_id,
-        entry.subject.name
+        entry.time_slot_id
     )
     
     return render_template('edit_timetable_entry.html',
