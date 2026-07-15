@@ -97,11 +97,17 @@ A comprehensive, interactive timetable management system built with Flask, MySQL
 
 ```
 timetable_system/
-├── app.py                  # Main Flask application
-├── models.py               # Database models
-├── create_db.py           # Database initialization
+├── app.py                  # Main Flask application with routing & handlers
+├── models.py               # SQLAlchemy database schema models (8 tables)
+├── config.py               # Flask application configurations
+├── extensions.py           # Shared SQLAlchemy database extensions
+├── create_db.py            # Local SQLite/MySQL table initializer script
+├── generate_gtu_report.py  # GTU document generation script
 ├── services/
-│   └── clash_service.py   # Clash detection logic
+│   ├── clash_service.py    # Main three-tier conflict checking logic
+│   └── ml_clash_predictor.py # Random Forest ML logic (predict & suggestions)
+├── ml_models/
+│   └── clash_predictor_model.pkl # Trained serialized Random Forest model binary
 ├── templates/
 │   ├── base.html
 │   ├── signup.html
@@ -119,7 +125,7 @@ timetable_system/
 │   ├── view_timetable.html
 │   ├── edit_timetable_entry.html
 │   ├── final_timetable_view.html
-│   ├── view_clashes.html
+│   ├── view_clashes.html   # Clash resolution suggestion page
 │   ├── 404.html
 │   └── 500.html
 ├── requirements.txt
@@ -267,12 +273,44 @@ pip install Flask Flask-SQLAlchemy PyMySQL cryptography Werkzeug
 - Working hours are configured
 - Time slots exist in database
 
+## 🤖 Machine Learning Integration
+The system integrates an intelligent Machine Learning prediction and recommendation module built using `scikit-learn` (Random Forest Classifier).
+
+### ML Model Features & Architecture
+- **Model Type**: Random Forest Classifier (`n_estimators=100`, `max_depth=10`).
+- **Feature Vector**:
+  1. `faculty_id` (Categorical)
+  2. `division_id` (Categorical)
+  3. `subject_id` (Categorical)
+  4. `time_slot_id` (Categorical)
+  5. `day_of_week` (Ordinal: Monday=0, ..., Saturday=5)
+  6. `room_number` (Numeric or hashed index)
+- **Model File**: Serialized and loaded from `ml_models/clash_predictor_model.pkl`.
+
+### AI-Powered Suggestion Engine
+- **Predictive Clash Risk**: Predicts conflict probability `[0,1]` and categorizes risk into Low (`<0.3`), Medium (`<0.7`), and High (`>=0.7`).
+- **Smart Slot Suggestions**: Recommends up to 5 alternative timeslots ranked by lowest clash risk.
+- **Faculty Recommendations**: Computes matching scores for alternate faculty members based on teaching competency, workload balance, and availability.
+- **Auto-Resolve**: Enables administrators to apply suggestions to resolve database conflicts with a single click.
+
 ## 📝 API Endpoints
 
+### Data Endpoints
 ```
-GET  /api/divisions/<branch_id>    # Get divisions by branch
-GET  /api/faculty-availability     # Get faculty availability
-GET  /api/subjects/search          # Search subjects
+GET  /api/divisions/<branch_id>        # Get divisions by branch
+GET  /api/faculty-availability         # Get faculty availability
+GET  /api/subjects/search              # Search subjects
+```
+
+### Machine Learning Endpoints (Requires Admin Auth)
+```
+POST /api/ml/predict-clash-risk       # Predict clash risk for proposed slot
+GET  /api/ml/slot-recommendations     # Get smart alternative timeslots
+GET  /api/ml/recommend-faculty         # Get best faculty suggestions for subject
+POST /api/ml/evaluate-timetable        # Evaluate overall timetable quality
+GET  /api/ml/clash-risk-summary        # Get aggregate risk metrics across divisions
+POST /api/ml/train-model               # Trigger model retraining on current DB data
+GET  /api/ml/clash-suggestions/<id>    # Retrieve context-aware resolution options for a clash
 ```
 
 ## 🚀 Production Deployment
