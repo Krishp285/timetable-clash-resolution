@@ -36,15 +36,43 @@ if 'ssl-mode' in database_url:
     import re
     database_url = re.sub(r'[?&]ssl-mode=[^&]*', '', database_url)
     database_url = database_url.replace('?&', '?').rstrip('?')
-app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# Configure SSL for Aiven MySQL (required for remote MySQL connections)
+
+# Configure SSL options for primary DB if needed
+engine_options = {}
 if needs_ssl or 'aivencloud.com' in database_url:
-    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    engine_options = {
         'connect_args': {
             'ssl': {'ssl_mode': 'REQUIRED'}
         }
     }
+
+# Test connection to the primary database
+from sqlalchemy import create_engine
+try:
+    test_engine_options = engine_options.copy()
+    if 'connect_args' not in test_engine_options:
+        test_engine_options['connect_args'] = {}
+    
+    # Set short connection timeout for testing connection
+    if database_url.startswith('mysql'):
+        test_engine_options['connect_args']['connect_timeout'] = 5
+    elif database_url.startswith('postgresql'):
+        test_engine_options['connect_args']['connect_timeout'] = 5
+        
+    engine = create_engine(database_url, **test_engine_options)
+    with engine.connect() as conn:
+        pass
+    print("[OK] Successfully connected to the primary database.")
+except Exception as db_err:
+    print(f"[WARNING] Primary database connection failed: {db_err}")
+    print("[INFO] Falling back to a local SQLite database for reliability.")
+    database_url = 'sqlite:///timetable_system.db'
+    engine_options = {}
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+if engine_options:
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = engine_options
 db.init_app(app)
 
 # ============================================
@@ -1203,8 +1231,22 @@ def api_train_model():
 try:
     with app.app_context():
         db.create_all()
+        # Seed default admin user if it does not exist
+        from models import User
+        admin = User.query.filter_by(username='admin').first()
+        if not admin:
+            admin = User(
+                username='admin',
+                email='admin@timetable.com',
+                full_name='System Administrator',
+                role='admin'
+            )
+            admin.set_password('admin123')
+            db.session.add(admin)
+            db.session.commit()
+            print("[OK] Seeded default admin user ('admin' / 'admin123')")
 except Exception as e:
-    print(f"⚠️ Warning: Could not connect to database on startup to create tables: {e}")
+    print(f"[WARNING] Could not initialize database tables: {e}")
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
