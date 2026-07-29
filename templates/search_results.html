@@ -1,0 +1,302 @@
+{% extends 'base.html' %}
+{% block title %}Search Results{% if q %} — "{{ q }}"{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .search-hero {
+        background: linear-gradient(135deg, rgba(124,58,237,0.15) 0%, rgba(6,214,160,0.08) 100%);
+        border: 1px solid rgba(148,163,184,0.1);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    .global-search-form {
+        display: flex; gap: 0.75rem; justify-content: center; margin-top: 1.25rem;
+    }
+    .global-search-input {
+        width: min(560px, 90%);
+        padding: 0.9rem 1.25rem;
+        background: rgba(15,23,42,0.8);
+        border: 2px solid rgba(148,163,184,0.2);
+        border-radius: 12px;
+        color: #f1f5f9; font-size: 1rem; outline: none;
+        transition: border-color 0.2s;
+    }
+    .global-search-input:focus {
+        border-color: rgba(6,214,160,0.5);
+        box-shadow: 0 0 0 3px rgba(6,214,160,0.1);
+    }
+
+    .results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .results-section {
+        background: rgba(15,23,42,0.55);
+        border: 1px solid rgba(148,163,184,0.1);
+        border-radius: 14px;
+        overflow: hidden;
+    }
+    .results-section-header {
+        display: flex; align-items: center; gap: 0.6rem;
+        padding: 1rem 1.25rem;
+        background: rgba(30,41,59,0.5);
+        border-bottom: 1px solid rgba(148,163,184,0.08);
+        font-weight: 700; font-size: 0.95rem;
+    }
+    .results-count {
+        margin-left: auto;
+        background: rgba(148,163,184,0.12);
+        color: #64748b; border-radius: 12px;
+        padding: 0.15rem 0.6rem; font-size: 0.78rem; font-weight: 600;
+    }
+    .results-section-body { padding: 0.75rem 1rem; }
+
+    .result-item {
+        display: flex; align-items: center; gap: 0.75rem;
+        padding: 0.75rem 0.5rem; border-radius: 8px;
+        text-decoration: none; color: inherit;
+        transition: background 0.15s;
+    }
+    .result-item:hover {
+        background: rgba(6,214,160,0.06);
+        text-decoration: none;
+    }
+    .result-icon {
+        width: 36px; height: 36px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.9rem; flex-shrink: 0;
+    }
+    .result-item + .result-item {
+        border-top: 1px solid rgba(148,163,184,0.06);
+    }
+    .result-title { font-weight: 600; color: #f1f5f9; font-size: 0.9rem; }
+    .result-sub   { font-size: 0.8rem; color: #64748b; margin-top: 0.1rem; }
+
+    .no-results-card {
+        text-align: center; padding: 4rem 2rem; color: #64748b;
+    }
+
+    .highlight {
+        background: rgba(6,214,160,0.2);
+        color: #6ee7b7;
+        border-radius: 3px; padding: 0 0.2rem;
+    }
+
+    .quick-links {
+        display: flex; flex-wrap: wrap; gap: 0.5rem;
+        justify-content: center; margin-top: 1rem;
+    }
+    .quick-link {
+        display: inline-flex; align-items: center; gap: 0.35rem;
+        padding: 0.4rem 0.9rem; border-radius: 20px;
+        background: rgba(30,41,59,0.6); border: 1px solid rgba(148,163,184,0.12);
+        color: #94a3b8; font-size: 0.8rem; font-weight: 600;
+        text-decoration: none; transition: all 0.2s;
+    }
+    .quick-link:hover {
+        background: rgba(6,214,160,0.1); border-color: rgba(6,214,160,0.3);
+        color: #6ee7b7; text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Search Hero -->
+<div class="search-hero">
+    <h1 style="font-size:1.6rem;font-weight:800;color:#f1f5f9;margin-bottom:0.5rem;">
+        <i class="fas fa-search"></i> Global Search
+    </h1>
+    {% if q %}
+    <p style="color:#64748b;">
+        Found <strong style="color:#06d6a0;">{{ total }}</strong> result{{ 's' if total != 1 else '' }} for
+        <strong style="color:#f1f5f9;">"{{ q }}"</strong>
+    </p>
+    {% else %}
+    <p style="color:#64748b;">Search across faculty, subjects, divisions, branches, rooms and clashes.</p>
+    {% endif %}
+
+    <form action="{{ url_for('global_search') }}" method="GET" class="global-search-form">
+        <input type="text" name="q" class="global-search-input"
+               value="{{ q }}" placeholder="e.g. Computer Science, Room 201, Dr. Patel..."
+               autofocus autocomplete="off">
+        <button type="submit" class="btn btn-primary" style="padding:0.9rem 1.5rem;">
+            <i class="fas fa-search"></i> Search
+        </button>
+    </form>
+
+    <!-- Quick links -->
+    <div class="quick-links">
+        <a href="{{ url_for('manage_faculty') }}" class="quick-link"><i class="fas fa-chalkboard-teacher"></i> All Faculty</a>
+        <a href="{{ url_for('manage_subjects') }}" class="quick-link"><i class="fas fa-book"></i> All Subjects</a>
+        <a href="{{ url_for('manage_branches') }}" class="quick-link"><i class="fas fa-sitemap"></i> Branches</a>
+        <a href="{{ url_for('manage_divisions') }}" class="quick-link"><i class="fas fa-layer-group"></i> Divisions</a>
+        <a href="{{ url_for('view_clashes') }}" class="quick-link"><i class="fas fa-exclamation-triangle"></i> Clashes</a>
+    </div>
+</div>
+
+{% if not q %}
+<div class="no-results-card">
+    <i class="fas fa-search" style="font-size:3rem;margin-bottom:1rem;"></i>
+    <h3>Start typing to search</h3>
+    <p>You can search for faculty names, departments, subjects, rooms, divisions, and more.</p>
+</div>
+
+{% elif total == 0 %}
+<div class="no-results-card">
+    <i class="fas fa-wind" style="font-size:3rem;margin-bottom:1rem;"></i>
+    <h3>No results found for "{{ q }}"</h3>
+    <p>Try a different search term or browse using the quick links above.</p>
+</div>
+
+{% else %}
+<div class="results-grid">
+
+    <!-- Faculty -->
+    {% if results.faculty %}
+    <div class="results-section">
+        <div class="results-section-header" style="color:#fca5a5;">
+            <i class="fas fa-chalkboard-teacher"></i> Faculty
+            <span class="results-count">{{ results.faculty|length }}</span>
+        </div>
+        <div class="results-section-body">
+            {% for f in results.faculty %}
+            <a href="{{ url_for('manage_faculty', search=f.name) }}" class="result-item">
+                <div class="result-icon" style="background:rgba(239,68,68,0.12);color:#fca5a5;">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <div class="result-title">{{ f.name }}
+                        {% if f.is_visiting %}<span style="background:rgba(124,58,237,0.15);color:#c4b5fd;padding:0.1rem 0.4rem;border-radius:8px;font-size:0.7rem;margin-left:0.3rem;">VISITING</span>{% endif %}
+                    </div>
+                    <div class="result-sub">{{ f.email }}{% if f.department %} · {{ f.department }}{% endif %}</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Subjects -->
+    {% if results.subjects %}
+    <div class="results-section">
+        <div class="results-section-header" style="color:#fcd34d;">
+            <i class="fas fa-book"></i> Subjects
+            <span class="results-count">{{ results.subjects|length }}</span>
+        </div>
+        <div class="results-section-body">
+            {% for s in results.subjects %}
+            <a href="{{ url_for('manage_subjects', q=s.code) }}" class="result-item">
+                <div class="result-icon" style="background:rgba(245,158,11,0.12);color:#fcd34d;">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <div>
+                    <div class="result-title">{{ s.name }}</div>
+                    <div class="result-sub">Code: {{ s.code }} · {{ s.credits }} credits</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Divisions -->
+    {% if results.divisions %}
+    <div class="results-section">
+        <div class="results-section-header" style="color:#c4b5fd;">
+            <i class="fas fa-layer-group"></i> Divisions
+            <span class="results-count">{{ results.divisions|length }}</span>
+        </div>
+        <div class="results-section-body">
+            {% for d in results.divisions %}
+            <a href="{{ url_for('timetable_create', division_id=d.id) }}" class="result-item">
+                <div class="result-icon" style="background:rgba(124,58,237,0.12);color:#c4b5fd;">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <div>
+                    <div class="result-title">{{ d.name }}</div>
+                    <div class="result-sub">{{ d.branch }} · Semester {{ d.semester }}</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Branches -->
+    {% if results.branches %}
+    <div class="results-section">
+        <div class="results-section-header" style="color:#67e8f9;">
+            <i class="fas fa-sitemap"></i> Branches
+            <span class="results-count">{{ results.branches|length }}</span>
+        </div>
+        <div class="results-section-body">
+            {% for b in results.branches %}
+            <a href="{{ url_for('manage_branches', q=b.short_name) }}" class="result-item">
+                <div class="result-icon" style="background:rgba(6,182,212,0.12);color:#67e8f9;">
+                    <i class="fas fa-sitemap"></i>
+                </div>
+                <div>
+                    <div class="result-title">{{ b.name }}</div>
+                    <div class="result-sub">Short: {{ b.short_name }}</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Rooms -->
+    {% if results.rooms %}
+    <div class="results-section">
+        <div class="results-section-header" style="color:#86efac;">
+            <i class="fas fa-door-open"></i> Rooms
+            <span class="results-count">{{ results.rooms|length }}</span>
+        </div>
+        <div class="results-section-body">
+            {% for r in results.rooms %}
+            <div class="result-item">
+                <div class="result-icon" style="background:rgba(34,197,94,0.12);color:#86efac;">
+                    <i class="fas fa-door-open"></i>
+                </div>
+                <div>
+                    <div class="result-title">Room {{ r }}</div>
+                    <div class="result-sub">Found in timetable entries</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Clashes -->
+    {% if results.clashes %}
+    <div class="results-section">
+        <div class="results-section-header" style="color:#f87171;">
+            <i class="fas fa-exclamation-triangle"></i> Clashes
+            <span class="results-count">{{ results.clashes|length }}</span>
+        </div>
+        <div class="results-section-body">
+            {% for c in results.clashes %}
+            <a href="{{ url_for('view_clashes') }}" class="result-item">
+                <div class="result-icon" style="background:rgba(239,68,68,0.12);color:#f87171;">
+                    <i class="fas fa-{% if c.type == 'faculty' %}user{% elif c.type == 'room' %}door-open{% else %}users{% endif %}"></i>
+                </div>
+                <div>
+                    <div class="result-title">{{ c.type|upper }} Clash
+                        {% if c.is_resolved %}<span style="color:#86efac;font-size:0.75rem;margin-left:0.3rem;">✓ Resolved</span>{% endif %}
+                    </div>
+                    <div class="result-sub">{{ c.detected_at }} · {{ c.severity|upper }}</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endif %}
+{% endblock %}

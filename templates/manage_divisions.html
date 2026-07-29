@@ -7,6 +7,12 @@
         <h1 class="card-title">
             <i class="fas fa-users"></i> Manage Divisions
         </h1>
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <form method="GET" style="display: inline;">
+                <input type="text" name="q" class="form-control" placeholder="Search divisions..." value="{{ q or '' }}">
+            </form>
+        </div>
     </div>
 
     <form method="POST" action="{{ url_for('add_division') }}"

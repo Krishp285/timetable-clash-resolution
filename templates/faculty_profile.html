@@ -1,62 +1,283 @@
 {% extends 'base.html' %}
 {% block title %}Faculty Profile{% endblock %}
 
+{% block extra_css %}
+<style>
+    .visiting-toggle-section {
+        background: linear-gradient(135deg, rgba(124, 58, 237, 0.12) 0%, rgba(6, 214, 160, 0.08) 100%);
+        border: 1.5px solid rgba(124, 58, 237, 0.25);
+        border-radius: 14px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .toggle-label {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 1rem;
+        color: #f1f5f9;
+    }
+    /* Custom toggle switch */
+    .toggle-switch {
+        position: relative;
+        width: 52px;
+        height: 28px;
+        flex-shrink: 0;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        inset: 0;
+        background: rgba(148, 163, 184, 0.2);
+        border-radius: 28px;
+        transition: 0.3s;
+        border: 1.5px solid rgba(148, 163, 184, 0.25);
+    }
+    .toggle-slider:before {
+        content: '';
+        position: absolute;
+        width: 20px; height: 20px;
+        left: 3px; bottom: 3px;
+        background: #94a3b8;
+        border-radius: 50%;
+        transition: 0.3s;
+    }
+    input:checked + .toggle-slider {
+        background: linear-gradient(135deg, #7c3aed, #06d6a0);
+        border-color: rgba(124, 58, 237, 0.5);
+    }
+    input:checked + .toggle-slider:before {
+        transform: translateX(24px);
+        background: white;
+    }
+    .visiting-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(6,214,160,0.15));
+        border: 1px solid rgba(124,58,237,0.35);
+        color: #c4b5fd;
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+    .section-divider {
+        border: none;
+        border-top: 1px solid rgba(148, 163, 184, 0.1);
+        margin: 2rem 0;
+    }
+    .day-checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    .day-chip {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.5rem 0.75rem;
+        border: 1.5px solid rgba(148,163,184,0.15);
+        border-radius: 8px;
+        background: rgba(30,41,59,0.5);
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.875rem;
+        color: #94a3b8;
+    }
+    .day-chip:has(input:checked) {
+        border-color: rgba(6,214,160,0.5);
+        background: rgba(6,214,160,0.1);
+        color: #6ee7b7;
+    }
+    .slot-chip-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    .slot-chip {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.5rem 1rem;
+        border: 1.5px solid rgba(148,163,184,0.15);
+        border-radius: 8px;
+        background: rgba(30,41,59,0.5);
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.875rem;
+        color: #94a3b8;
+    }
+    .slot-chip:has(input:checked) {
+        border-color: rgba(124,58,237,0.5);
+        background: rgba(124,58,237,0.1);
+        color: #c4b5fd;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="card" style="max-width: 800px; margin: 0 auto;">
+<div class="card" style="max-width: 860px; margin: 0 auto;">
     <div class="card-header">
         <h1 class="card-title">
             <i class="fas fa-user-edit"></i> Complete Your Profile
         </h1>
+        {% if faculty.is_visiting %}
+        <span class="visiting-badge">
+            <i class="fas fa-star"></i> Visiting Faculty
+        </span>
+        {% endif %}
     </div>
-    
+
     <form method="POST">
+        <!-- Basic Info -->
+        <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" name="full_name" class="form-control" value="{{ current_user.full_name }}" required placeholder="e.g., Prof. Jane Doe">
+        </div>
+
         <div class="form-group">
             <label class="form-label">Phone Number</label>
             <input type="tel" name="phone" class="form-control" value="{{ faculty.phone or '' }}" placeholder="+91 1234567890">
         </div>
-        
-        <div class="form-group">
-            <label class="form-label">Department</label>
-            <input type="text" name="department" class="form-control" value="{{ faculty.department or '' }}" placeholder="e.g., Computer Science">
-        </div>
-        
-        <div class="form-group">
-            <label class="form-label">Designation</label>
-            <input type="text" name="designation" class="form-control" value="{{ faculty.designation or '' }}" placeholder="e.g., Professor, Assistant Professor">
-        </div>
-        
-        <h3 style="margin: 2rem 0 1rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-clock"></i> Working Hours</h3>
-        
+
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div class="form-group">
-                <label class="form-label">Start Time</label>
-                <input type="time" name="start_time" class="form-control" value="{{ faculty.get_working_hours()['start'] if faculty.get_working_hours() else '09:00' }}" required>
+                <label class="form-label">Department</label>
+                <input type="text" name="department" class="form-control" value="{{ faculty.department or '' }}" placeholder="e.g., Computer Science">
             </div>
-            
             <div class="form-group">
-                <label class="form-label">End Time</label>
-                <input type="time" name="end_time" class="form-control" value="{{ faculty.get_working_hours()['end'] if faculty.get_working_hours() else '17:00' }}" required>
+                <label class="form-label">Designation</label>
+                <input type="text" name="designation" class="form-control" value="{{ faculty.designation or '' }}" placeholder="e.g., Assistant Professor">
             </div>
         </div>
-        
-        <h3 style="margin: 2rem 0 1rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-book"></i> Subjects You Can Teach</h3>
-        
+
+        <hr class="section-divider">
+
+        <!-- Visiting Faculty Toggle -->
+        <div class="visiting-toggle-section">
+            <label class="toggle-label" for="is_visiting_check">
+                <span class="toggle-switch">
+                    <input type="checkbox" name="is_visiting" id="is_visiting_check"
+                           {% if faculty.is_visiting %}checked{% endif %}
+                           onchange="toggleVisitingMode(this.checked)">
+                    <span class="toggle-slider"></span>
+                </span>
+                <div>
+                    <div>I am a <strong>Visiting Faculty</strong></div>
+                    <div style="font-size: 0.8rem; color: #64748b; font-weight: 400; margin-top: 0.2rem;">
+                        Enable this if you visit only on specific days/slots instead of fixed working hours
+                    </div>
+                </div>
+            </label>
+        </div>
+
+        <!-- Regular Working Hours (hidden for visiting) -->
+        <div id="working-hours-section">
+            <h3 style="margin: 0 0 1rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-clock"></i> Working Hours</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Start Time</label>
+                    <input type="time" name="start_time" class="form-control"
+                           value="{{ faculty.get_working_hours()['start'] if faculty.get_working_hours() else '09:00' }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">End Time</label>
+                    <input type="time" name="end_time" class="form-control"
+                           value="{{ faculty.get_working_hours()['end'] if faculty.get_working_hours() else '17:00' }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Visiting Faculty Specific Slots (shown only for visiting) -->
+        <div id="visiting-section" style="display: none;">
+            <h3 style="margin: 0 0 1.5rem; color: #94a3b8; font-weight: 700;">
+                <i class="fas fa-calendar-alt"></i> Weekly Availability
+            </h3>
+            <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1.5rem;">Select the days you are available and configure the slots for each day:</p>
+
+            {% for day in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] %}
+            {% set day_active = day in (faculty.get_visiting_days() or []) %}
+            {% set day_slots = faculty.get_visiting_slots(day) or [] %}
+            <div class="day-availability-card" style="background: rgba(30,41,59,0.3); border: 1.5px solid rgba(148,163,184,0.1); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem; transition: 0.2s;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                    <label class="toggle-label" style="margin-bottom: 0;">
+                        <input type="checkbox" name="visiting_days" value="{{ day }}" id="check_{{ day }}"
+                               {% if day_active %}checked{% endif %}
+                               onchange="toggleDaySlots('{{ day }}', this.checked)"
+                               style="width: 18px; height: 18px; accent-color: #06d6a0; cursor: pointer;">
+                        <span style="font-size: 1.1rem; font-weight: 700; color: #f1f5f9; margin-left: 0.5rem;">{{ day }}</span>
+                    </label>
+                </div>
+                
+                <div id="slots_container_{{ day }}" style="display: {% if day_active %}block{% else %}none{% endif %}; border-top: 1px solid rgba(148, 163, 184, 0.08); padding-top: 1rem;">
+                    <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 0.75rem;">Available Time Slots for {{ day }}:</p>
+                    <div class="slot-chip-grid">
+                        {% for slot in timeslots %}
+                        <label class="slot-chip">
+                            <input type="checkbox" name="visiting_slots_{{ day }}" value="{{ slot.id }}"
+                                   {% if slot.id in day_slots %}checked{% endif %}>
+                            <i class="fas fa-clock" style="font-size: 0.75rem;"></i>
+                            {{ slot.time_range }}{% if slot.slot_label %} <small>({{ slot.slot_label }})</small>{% endif %}
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <hr class="section-divider">
+
+        <!-- Subjects -->
+        <h3 style="margin: 0 0 1rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-book"></i> Subjects You Can Teach</h3>
         <div class="form-group">
             <label class="form-label">Enter subjects (comma-separated)</label>
-            <textarea name="subjects" class="form-control" rows="4" placeholder="e.g., Data Structures, Algorithms, Database Management, Operating Systems" required>{{ faculty.get_subjects()|join(', ') if faculty.get_subjects() else '' }}</textarea>
+            <textarea name="subjects" class="form-control" rows="4"
+                      placeholder="e.g., Data Structures, Algorithms, DBMS">{{ faculty.get_subjects()|join(', ') if faculty.get_subjects() else '' }}</textarea>
             <small class="form-text">Separate multiple subjects with commas</small>
         </div>
-        
+
         <div class="d-flex gap-2" style="margin-top: 2rem;">
             <button type="submit" class="btn btn-primary">
                 <i class="fas fa-save"></i> Save Profile
             </button>
-           <a href="{{ url_for('faculty_dashboard') }}" class="btn btn-secondary">
-
+            <a href="{{ url_for('faculty_dashboard') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Back to Dashboard
             </a>
         </div>
     </form>
 </div>
 
+<script>
+// Pass timeslots availability state on initial load
+document.addEventListener('DOMContentLoaded', () => {
+    const isVisiting = document.getElementById('is_visiting_check').checked;
+    toggleVisitingMode(isVisiting);
+});
+
+function toggleVisitingMode(isVisiting) {
+    const workingHours = document.getElementById('working-hours-section');
+    const visitingSection = document.getElementById('visiting-section');
+    if (isVisiting) {
+        workingHours.style.display = 'none';
+        visitingSection.style.display = 'block';
+    } else {
+        workingHours.style.display = 'block';
+        visitingSection.style.display = 'none';
+    }
+}
+
+function toggleDaySlots(day, isChecked) {
+    const container = document.getElementById(`slots_container_${day}`);
+    if (container) {
+        container.style.display = isChecked ? 'block' : 'none';
+    }
+}
+</script>
 {% endblock %}

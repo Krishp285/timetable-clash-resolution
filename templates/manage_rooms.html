@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% block title %}Manage Rooms & Resources{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">
+            <i class="fas fa-door-open"></i> Manage Rooms & Resources
+        </h1>
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <form method="GET" style="display: inline;">
+                <input type="text" name="q" class="form-control" placeholder="Search rooms..." value="{{ q or '' }}">
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Room Form -->
+    <form method="POST" action="{{ url_for('add_room') }}"
+        style="background: rgba(30, 41, 59, 0.5); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid rgba(148, 163, 184, 0.08);">
+        <h3 style="margin-bottom: 1rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-plus-circle"></i> Add New Room / Resource</h3>
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 1rem; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Room / Resource Name</label>
+                <input type="text" name="name" class="form-control" placeholder="e.g., 101, Lab-A" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Capacity</label>
+                <input type="number" name="capacity" class="form-control" min="1" value="60" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Type</label>
+                <select name="room_type" class="form-control" required>
+                    <option value="Classroom">Classroom</option>
+                    <option value="Lab">Lab</option>
+                    <option value="Seminar Hall">Seminar Hall</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add
+            </button>
+        </div>
+    </form>
+
+    <!-- Rooms Table -->
+    <h3 style="color: #94a3b8; font-weight: 700;"><i class="fas fa-list"></i> All Rooms & Resources</h3>
+    <div class="table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Room Name</th>
+                    <th>Capacity</th>
+                    <th>Type</th>
+                    <th>Created Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for room in rooms %}
+                <tr>
+                    <td><span class="badge badge-success">{{ room.name }}</span></td>
+                    <td>{{ room.capacity }}</td>
+                    <td>{{ room.room_type }}</td>
+                    <td>{{ room.created_at.strftime('%Y-%m-%d') if room.created_at else 'N/A' }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick="openEditRoomModal(
+                                '{{ room.id }}',
+                                '{{ room.name }}',
+                                '{{ room.capacity }}',
+                                '{{ room.room_type }}'
+                            )">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <form method="POST" action="{{ url_for('delete_room', room_id=room.id) }}"
+                            style="display: inline;" onsubmit="return confirm('Delete this room/resource?');">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #64748b;">No rooms/resources added yet</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Edit Room Modal -->
+<div id="editRoomModal" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width:500px;">
+        <h3><i class="fas fa-edit"></i> Edit Room / Resource</h3>
+
+        <form method="POST" action="{{ url_for('edit_room') }}">
+            <input type="hidden" name="room_id" id="edit_room_id">
+
+            <div class="form-group">
+                <label class="form-label">Room Name</label>
+                <input type="text" name="name" id="edit_room_name" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Capacity</label>
+                <input type="number" name="capacity" id="edit_room_capacity" class="form-control" min="1" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Type</label>
+                <select name="room_type" id="edit_room_type" class="form-control" required>
+                    <option value="Classroom">Classroom</option>
+                    <option value="Lab">Lab</option>
+                    <option value="Seminar Hall">Seminar Hall</option>
+                </select>
+            </div>
+
+            <div style="display:flex; gap:1rem; justify-content:flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="closeEditRoomModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function openEditRoomModal(id, name, capacity, roomType) {
+    document.getElementById('edit_room_id').value = id;
+    document.getElementById('edit_room_name').value = name;
+    document.getElementById('edit_room_capacity').value = capacity;
+    document.getElementById('edit_room_type').value = roomType;
+
+    document.getElementById('editRoomModal').style.display = 'flex';
+}
+
+function closeEditRoomModal() {
+    document.getElementById('editRoomModal').style.display = 'none';
+}
+</script>
+{% endblock %}
+
+{% endblock %}

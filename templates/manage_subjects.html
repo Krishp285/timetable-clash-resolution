@@ -10,7 +10,7 @@
         <div class="search-box">
             <i class="fas fa-search"></i>
             <form method="GET" style="display: inline;">
-                <input type="text" name="search" class="form-control" placeholder="Search subjects..." value="{{ search }}">
+                <input type="text" name="q" class="form-control" placeholder="Search subjects..." value="{{ q or search or '' }}">
             </form>
         </div>
     </div>

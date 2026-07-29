@@ -686,11 +686,21 @@
             
             <div class="navbar-menu">
                 {% if session.get('role') == 'admin' %}
+                    <form action="{{ url_for('global_search') }}" method="GET" style="display: flex; align-items: center; position: relative;">
+                        <input type="text" name="q" placeholder="Search anything..." 
+                               style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(148, 163, 184, 0.2); color: #f1f5f9; padding: 0.4rem 0.8rem 0.4rem 2rem; border-radius: 20px; font-size: 0.85rem; width: 180px; transition: width 0.3s ease, border-color 0.3s ease;"
+                               onfocus="this.style.width='250px'; this.style.borderColor='rgba(6,214,160,0.5)';"
+                               onblur="if(!this.value) this.style.width='180px';">
+                        <i class="fas fa-search" style="position: absolute; left: 0.75rem; color: #64748b; font-size: 0.8rem; pointer-events: none;"></i>
+                    </form>
                     <a href="{{ url_for('admin_dashboard') }}">
                         <i class="fas fa-home"></i> Dashboard
                     </a>
                     <a href="{{ url_for('timetable_select') }}">
                         <i class="fas fa-calendar-plus"></i> Create Timetable
+                    </a>
+                    <a href="{{ url_for('manage_rooms') }}">
+                        <i class="fas fa-door-open"></i> Manage Rooms
                     </a>
                     <a href="{{ url_for('final_timetable_view') }}">
                         <i class="fas fa-eye"></i> View All

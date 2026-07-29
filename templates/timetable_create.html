@@ -197,6 +197,195 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
+
+    /* Clash Risk Prediction Panel */
+    .clash-risk-panel {
+        background: rgba(15, 23, 42, 0.7);
+        border: 1.5px solid rgba(148, 163, 184, 0.15);
+        border-radius: 14px;
+        padding: 1.25rem 1.5rem;
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        display: none;
+        transition: all 0.3s ease;
+    }
+
+    .clash-risk-panel .crp-header {
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .clash-risk-panel .crp-meta {
+        font-size: 0.82rem;
+        color: #94a3b8;
+        margin-bottom: 0.75rem;
+    }
+
+    .clash-risk-panel .crp-meta span {
+        margin-right: 1rem;
+    }
+
+    .crp-risk-badge {
+        display: inline-block;
+        font-size: 1.05rem;
+        font-weight: 800;
+        padding: 0.35rem 1rem;
+        border-radius: 8px;
+        border: 2px solid;
+        margin-bottom: 0.6rem;
+        letter-spacing: 0.03em;
+    }
+
+    .crp-risk-badge.low  { background: rgba(34,197,94,0.15);  border-color: rgba(34,197,94,0.4);  color: #86efac; }
+    .crp-risk-badge.medium { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.4); color: #fcd34d; }
+    .crp-risk-badge.high { background: rgba(239,68,68,0.18);  border-color: rgba(239,68,68,0.45); color: #fca5a5; }
+
+    .crp-info-row {
+        font-size: 0.82rem;
+        color: #94a3b8;
+        margin-bottom: 0.25rem;
+    }
+
+    .crp-legend {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.8rem;
+        flex-wrap: wrap;
+        align-items: center;
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+
+    .crp-legend-label {
+        margin-right: 0.25rem;
+        color: #64748b;
+    }
+
+    .crp-legend-badge {
+        display: inline-block;
+        padding: 0.2rem 0.65rem;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 0.78rem;
+        border: 1px solid;
+    }
+
+    .crp-legend-badge.low    { background: rgba(34,197,94,0.15);  border-color: rgba(34,197,94,0.4);  color: #86efac; }
+    .crp-legend-badge.medium { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.4); color: #fcd34d; }
+    .crp-legend-badge.high   { background: rgba(239,68,68,0.18);  border-color: rgba(239,68,68,0.4);  color: #fca5a5; }
+    /* Faculty Board Panel */
+    .faculty-board-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(5, 8, 20, 0.75);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        display: none;
+        align-items: flex-start;
+        justify-content: flex-end;
+        padding: 1rem;
+    }
+    .faculty-board-overlay.open { display: flex; }
+
+    .faculty-board-panel {
+        width: min(480px, 95vw);
+        max-height: calc(100vh - 2rem);
+        overflow-y: auto;
+        background: linear-gradient(180deg, rgba(15,23,42,0.98) 0%, rgba(10,14,26,0.98) 100%);
+        border: 1px solid rgba(148,163,184,0.12);
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        padding: 1.25rem;
+        animation: boardSlide 0.3s cubic-bezier(0.16,1,0.3,1);
+    }
+    @keyframes boardSlide {
+        from { transform: translateX(60px); opacity: 0; }
+        to   { transform: translateX(0);   opacity: 1; }
+    }
+
+    .board-search-bar {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+    .board-search-bar input, .board-search-bar select {
+        background: rgba(30,41,59,0.7);
+        border: 1px solid rgba(148,163,184,0.15);
+        color: #f1f5f9; border-radius: 8px;
+        padding: 0.45rem 0.75rem; font-size: 0.875rem; outline: none;
+        flex: 1;
+    }
+    .board-search-bar input:focus, .board-search-bar select:focus {
+        border-color: rgba(6,214,160,0.4);
+    }
+
+    .board-faculty-card {
+        background: rgba(30,41,59,0.55);
+        border: 1.5px solid rgba(148,163,184,0.08);
+        border-radius: 10px; padding: 0.9rem 1rem;
+        margin-bottom: 0.6rem; cursor: pointer;
+        transition: all 0.2s;
+    }
+    .board-faculty-card:hover {
+        border-color: rgba(6,214,160,0.35);
+        background: rgba(6,214,160,0.06);
+        transform: translateX(3px);
+    }
+    .board-faculty-card.board-busy {
+        opacity: 0.45; cursor: default;
+    }
+    .board-faculty-card.board-busy:hover {
+        transform: none; border-color: rgba(239,68,68,0.2);
+        background: rgba(239,68,68,0.04);
+    }
+    .board-faculty-card.board-unavailable {
+        opacity: 0.35; cursor: default;
+    }
+
+    .slot-dots {
+        display: flex; gap: 4px; flex-wrap: wrap; margin-top: 0.4rem;
+    }
+    .slot-dot {
+        width: 28px; height: 12px; border-radius: 3px;
+        font-size: 0.55rem; display: flex; align-items: center; justify-content: center;
+        color: white; font-weight: 700; letter-spacing: 0;
+        flex-shrink: 0;
+    }
+    .slot-dot.available   { background: rgba(34,197,94,0.7); }
+    .slot-dot.busy        { background: rgba(239,68,68,0.7); }
+    .slot-dot.unavailable { background: rgba(100,116,139,0.35); }
+    .slot-dot.current     { outline: 2px solid rgba(6,214,160,0.9); outline-offset: 1px; }
+
+    .visiting-chip {
+        display: inline-flex; align-items: center; gap: 0.25rem;
+        background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.3);
+        color: #c4b5fd; padding: 0.15rem 0.5rem; border-radius: 12px;
+        font-size: 0.7rem; font-weight: 700;
+    }
+
+    .board-toggle-btn {
+        position: fixed;
+        right: 1.5rem; bottom: 2rem;
+        background: linear-gradient(135deg, #7c3aed, #06d6a0);
+        color: white; border: none; border-radius: 50px;
+        padding: 0.75rem 1.25rem;
+        font-weight: 700; font-size: 0.9rem;
+        display: flex; align-items: center; gap: 0.5rem;
+        cursor: pointer; z-index: 500;
+        box-shadow: 0 6px 20px rgba(124,58,237,0.4);
+        transition: all 0.3s;
+        font-family: 'Inter', sans-serif;
+    }
+    .board-toggle-btn:hover {
+        transform: translateY(-2px) scale(1.04);
+        box-shadow: 0 10px 30px rgba(124,58,237,0.5);
+    }
 </style>
 {% endblock %}
 
@@ -263,39 +452,59 @@
                         </div>
                     </div>
                 {% else %}
-                    <div class="add-entry-form">
-                        <form method="POST" action="{{ url_for('add_timetable_entry') }}" onsubmit="return validateForm(this);">
-                            <input type="hidden" name="division_id" value="{{ division.id }}">
-                            <input type="hidden" name="day" value="{{ current_day }}">
-                            <input type="hidden" name="time_slot_id" value="{{ slot.id }}">
-                            
-                            <div class="form-group">
-                                <label class="form-label">Subject</label>
-                                <select name="subject_id" class="form-control" required onchange="filterFaculty(this, '{{ slot.id }}')">
-                                    <option value="">-- Select Subject --</option>
-                                    {% for subject in subjects %}
-                                    <option value="{{ subject.id }}" data-name="{{ subject.name }}">{{ subject.name }} ({{ subject.code }})</option>
-                                    {% endfor %}
-                                </select>
+                            <div class="add-entry-form">
+                                <form method="POST" action="{{ url_for('add_timetable_entry') }}" onsubmit="return validateForm(this);" id="entry-form-{{ slot.id }}">
+                                    <input type="hidden" name="division_id" value="{{ division.id }}">
+                                    <input type="hidden" name="day" value="{{ current_day }}">
+                                    <input type="hidden" name="time_slot_id" value="{{ slot.id }}">
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Subject</label>
+                                        <select name="subject_id" class="form-control" required onchange="filterFaculty(this, '{{ slot.id }}')">
+                                            <option value="">-- Select Subject --</option>
+                                            {% for subject in subjects %}
+                                            <option value="{{ subject.id }}" data-name="{{ subject.name }}">{{ subject.name }} ({{ subject.code }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Faculty</label>
+                                        <select name="faculty_id" class="form-control faculty-select-{{ slot.id }}" required onchange="onFacultyChange(this, '{{ slot.id }}', {{ division.id }})">
+                                            <option value="">-- First select subject --</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Clash-Risk Prediction Panel -->
+                                    <div class="clash-risk-panel" id="crp-{{ slot.id }}">
+                                        <div class="crp-header">Clash-Risk Prediction &mdash; Proposed Entry</div>
+                                        <div class="crp-meta" id="crp-meta-{{ slot.id }}"></div>
+                                        <div id="crp-badge-{{ slot.id }}"></div>
+                                        <div class="crp-info-row" id="crp-conf-{{ slot.id }}"></div>
+                                        <div class="crp-info-row" id="crp-rec-{{ slot.id }}"></div>
+                                        <div class="crp-legend">
+                                            <span class="crp-legend-label">Risk-level legend:</span>
+                                            <span class="crp-legend-badge low">LOW</span>
+                                            <span class="crp-legend-badge medium">MEDIUM</span>
+                                            <span class="crp-legend-badge high">HIGH</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Room / Resource</label>
+                                        <select name="room_number" class="form-control" required onchange="onRoomChange(this, '{{ slot.id }}', {{ division.id }})">
+                                            <option value="">-- Select Room --</option>
+                                            {% for room in rooms %}
+                                            <option value="{{ room.name }}">{{ room.name }} (Capacity: {{ room.capacity }}, {{ room.room_type }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-success" style="width: 100%;">
+                                        <i class="fas fa-plus"></i> Add Entry
+                                    </button>
+                                </form>
                             </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Faculty</label>
-                                <select name="faculty_id" class="form-control faculty-select-{{ slot.id }}" required>
-                                    <option value="">-- First select subject --</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Room Number</label>
-                                <input type="text" name="room_number" class="form-control" placeholder="e.g., 101, Lab-A" required>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-success" style="width: 100%;">
-                                <i class="fas fa-plus"></i> Add Entry
-                            </button>
-                        </form>
-                    </div>
                 {% endif %}
             </div>
             {% endfor %}
@@ -342,13 +551,20 @@
                         <i class="fas fa-magic"></i> ML Suggestions
                     </button>
                 </h4>
-                <div class="faculty-list">
+                <div class="faculty-list" id="faculty-list-{{ slot.id }}">
                     {% for faculty in faculty_availability[slot.id] %}
-                    <div class="faculty-card {% if faculty.is_available %}available{% else %}busy{% endif %}" onclick="{% if faculty.is_available %}selectFacultyWithRisk({{ slot.id }}, {{ faculty.faculty_id }}, '{{ faculty.name|replace("'", "\\'") }}', '{{ division.id }}'){% endif %}" id="faculty-{{ slot.id }}-{{ faculty.faculty_id }}">
+                    <div class="faculty-card {% if faculty.is_available %}available{% else %}busy{% endif %}"
+                         onclick="{% if faculty.is_available %}selectFacultyWithRisk({{ slot.id }}, {{ faculty.faculty_id }}, '{{ faculty.name|replace("'", "\\'") }}', '{{ division.id }}'){% endif %}"
+                         id="faculty-{{ slot.id }}-{{ faculty.faculty_id }}">
                         <div class="d-flex justify-between align-center">
                             <div>
                                 <div class="faculty-name">
                                     <i class="fas fa-user"></i> {{ faculty.name }}
+                                    {% if faculty.is_visiting %}
+                                    <span class="visiting-chip" style="margin-left:0.4rem;">
+                                        <i class="fas fa-star"></i> Visiting
+                                    </span>
+                                    {% endif %}
                                 </div>
                                 <div class="faculty-subjects">
                                     {% if faculty.subjects %}
@@ -361,18 +577,14 @@
                             </div>
                             <div>
                                 {% if faculty.is_available %}
-                                    <span class="badge badge-success">
-                                        <i class="fas fa-check"></i> Available
-                                    </span>
+                                    <span class="badge badge-success"><i class="fas fa-check"></i> Available</span>
                                 {% else %}
-                                    <span class="badge badge-danger">
-                                        <i class="fas fa-times"></i> Busy
-                                    </span>
+                                    <span class="badge badge-danger"><i class="fas fa-times"></i> Busy</span>
                                 {% endif %}
                             </div>
                         </div>
                         {% if not faculty.is_available and faculty.clash_details %}
-                        <div style="margin-top: 0.5rem; padding: 0.5rem; background: rgba(239, 68, 68, 0.08); border-radius: 6px; font-size: 0.85rem; color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.15);">
+                        <div style="margin-top: 0.5rem; padding: 0.5rem; background: rgba(239,68,68,0.08); border-radius: 6px; font-size: 0.85rem; color: #fca5a5; border: 1px solid rgba(239,68,68,0.15);">
                             {{ faculty.clash_details.subject }} - {{ faculty.clash_details.division }}
                         </div>
                         {% endif %}
@@ -382,6 +594,50 @@
             </div>
             {% endfor %}
         </div>
+    </div>
+</div>
+
+<!-- ─── Faculty Board floating button ─── -->
+<button class="board-toggle-btn" onclick="openFacultyBoard()" id="faculty-board-btn">
+    <i class="fas fa-th-list"></i> Faculty Board
+</button>
+
+<!-- ─── Faculty Board overlay panel ─── -->
+<div class="faculty-board-overlay" id="faculty-board-overlay" onclick="closeBoardIfOutside(event)">
+    <div class="faculty-board-panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+            <h3 style="margin:0;color:#f1f5f9;font-weight:800;">
+                <i class="fas fa-users"></i> Faculty Board
+            </h3>
+            <button onclick="closeFacultyBoard()" style="background:rgba(148,163,184,0.1);border:none;color:#94a3b8;padding:0.4rem 0.8rem;border-radius:8px;cursor:pointer;font-size:0.9rem;">
+                <i class="fas fa-times"></i> Close
+            </button>
+        </div>
+
+        <div class="board-search-bar">
+            <input type="text" id="board-search" placeholder="🔍 Search faculty name or subject..." oninput="renderBoard()">
+            <select id="board-filter-avail" onchange="renderBoard()" style="flex:0.5;">
+                <option value="">All</option>
+                <option value="available">Available only</option>
+                <option value="visiting">Visiting only</option>
+            </select>
+        </div>
+
+        <div style="font-size:0.78rem;color:#64748b;margin-bottom:0.75rem;">
+            Showing availability for <strong style="color:#06d6a0;">{{ current_day }}</strong>.
+            Click a faculty card to assign them to the <strong>currently focused slot</strong>.
+            <br><span style="display:inline-flex;gap:0.3rem;align-items:center;margin-top:0.3rem;">
+                <span class="slot-dot available"></span> Available &nbsp;
+                <span class="slot-dot busy"></span> Busy &nbsp;
+                <span class="slot-dot unavailable"></span> Outside hours
+            </span>
+        </div>
+
+        <div id="board-loading" style="text-align:center;padding:2rem;color:#64748b;">
+            <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;margin-bottom:0.5rem;"></i>
+            <div>Loading faculty data...</div>
+        </div>
+        <div id="board-list" style="display:none;"></div>
     </div>
 </div>
 
@@ -398,7 +654,103 @@ function selectFacultyWithRisk(slotId, facultyId, facultyName, divId) {
     // Predict risk for this combination
     if (currentSubjectId) {
         predictClashRisk(slotId, facultyId, divId);
+        // Also update the detailed panel
+        const roomInput = document.querySelector(`#entry-form-${slotId} [name="room_number"]`);
+        const room = roomInput ? (roomInput.value || '101') : '101';
+        updateClashRiskPanel(slotId, facultyId, divId, room);
     }
+}
+
+// Called when faculty dropdown changes
+function onFacultyChange(selectEl, slotId, divId) {
+    const facultyId = selectEl.value;
+    if (!facultyId || !currentSubjectId) return;
+    const roomInput = document.querySelector(`#entry-form-${slotId} [name="room_number"]`);
+    const room = roomInput ? (roomInput.value || '101') : '101';
+    updateClashRiskPanel(slotId, facultyId, divId, room);
+}
+
+// Called when room number input changes (debounced)
+let _roomDebounce = {};
+function onRoomChange(inputEl, slotId, divId) {
+    clearTimeout(_roomDebounce[slotId]);
+    _roomDebounce[slotId] = setTimeout(() => {
+        const facultySelect = document.querySelector(`.faculty-select-${slotId}`);
+        const facultyId = facultySelect ? facultySelect.value : null;
+        if (!facultyId || !currentSubjectId) return;
+        updateClashRiskPanel(slotId, facultyId, divId, inputEl.value || '101');
+    }, 500);
+}
+
+// Fetch risk and populate the panel
+function updateClashRiskPanel(slotId, facultyId, divId, room) {
+    const panel   = document.getElementById(`crp-${slotId}`);
+    const meta    = document.getElementById(`crp-meta-${slotId}`);
+    const badge   = document.getElementById(`crp-badge-${slotId}`);
+    const conf    = document.getElementById(`crp-conf-${slotId}`);
+    const rec     = document.getElementById(`crp-rec-${slotId}`);
+    if (!panel) return;
+
+    // Show panel with loading state
+    panel.style.display = 'block';
+
+    // Resolve human-readable labels
+    const facultySelect = document.querySelector(`.faculty-select-${slotId}`);
+    const facultyName   = facultySelect ? (facultySelect.options[facultySelect.selectedIndex]?.text || 'Faculty') : 'Faculty';
+    const subjectSelect = document.querySelector(`#entry-form-${slotId} select[name="subject_id"]`);
+    const subjectName   = subjectSelect ? (subjectSelect.options[subjectSelect.selectedIndex]?.text || '') : '';
+    const divisionName  = "{{ division.full_name }}";
+    const slotTime      = "{{ current_day }}";
+
+    meta.innerHTML = `
+        <span><strong>Faculty:</strong> ${facultyName}</span>
+        <span><strong>Division:</strong> ${divisionName}</span>
+        <span><strong>Slot:</strong> ${currentDay} · Room ${room || '—'}</span>
+    `;
+    badge.innerHTML = `<div style="color:#64748b; font-size:0.82rem;">Analysing...</div>`;
+    conf.innerHTML = '';
+    rec.innerHTML  = '';
+
+    fetch('/api/ml/predict-clash-risk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            faculty_id:   parseInt(facultyId),
+            division_id:  parseInt(divId),
+            subject_id:   parseInt(currentSubjectId),
+            time_slot_id: parseInt(slotId),
+            day:          currentDay,
+            room_number:  room || '101'
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.success || !data.risk) return;
+        const risk       = data.risk;
+        const level      = risk.risk_level;    // low / medium / high
+        const score      = (risk.risk_score * 100).toFixed(2);
+        const confidence = (risk.confidence  * 100).toFixed(2);
+
+        let icon = level === 'high' ? '⚠ ' : (level === 'medium' ? '! ' : '✓ ');
+        badge.innerHTML = `<div class="crp-risk-badge ${level}">${icon}RISK: ${level.toUpperCase()} &nbsp;(score ${(risk.risk_score).toFixed(2)})</div>`;
+        conf.textContent = `Confidence: ${confidence}%`;
+
+        let recText = '';
+        if (level === 'high')   recText = 'Recommendation: choose an alternative slot or faculty.';
+        else if (level === 'medium') recText = 'Recommendation: consider checking faculty workload.';
+        else                    recText = 'Recommendation: this combination looks good to schedule!';
+        rec.textContent = recText;
+
+        // Also update the small inline risk badge on faculty card
+        const riskEl = document.getElementById(`risk-${slotId}-${facultyId}`);
+        if (riskEl) {
+            riskEl.innerHTML = `<span class="ml-badge risk-${level}">${icon}${level.toUpperCase()} (${Math.round(risk.risk_score*100)}%)</span>`;
+        }
+    })
+    .catch(err => {
+        badge.innerHTML = `<div style="color:#fca5a5; font-size:0.82rem;">Could not predict risk.</div>`;
+        console.error('CRP error:', err);
+    });
 }
 
 // Original selectFaculty function
@@ -688,6 +1040,140 @@ function recommendFacultyToForm(slotId, facultyId, facultyName) {
             slotEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }, 300);
+}
+
+// ─── Faculty Board ──────────────────────────────────────────────────────────
+let boardData = null; // cache
+
+function openFacultyBoard() {
+    document.getElementById('faculty-board-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    if (!boardData) {
+        loadBoardData();
+    } else {
+        renderBoard();
+    }
+}
+
+function closeFacultyBoard() {
+    document.getElementById('faculty-board-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+function closeBoardIfOutside(e) {
+    if (e.target === document.getElementById('faculty-board-overlay')) {
+        closeFacultyBoard();
+    }
+}
+
+function loadBoardData() {
+    document.getElementById('board-loading').style.display = 'block';
+    document.getElementById('board-list').style.display = 'none';
+
+    fetch(`/api/faculty-matrix?day=${encodeURIComponent(currentDay)}&division_id=${divisionId}`)
+        .then(r => r.json())
+        .then(data => {
+            boardData = data;
+            document.getElementById('board-loading').style.display = 'none';
+            document.getElementById('board-list').style.display = 'block';
+            renderBoard();
+        })
+        .catch(err => {
+            document.getElementById('board-loading').innerHTML =
+                '<p style="color:#fca5a5;"><i class="fas fa-exclamation-triangle"></i> Could not load faculty data.</p>';
+        });
+}
+
+function renderBoard() {
+    if (!boardData) return;
+    const searchTxt = (document.getElementById('board-search').value || '').toLowerCase();
+    const filterAvail = document.getElementById('board-filter-avail').value;
+
+    const list = document.getElementById('board-list');
+    const timeslots = boardData.timeslots;
+    let html = '';
+
+    const filtered = boardData.matrix.filter(fac => {
+        const matchSearch = !searchTxt ||
+            fac.name.toLowerCase().includes(searchTxt) ||
+            fac.department.toLowerCase().includes(searchTxt) ||
+            fac.subjects.some(s => s.toLowerCase().includes(searchTxt));
+
+        const slotForCurrentSlot = currentSlotId ? fac.slots[currentSlotId] : null;
+        const matchFilter =
+            filterAvail === '' ? true :
+            filterAvail === 'available' ? (slotForCurrentSlot === 'available') :
+            filterAvail === 'visiting' ? fac.is_visiting : true;
+
+        return matchSearch && matchFilter;
+    });
+
+    if (filtered.length === 0) {
+        list.innerHTML = '<p style="text-align:center;color:#64748b;padding:2rem;">No faculty match your search.</p>';
+        return;
+    }
+
+    filtered.forEach(fac => {
+        // Determine status for current slot (if selected)
+        const curStatus = currentSlotId ? (fac.slots[currentSlotId] || 'unavailable') : 'available';
+        const cardClass = curStatus === 'busy' ? 'board-busy' : curStatus === 'unavailable' ? 'board-unavailable' : '';
+        const clickable = curStatus === 'available';
+
+        // Build slot dots row
+        let dotsHtml = '<div class="slot-dots">';
+        timeslots.forEach(slot => {
+            const st = fac.slots[slot.id] || 'unavailable';
+            const isCurrent = String(slot.id) === String(currentSlotId);
+            dotsHtml += `<span class="slot-dot ${st} ${isCurrent ? 'current' : ''}" title="${slot.time_range}: ${st}"></span>`;
+        });
+        dotsHtml += '</div>';
+
+        const visitingBadge = fac.is_visiting
+            ? '<span class="visiting-chip" style="margin-left:0.35rem;"><i class="fas fa-star"></i> Visiting</span>'
+            : '';
+
+        const subjects = fac.subjects.length
+            ? fac.subjects.slice(0, 4).map(s => `<span class="badge badge-info" style="font-size:0.7rem;">${s}</span>`).join(' ')
+            : '<span style="color:#64748b;font-size:0.78rem;">No subjects set</span>';
+
+        const statusBadge = curStatus === 'available'
+            ? '<span class="badge badge-success" style="font-size:0.72rem;"><i class="fas fa-check"></i> Free this slot</span>'
+            : curStatus === 'busy'
+            ? '<span class="badge badge-danger" style="font-size:0.72rem;"><i class="fas fa-times"></i> Busy this slot</span>'
+            : '<span style="background:rgba(100,116,139,0.2);color:#94a3b8;padding:0.2rem 0.6rem;border-radius:6px;font-size:0.72rem;">Outside hours</span>';
+
+        const onclickAttr = clickable && currentSlotId
+            ? `onclick="boardSelectFaculty(${currentSlotId}, ${fac.faculty_id}, '${fac.name.replace(/'/g, "\\'")}')"`
+            : '';
+
+        html += `
+            <div class="board-faculty-card ${cardClass}" ${onclickAttr} title="${clickable ? 'Click to assign' : 'Not available for current slot'}">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;">
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:700;color:#f1f5f9;font-size:0.925rem;display:flex;align-items:center;flex-wrap:wrap;gap:0.3rem;">
+                            <i class="fas fa-user"></i> ${fac.name}${visitingBadge}
+                        </div>
+                        <div style="font-size:0.78rem;color:#64748b;margin-top:0.2rem;">${fac.department || ''} ${fac.designation ? '· ' + fac.designation : ''}</div>
+                        <div style="margin-top:0.35rem;">${subjects}</div>
+                    </div>
+                    <div style="flex-shrink:0;">${statusBadge}</div>
+                </div>
+                <div style="margin-top:0.5rem;font-size:0.72rem;color:#64748b;">All slots this day:</div>
+                ${dotsHtml}
+            </div>`;
+    });
+
+    list.innerHTML = html + `<p style="text-align:center;font-size:0.75rem;color:#64748b;margin-top:0.5rem;">${filtered.length} of ${boardData.matrix.length} faculty shown</p>`;
+}
+
+function boardSelectFaculty(slotId, facultyId, facultyName) {
+    selectFacultyWithRisk(slotId, facultyId, facultyName, divisionId);
+    closeFacultyBoard();
+    // Scroll to the form for that slot
+    setTimeout(() => {
+        const slotEl = document.getElementById('slot-' + slotId);
+        if (slotEl) slotEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 200);
 }
 </script>
 {% endblock %}

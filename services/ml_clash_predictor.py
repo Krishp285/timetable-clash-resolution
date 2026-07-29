@@ -3,9 +3,16 @@ ML-Based Clash Prediction and Recommendation System
 Uses pattern analysis and machine learning to predict and prevent scheduling conflicts
 """
 
-import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import LabelEncoder
+try:
+    import numpy as np
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.preprocessing import LabelEncoder
+    HAS_SKLEARN = True
+except Exception as e:
+    print(f"[WARNING] ML sklearn/scipy failed to load ({e}). Using rule-based fallback predictor.")
+    HAS_SKLEARN = False
+    np = None
+
 from models import Timetable, Faculty, Division, TimeSlot, db, Subject
 from datetime import datetime
 import json
@@ -34,32 +41,130 @@ class MLClashPredictor:
         # Get all timetable entries
         all_entries = Timetable.query.all()
         
-        if len(all_entries) < 10:
+        if len(all_entries) < 5:
             return None, None  # Not enough data
         
         features = []
         clash_labels = []
         
+        # 1. Existing valid entries (mostly negative / no clash)
         for entry in all_entries:
-            # Extract features
             feature_set = [
                 entry.faculty_id,
                 entry.division_id,
                 entry.subject_id,
                 entry.time_slot_id,
                 self._day_to_number(entry.day),
-                int(entry.room_number) if entry.room_number.isdigit() else hash(entry.room_number) % 100
+                self._room_to_number(entry.room_number)
             ]
             features.append(feature_set)
+            clash_labels.append(0)  # Valid entry
             
-            # Label: 1 if this entry has potential for clash, 0 otherwise
-            clash_risk = self._calculate_entry_clash_risk(entry)
-            clash_labels.append(1 if clash_risk > 0.5 else 0)
+        # 2. Generate synthetic positive samples (clash scenarios)
+        import random
+        faculties = [f.id for f in Faculty.query.all()]
+        divisions = [d.id for d in Division.query.all()]
+        subjects = [s.id for s in Subject.query.all()]
+        slots = [sl.id for sl in TimeSlot.query.all()]
+        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+        rooms = self._get_available_rooms()
         
+        if not faculties or not divisions or not slots:
+            return np.array(features), np.array(clash_labels)
+            
+        # Create map of occupied resources
+        occupancy = {}
+        for entry in all_entries:
+            key = (entry.day, entry.time_slot_id)
+            if key not in occupancy:
+                occupancy[key] = {'faculties': set(), 'divisions': set(), 'rooms': set()}
+            occupancy[key]['faculties'].add(entry.faculty_id)
+            occupancy[key]['divisions'].add(entry.division_id)
+            occupancy[key]['rooms'].add(entry.room_number)
+            
+        # Generate synthetic clash samples
+        for _ in range(250):
+            day = random.choice(days)
+            slot_id = random.choice(slots)
+            key = (day, slot_id)
+            
+            if key not in occupancy or not occupancy[key]['faculties']:
+                continue
+                
+            # Faculty clash: Assign a faculty who is already teaching at this day/slot
+            busy_faculty = list(occupancy[key]['faculties'])[0]
+            feature_set = [
+                busy_faculty,
+                random.choice(divisions),
+                random.choice(subjects),
+                slot_id,
+                self._day_to_number(day),
+                self._room_to_number(random.choice(rooms) if rooms else '101')
+            ]
+            features.append(feature_set)
+            clash_labels.append(1)  # Clash!
+            
+            # Division clash: Assign a division that already has a class
+            busy_division = list(occupancy[key]['divisions'])[0]
+            feature_set = [
+                random.choice(faculties),
+                busy_division,
+                random.choice(subjects),
+                slot_id,
+                self._day_to_number(day),
+                self._room_to_number(random.choice(rooms) if rooms else '101')
+            ]
+            features.append(feature_set)
+            clash_labels.append(1)  # Clash!
+            
+            # Room clash: Assign a room that is already occupied
+            busy_room = list(occupancy[key]['rooms'])[0]
+            room_val = self._room_to_number(busy_room)
+            feature_set = [
+                random.choice(faculties),
+                random.choice(divisions),
+                random.choice(subjects),
+                slot_id,
+                self._day_to_number(day),
+                room_val
+            ]
+            features.append(feature_set)
+            clash_labels.append(1)  # Clash!
+
+        # 3. Generate synthetic negative samples (clean slots where resources are free)
+        for _ in range(200):
+            day = random.choice(days)
+            slot_id = random.choice(slots)
+            key = (day, slot_id)
+            
+            free_faculties = [f for f in faculties if key not in occupancy or f not in occupancy[key]['faculties']]
+            free_divisions = [d for d in divisions if key not in occupancy or d not in occupancy[key]['divisions']]
+            free_rooms = [r for r in rooms if key not in occupancy or r not in occupancy[key]['rooms']]
+            
+            if free_faculties and free_divisions:
+                fac = random.choice(free_faculties)
+                div = random.choice(free_divisions)
+                room = random.choice(free_rooms) if free_rooms else '101'
+                room_val = self._room_to_number(room)
+                feature_set = [
+                    fac,
+                    div,
+                    random.choice(subjects),
+                    slot_id,
+                    self._day_to_number(day),
+                    room_val
+                ]
+                features.append(feature_set)
+                clash_labels.append(0)  # No clash
+                
         return np.array(features), np.array(clash_labels)
     
     def train_model(self):
         """Train the clash prediction model"""
+        if not HAS_SKLEARN:
+            self.is_trained = False
+            return False
+            
         X, y = self.prepare_features()
         
         if X is None:
@@ -105,7 +210,7 @@ class MLClashPredictor:
                 subject_id,
                 time_slot_id,
                 self._day_to_number(day),
-                int(room_number) if room_number.isdigit() else hash(room_number) % 100
+                self._room_to_number(room_number)
             ]])
             
             # Get prediction probability
@@ -165,14 +270,18 @@ class MLClashPredictor:
                 if exclude_slot_id and slot.id == exclude_slot_id:
                     continue
                 
-                # Check if this slot-day combination is already occupied
+                # Check if this slot-day combination is already occupied or outside faculty hours
+                faculty = Faculty.query.get(faculty_id)
                 existing = Timetable.query.filter(
                     Timetable.faculty_id == faculty_id,
                     Timetable.time_slot_id == slot.id,
                     Timetable.day == day
                 ).first()
                 
-                if existing:
+                if faculty and not faculty.is_available_for_slot(day, slot):
+                    status = 'unavailable'
+                    clash_risk = 1.0
+                elif existing:
                     status = 'unavailable'
                     clash_risk = 1.0
                 else:
@@ -196,10 +305,35 @@ class MLClashPredictor:
                     'status': status
                 })
         
-        # Sort by clash risk (low risk first)
-        recommendations.sort(key=lambda x: x['clash_risk'])
-        
-        return recommendations[:5]  # Return top 5 recommendations
+        # Group recommendations by day to offer best suggestions across different days
+        by_day = {}
+        for rec in recommendations:
+            if rec['status'] == 'unavailable':
+                continue
+            d = rec['day']
+            if d not in by_day:
+                by_day[d] = []
+            by_day[d].append(rec)
+            
+        best_per_day = []
+        for d in days_priority:
+            if d in by_day and by_day[d]:
+                # Sort slots on this day by clash risk (lowest first)
+                by_day[d].sort(key=lambda x: x['clash_risk'])
+                # Pick the best slot for this day
+                best_per_day.append(by_day[d][0])
+                
+        # If we have fewer than 5 recommendations from different days, fill up with other available slots
+        if len(best_per_day) < 5:
+            chosen_keys = {(r['day'], r['slot_id']) for r in best_per_day}
+            remaining_slots = [
+                r for r in recommendations 
+                if r['status'] != 'unavailable' and (r['day'], r['slot_id']) not in chosen_keys
+            ]
+            remaining_slots.sort(key=lambda x: x['clash_risk'])
+            best_per_day.extend(remaining_slots)
+            
+        return best_per_day[:5]
     
     def recommend_faculty_for_subject(self, subject_id, division_id, preferred_day, preferred_time_slot_id):
         """
@@ -230,7 +364,11 @@ class MLClashPredictor:
             can_teach = subject.name in faculty.get_subjects()
             subject_match = 1.0 if can_teach else 0.2
             
-            # Check availability on preferred day/slot
+            # Check availability on preferred day/slot (working hours / visiting slots)
+            time_slot = TimeSlot.query.get(preferred_time_slot_id)
+            if time_slot and not faculty.is_available_for_slot(preferred_day, time_slot):
+                continue
+                
             conflict = Timetable.query.filter(
                 Timetable.faculty_id == faculty.id,
                 Timetable.day == preferred_day,
@@ -333,6 +471,13 @@ class MLClashPredictor:
         """Convert day name to number"""
         days = {'Monday': 0, 'Tuesday': 1, 'Wednesday': 2, 'Thursday': 3, 'Friday': 4, 'Saturday': 5}
         return days.get(day, 0)
+        
+    def _room_to_number(self, room):
+        """Convert room identifier (digits or text) to float/int representation"""
+        if not room:
+            return 101.0
+        room_str = str(room).strip()
+        return float(room_str) if room_str.isdigit() else float(hash(room_str) % 100)
     
     def _get_available_rooms(self):
         """Get list of available room numbers"""

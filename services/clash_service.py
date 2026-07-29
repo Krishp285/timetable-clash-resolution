@@ -177,6 +177,19 @@ class ClashService:
         )
         if has_clash:
             clashes.append(details)
+            
+        # Check faculty availability (working hours or visiting slots)
+        faculty = Faculty.query.get(faculty_id)
+        time_slot = TimeSlot.query.get(time_slot_id)
+        if faculty and time_slot:
+            if not faculty.is_available_for_slot(day, time_slot):
+                clashes.append({
+                    'type': 'faculty_availability_clash',
+                    'message': f"Faculty {faculty.user.full_name} is not available on {day} at {time_slot.time_range}.",
+                    'faculty_name': faculty.user.full_name,
+                    'day': day,
+                    'time_slot': time_slot.time_range
+                })
         
         # Check room clash
         has_clash, details = ClashService.check_room_clash(
@@ -225,7 +238,8 @@ class ClashService:
     @staticmethod
     def get_all_faculty_availability(day, time_slot_id, subject_name=None):
         """
-        Get all faculty and their availability for a specific day and time
+        Get all faculty and their availability for a specific day and time.
+        Supports both regular faculty (working hours) and visiting faculty (specific slots).
         
         Args:
             day: Day of the week
@@ -244,6 +258,7 @@ class ClashService:
         )
         
         result = []
+        time_slot = TimeSlot.query.get(time_slot_id)
         
         for faculty in faculty_query.all():
             # Check if faculty teaches this subject (if provided)
@@ -252,26 +267,15 @@ class ClashService:
                 if not subjects or subject_name not in subjects:
                     continue
             
-            # Check availability
+            # Check if faculty is within their scheduled hours/visiting slots
+            is_within_hours = True
+            if time_slot:
+                is_within_hours = faculty.is_available_for_slot(day, time_slot)
+            
+            # Check if faculty already has a timetable conflict at this slot
             has_clash, details = ClashService.check_faculty_clash(
                 faculty.id, day, time_slot_id
             )
-            
-            # Check working hours
-            working_hours = faculty.get_working_hours()
-            time_slot = TimeSlot.query.get(time_slot_id)
-            is_within_hours = True
-            
-            if working_hours and time_slot:
-                from datetime import datetime
-                try:
-                    start = datetime.strptime(working_hours['start'], '%H:%M').time()
-                    end = datetime.strptime(working_hours['end'], '%H:%M').time()
-                    
-                    if not (start <= time_slot.start_time and time_slot.end_time <= end):
-                        is_within_hours = False
-                except Exception:
-                    is_within_hours = True
             
             result.append({
                 'faculty_id': faculty.id,
@@ -280,11 +284,14 @@ class ClashService:
                 'designation': faculty.designation or 'Faculty',
                 'subjects': faculty.get_subjects() or [],
                 'is_available': not has_clash and is_within_hours,
+                'is_visiting': faculty.is_visiting,
                 'clash_details': details if has_clash else None,
-                'working_hours': working_hours
+                'working_hours': faculty.get_working_hours() if not faculty.is_visiting else None,
+                'visiting_days': faculty.get_visiting_days() if faculty.is_visiting else [],
+                'visiting_slot_ids': faculty.get_visiting_slots() if faculty.is_visiting else [],
             })
         
-        # Sort: available first, then by name
+        # Sort: available first, then visiting faculty (they are special), then by name
         result.sort(key=lambda x: (not x['is_available'], x['name']))
         
         return result
@@ -882,20 +889,71 @@ class ClashService:
                                 })
                 
                 suggestions = suggestions[:5]
+
         
-            priority = {
-                'room_change': 0,
-                'faculty_change': 1,
-                'timeslot_change': 2
-            }
-            suggestions.sort(key=lambda x: (priority.get(x.get('type'), 99), x.get('risk_score', 1)))
+        priority = {
+            'room_change': 0,
+            'faculty_change': 1,
+            'timeslot_change': 2
+        }
+
+        # Pre-validate each suggestion: check if it would itself create a new clash
+        validated_suggestions = []
+        for sug in suggestions:
+            would_clash = False
+            clash_warning = None
+            try:
+                if sug['action_type'] == 'change_faculty' and clash.division_id and matching_slot:
+                    new_fac_id = int(sug['action_value'])
+                    is_ok, new_clashes = ClashService.validate_and_detect_clashes(
+                        new_fac_id, clash.division_id,
+                        details.get('room', '101'),
+                        day, matching_slot.id
+                    )
+                    if not is_ok:
+                        would_clash = True
+                        clash_warning = 'Applying this may create a new clash'
+                elif sug['action_type'] == 'change_room' and clash.faculty_id and clash.division_id and matching_slot:
+                    is_ok, new_clashes = ClashService.validate_and_detect_clashes(
+                        clash.faculty_id, clash.division_id,
+                        sug['action_value'],
+                        day, matching_slot.id
+                    )
+                    if not is_ok:
+                        would_clash = True
+                        clash_warning = 'This room may already be occupied'
+                elif sug['action_type'] == 'change_timeslot' and clash.faculty_id and clash.division_id:
+                    parts = sug['action_value'].split('|')
+                    new_slot_id = int(parts[0])
+                    new_day = parts[1] if len(parts) > 1 else day
+                    is_ok, new_clashes = ClashService.validate_and_detect_clashes(
+                        clash.faculty_id, clash.division_id,
+                        details.get('room', '101'),
+                        new_day, new_slot_id
+                    )
+                    if not is_ok:
+                        would_clash = True
+                        clash_warning = 'This slot has a conflict too'
+            except Exception:
+                pass
+            
+            sug['would_cause_clash'] = would_clash
+            sug['clash_warning'] = clash_warning
+            validated_suggestions.append(sug)
+        
+        # Sort: safe suggestions first, then risky ones
+        validated_suggestions.sort(key=lambda x: (
+            x.get('would_cause_clash', False),
+            priority.get(x.get('type'), 99),
+            x.get('risk_score', 1)
+        ))
         
         return {
             'clash_id': clash_id,
             'clash_type': clash.clash_type,
             'clash_details': details,
-            'suggestions': suggestions,
-            'total_suggestions': len(suggestions)
+            'suggestions': validated_suggestions,
+            'total_suggestions': len(validated_suggestions)
         }
     
     @staticmethod
@@ -979,9 +1037,11 @@ class ClashService:
             else:
                 return False, f'Unknown action type: {action_type}'
             
-            # Mark clash as resolved
+            # Mark clash as resolved with tracking info
             clash.is_resolved = True
             clash.resolved_at = datetime.utcnow()
+            clash.resolution_method = 'auto'
+            clash.resolution_note = f'Auto-applied: {action_type} → {action_value}'
             
             db.session.commit()
             return True, message
@@ -991,12 +1051,13 @@ class ClashService:
             return False, f'Error applying suggestion: {str(e)}'
     
     @staticmethod
-    def resolve_clash(clash_id):
+    def resolve_clash(clash_id, resolved_by_id=None):
         """
-        Mark a clash as resolved
+        Mark a clash as manually resolved.
         
         Args:
             clash_id: ID of the clash log
+            resolved_by_id: User ID of who resolved it
         
         Returns:
             bool: Success status
@@ -1005,6 +1066,9 @@ class ClashService:
         if clash:
             clash.is_resolved = True
             clash.resolved_at = datetime.utcnow()
+            clash.resolution_method = 'manual'
+            if resolved_by_id:
+                clash.resolved_by = resolved_by_id
             db.session.commit()
             return True
         return False

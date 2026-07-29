@@ -7,7 +7,7 @@ Usage: python create_db.py
 
 from app import app
 from extensions import db
-from models import User
+from models import User, Room
 
 def create_database():
     """Create all database tables and default admin user"""
@@ -50,6 +50,23 @@ def create_database():
         else:
             print("! Admin user already exists")
         
+        # Create default rooms
+        print("Creating default rooms...")
+        default_rooms = [
+            {'name': '101', 'capacity': 60, 'room_type': 'Classroom'},
+            {'name': '102', 'capacity': 60, 'room_type': 'Classroom'},
+            {'name': '103', 'capacity': 60, 'room_type': 'Classroom'},
+            {'name': '104', 'capacity': 60, 'room_type': 'Classroom'},
+            {'name': 'Lab-A', 'capacity': 30, 'room_type': 'Lab'},
+            {'name': 'Lab-B', 'capacity': 30, 'room_type': 'Lab'},
+            {'name': 'Seminar-1', 'capacity': 120, 'room_type': 'Seminar Hall'},
+        ]
+        for r_info in default_rooms:
+            room = Room(name=r_info['name'], capacity=r_info['capacity'], room_type=r_info['room_type'])
+            db.session.add(room)
+        db.session.commit()
+        print("[OK] Default rooms created!")
+        
         print()
         print("=" * 60)
         print("DATABASE SETUP COMPLETE!")
@@ -62,6 +79,7 @@ def create_database():
         print("  [OK] divisions          - Division/sections")
         print("  [OK] subjects           - Course subjects")
         print("  [OK] time_slots         - Time slots")
+        print("  [OK] rooms              - Rooms & resources")
         print("  [OK] timetable          - Timetable entries")
         print("  [OK] clash_logs         - Clash detection logs")
         print()

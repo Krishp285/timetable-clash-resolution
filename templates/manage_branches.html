@@ -7,6 +7,12 @@
         <h1 class="card-title">
             <i class="fas fa-building"></i> Manage Branches
         </h1>
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <form method="GET" style="display: inline;">
+                <input type="text" name="q" class="form-control" placeholder="Search branches..." value="{{ q or '' }}">
+            </form>
+        </div>
     </div>
     
     <form method="POST" action="{{ url_for('add_branch') }}" style="background: rgba(30, 41, 59, 0.5); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid rgba(148, 163, 184, 0.08);">

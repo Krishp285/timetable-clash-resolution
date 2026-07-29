@@ -51,8 +51,14 @@
         </div>
         
         <div class="form-group">
-            <label class="form-label">Room Number</label>
-            <input type="text" name="room_number" class="form-control" value="{{ entry.room_number }}" required>
+            <label class="form-label">Room / Resource</label>
+            <select name="room_number" class="form-control" required>
+                {% for room in rooms %}
+                <option value="{{ room.name }}" {% if room.name == entry.room_number %}selected{% endif %}>
+                    {{ room.name }} (Capacity: {{ room.capacity }}, {{ room.room_type }})
+                </option>
+                {% endfor %}
+            </select>
         </div>
         
         <div class="d-flex gap-2">

@@ -3,367 +3,232 @@
 
 {% block extra_css %}
 <style>
+    /* ─── Tabs ─────────────────────────────── */
+    .clash-tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .clash-tab {
+        padding: 0.65rem 1.5rem; border-radius: 10px;
+        background: rgba(30,41,59,0.5); border: 1.5px solid rgba(148,163,184,0.12);
+        color: #94a3b8; font-weight: 600; font-size: 0.9rem; cursor: pointer;
+        transition: all 0.25s; text-decoration: none;
+    }
+    .clash-tab.active, .clash-tab:hover {
+        background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(124,58,237,0.15));
+        border-color: rgba(239,68,68,0.35); color: #fca5a5;
+    }
+    .clash-tab.active { font-weight: 700; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* ─── Filter bar ─────────────────────────── */
+    .filter-bar {
+        display: flex; gap: 0.75rem; flex-wrap: wrap;
+        background: rgba(15,23,42,0.5); padding: 1rem 1.25rem;
+        border-radius: 12px; margin-bottom: 1.5rem;
+        border: 1px solid rgba(148,163,184,0.1);
+    }
+    .filter-bar select, .filter-bar input[type=text], .filter-bar input[type=date] {
+        background: rgba(30,41,59,0.7); border: 1px solid rgba(148,163,184,0.15);
+        color: #f1f5f9; border-radius: 8px; padding: 0.45rem 0.9rem;
+        font-size: 0.875rem; outline: none;
+    }
+    .filter-bar select:focus, .filter-bar input:focus {
+        border-color: rgba(6,214,160,0.4); box-shadow: 0 0 0 2px rgba(6,214,160,0.08);
+    }
+
+    /* ─── Clash cards ─────────────────────────── */
     .clash-card {
-        background: rgba(15, 23, 42, 0.6);
-        backdrop-filter: blur(12px);
+        background: rgba(15,23,42,0.6); backdrop-filter: blur(12px);
+        border-radius: 12px; margin-bottom: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        border: 1px solid rgba(148,163,184,0.08);
         border-left: 4px solid #ef4444;
-        padding: 1.5rem;
-        border-radius: 12px;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(148, 163, 184, 0.08);
-        border-left: 4px solid #ef4444;
-        transition: all 0.3s ease;
+        transition: all 0.3s ease; overflow: hidden;
     }
-    
     .clash-card:hover {
-        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 6px 25px rgba(0,0,0,0.3);
         transform: translateY(-2px);
-        border-color: rgba(148, 163, 184, 0.15);
-        border-left-color: #ef4444;
     }
-    
+    .clash-card-body { padding: 1.5rem; }
     .clash-card.resolved {
-        border-left-color: #22c55e;
-        opacity: 0.6;
+        border-left-color: #22c55e; opacity: 0.72;
     }
-    
+    .clash-card.resolved:hover { opacity: 1; }
+
     .clash-type {
-        display: inline-block;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        font-size: 0.9rem;
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        padding: 0.4rem 0.9rem; border-radius: 8px;
+        font-weight: 600; font-size: 0.85rem;
     }
-    
-    .clash-type.faculty {
-        background: rgba(239, 68, 68, 0.15);
-        color: #fca5a5;
-        border: 1px solid rgba(239, 68, 68, 0.25);
-    }
-    
-    .clash-type.room {
-        background: rgba(245, 158, 11, 0.15);
-        color: #fcd34d;
-        border: 1px solid rgba(245, 158, 11, 0.25);
-    }
-    
-    .clash-type.division {
-        background: rgba(124, 58, 237, 0.15);
-        color: #c4b5fd;
-        border: 1px solid rgba(124, 58, 237, 0.25);
-    }
-    
+    .clash-type.faculty  { background: rgba(239,68,68,0.12); color: #fca5a5; border: 1px solid rgba(239,68,68,0.2); }
+    .clash-type.room     { background: rgba(245,158,11,0.12); color: #fcd34d; border: 1px solid rgba(245,158,11,0.2); }
+    .clash-type.division { background: rgba(124,58,237,0.12); color: #c4b5fd; border: 1px solid rgba(124,58,237,0.2); }
+
     .clash-details {
-        background: rgba(30, 41, 59, 0.6);
-        padding: 1rem;
-        border-radius: 10px;
-        margin-top: 1rem;
-        font-size: 0.95rem;
-        border: 1px solid rgba(148, 163, 184, 0.08);
-        color: #94a3b8;
+        background: rgba(30,41,59,0.6); padding: 1rem; border-radius: 10px;
+        margin-top: 1rem; font-size: 0.92rem;
+        border: 1px solid rgba(148,163,184,0.08); color: #94a3b8;
     }
-    
-    .clash-details strong {
-        color: #f1f5f9;
-    }
+    .clash-details p { margin-bottom: 0.3rem; }
+    .clash-details strong { color: #f1f5f9; }
 
-    .clash-details p {
-        margin-bottom: 0.35rem;
+    /* ─── Resolve button (clearly an action, not a status) ─────────────────────────────── */
+    .btn-resolve {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        background: transparent;
+        border: 2px solid #22c55e;
+        color: #86efac;
+        padding: 0.5rem 1.1rem;
+        border-radius: 9px; font-weight: 700; font-size: 0.875rem;
+        cursor: pointer; transition: all 0.25s;
+        font-family: 'Inter', sans-serif;
+        position: relative;
     }
-
-    .clash-actions {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
+    .btn-resolve:hover {
+        background: rgba(34,197,94,0.12);
+        color: #4ade80;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(34,197,94,0.2);
     }
+    .btn-resolve::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: calc(100% + 6px);
+        left: 50%; transform: translateX(-50%);
+        background: rgba(15,23,42,0.95); color: #94a3b8;
+        padding: 0.35rem 0.75rem; border-radius: 6px;
+        font-size: 0.75rem; font-weight: 400;
+        white-space: nowrap; opacity: 0; pointer-events: none;
+        transition: opacity 0.2s;
+        border: 1px solid rgba(148,163,184,0.15);
+    }
+    .btn-resolve:hover::after { opacity: 1; }
 
-    /* AI Suggestions Panel */
+    /* ─── Timeline ─────────────────────────── */
+    .resolution-timeline {
+        display: flex; align-items: center; gap: 0.5rem;
+        font-size: 0.8rem; color: #64748b; margin-top: 0.75rem;
+        padding: 0.5rem 0.75rem; background: rgba(30,41,59,0.4);
+        border-radius: 8px; border: 1px solid rgba(148,163,184,0.08);
+    }
+    .timeline-dot {
+        width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+    .timeline-line { flex: 1; height: 1px; background: rgba(148,163,184,0.2); }
+
+    /* ─── Stats ─────────────────────────── */
+    .clash-stats { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .stat-card {
+        background: rgba(30,41,59,0.6); backdrop-filter: blur(8px);
+        padding: 1rem 1.5rem; border-radius: 12px;
+        border: 1px solid rgba(148,163,184,0.1);
+        display: flex; align-items: center; gap: 0.75rem;
+        flex: 1; min-width: 140px; transition: all 0.3s;
+    }
+    .stat-card:hover { border-color: rgba(6,214,160,0.2); }
+    .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+    .stat-value { font-size: 1.5rem; font-weight: 800; color: #f1f5f9; line-height: 1; }
+    .stat-label { font-size: 0.78rem; color: #64748b; margin-top: 0.15rem; }
+
+    /* ─── AI Suggestions ─────────────────────────── */
     .ai-suggestions-panel {
         margin-top: 1rem;
-        background: linear-gradient(135deg, rgba(124, 58, 237, 0.3) 0%, rgba(6, 214, 160, 0.15) 100%);
-        backdrop-filter: blur(12px);
-        border-radius: 14px;
-        padding: 1.25rem;
-        color: white;
-        animation: slideDown 0.4s ease-out;
-        position: relative;
-        overflow: hidden;
-        border: 1px solid rgba(148, 163, 184, 0.12);
+        background: linear-gradient(135deg, rgba(124,58,237,0.3) 0%, rgba(6,214,160,0.15) 100%);
+        backdrop-filter: blur(12px); border-radius: 14px; padding: 1.25rem;
+        color: white; animation: slideDown 0.4s ease-out;
+        border: 1px solid rgba(148,163,184,0.12);
     }
-
-    .ai-suggestions-panel::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 100%;
-        height: 100%;
-        background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
-        pointer-events: none;
-    }
-
     @keyframes slideDown {
-        from {
-            opacity: 0;
-            max-height: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            max-height: 1000px;
-            transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
     }
-
     .ai-suggestions-header {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-        font-size: 1.05rem;
-        font-weight: 700;
+        display: flex; align-items: center; gap: 0.5rem;
+        margin-bottom: 1rem; font-size: 1.05rem; font-weight: 700;
     }
-
-    .ai-suggestions-header .ai-icon {
-        background: rgba(255,255,255,0.15);
-        padding: 0.35rem 0.6rem;
-        border-radius: 6px;
-        font-size: 1rem;
-    }
+    .ai-icon { background: rgba(255,255,255,0.15); padding: 0.35rem 0.6rem; border-radius: 6px; }
 
     .suggestion-item {
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 10px;
-        padding: 1rem;
-        margin-bottom: 0.75rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        transition: all 0.25s ease;
-        backdrop-filter: blur(4px);
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 10px; padding: 1rem; margin-bottom: 0.75rem;
+        display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+        transition: all 0.25s;
     }
-
-    .suggestion-item:hover {
-        background: rgba(255, 255, 255, 0.15);
-        transform: translateX(4px);
-        border-color: rgba(6, 214, 160, 0.3);
+    .suggestion-item:hover { background: rgba(255,255,255,0.15); transform: translateX(4px); }
+    .suggestion-item.has-clash-warning {
+        border-color: rgba(245,158,11,0.4);
+        background: rgba(245,158,11,0.06);
     }
-
-    .suggestion-info {
-        flex: 1;
+    .clash-warning-badge {
+        display: inline-flex; align-items: center; gap: 0.3rem;
+        background: rgba(245,158,11,0.2); border: 1px solid rgba(245,158,11,0.35);
+        color: #fcd34d; padding: 0.2rem 0.6rem; border-radius: 6px;
+        font-size: 0.72rem; font-weight: 700; margin-top: 0.3rem;
     }
-
-    .suggestion-description {
-        font-weight: 600;
-        font-size: 0.95rem;
-        margin-bottom: 0.25rem;
-    }
-
-    .suggestion-detail {
-        font-size: 0.82rem;
-        opacity: 0.85;
-    }
-
+    .suggestion-info { flex: 1; }
+    .suggestion-description { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.2rem; }
+    .suggestion-detail { font-size: 0.82rem; opacity: 0.85; }
     .suggestion-risk-badge {
-        display: inline-block;
-        padding: 0.3rem 0.6rem;
-        border-radius: 6px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        white-space: nowrap;
+        display: inline-block; padding: 0.3rem 0.6rem; border-radius: 6px;
+        font-size: 0.75rem; font-weight: 700; white-space: nowrap;
     }
-
-    .risk-low {
-        background: rgba(72, 187, 120, 0.9);
-        color: white;
-    }
-
-    .risk-medium {
-        background: rgba(246, 173, 85, 0.9);
-        color: white;
-    }
-
-    .risk-high {
-        background: rgba(245, 101, 101, 0.9);
-        color: white;
-    }
-
+    .risk-low { background: rgba(72,187,120,0.9); color: white; }
+    .risk-medium { background: rgba(246,173,85,0.9); color: white; }
+    .risk-high { background: rgba(245,101,101,0.9); color: white; }
     .apply-btn {
-        background: rgba(255, 255, 255, 0.95);
-        color: #7c3aed;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        font-weight: 700;
-        font-size: 0.82rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        white-space: nowrap;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.3rem;
+        background: rgba(255,255,255,0.95); color: #7c3aed; border: none;
+        padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700;
+        font-size: 0.82rem; cursor: pointer; transition: all 0.2s;
+        white-space: nowrap; display: inline-flex; align-items: center; gap: 0.3rem;
         font-family: 'Inter', sans-serif;
     }
-
-    .apply-btn:hover {
-        background: white;
-        transform: scale(1.05);
-        box-shadow: 0 2px 12px rgba(0,0,0,0.2);
-    }
-
-    .ai-loading {
-        text-align: center;
-        padding: 1.5rem;
-    }
-
+    .apply-btn:hover { background: white; transform: scale(1.05); }
+    .apply-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .ai-spinner {
-        border: 3px solid rgba(255, 255, 255, 0.2);
-        border-radius: 50%;
+        border: 3px solid rgba(255,255,255,0.2); border-radius: 50%;
         border-top: 3px solid var(--primary);
-        width: 24px;
-        height: 24px;
-        animation: spin 0.8s linear infinite;
+        width: 24px; height: 24px; animation: spin 0.8s linear infinite;
         display: inline-block;
-        margin-bottom: 0.5rem;
     }
-
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    .no-suggestions {
-        text-align: center;
-        padding: 1rem;
-        opacity: 0.8;
-        font-style: italic;
-    }
-
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .btn-ai {
         background: linear-gradient(135deg, #7c3aed 0%, #06d6a0 100%);
-        color: white;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        font-size: 0.9rem;
-        font-family: 'Inter', sans-serif;
+        color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px;
+        font-weight: 600; cursor: pointer; transition: all 0.3s;
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        font-size: 0.9rem; font-family: 'Inter', sans-serif;
     }
-
-    .btn-ai:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 15px rgba(124, 58, 237, 0.35);
-    }
-
-    .btn-ai:active {
-        transform: translateY(0);
-    }
-
+    .btn-ai:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(124,58,237,0.35); }
     .score-badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 42px;
-        height: 42px;
-        border-radius: 50%;
-        font-weight: 800;
-        font-size: 0.85rem;
+        display: inline-flex; align-items: center; justify-content: center;
+        min-width: 42px; height: 42px; border-radius: 50%;
+        font-weight: 800; font-size: 0.85rem;
     }
 
-    /* Toast notification */
+    /* ─── Resolved clash accordion ─────────────────────────── */
+    .resolved-clash-header {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 1rem 1.5rem; cursor: pointer; user-select: none;
+    }
+    .resolved-clash-body {
+        padding: 0 1.5rem 1.25rem;
+        border-top: 1px solid rgba(148,163,184,0.08);
+        display: none;
+    }
+    .resolved-clash-body.open { display: block; }
+
+    /* ─── Toast ─────────────────────────── */
     .toast-notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-        padding: 1rem 1.5rem;
-        border-radius: 10px;
-        font-weight: 600;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        position: fixed; top: 20px; right: 20px; z-index: 9999;
+        padding: 1rem 1.5rem; border-radius: 10px; font-weight: 600;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3); max-width: 400px;
         animation: toastSlide 0.4s ease-out;
-        max-width: 400px;
     }
-
-    .toast-success {
-        background: linear-gradient(135deg, #22c55e, #16a34a);
-        color: white;
-    }
-
-    .toast-error {
-        background: linear-gradient(135deg, #ef4444, #dc2626);
-        color: white;
-    }
-
+    .toast-success { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; }
+    .toast-error   { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
     @keyframes toastSlide {
-        from {
-            opacity: 0;
-            transform: translateX(100px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-
-    /* Stats bar */
-    .clash-stats {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-        flex-wrap: wrap;
-    }
-
-    .stat-card {
-        background: rgba(30, 41, 59, 0.6);
-        backdrop-filter: blur(8px);
-        padding: 1rem 1.5rem;
-        border-radius: 12px;
-        border: 1px solid rgba(148, 163, 184, 0.1);
-        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        flex: 1;
-        min-width: 150px;
-        transition: all 0.3s ease;
-    }
-
-    .stat-card:hover {
-        border-color: rgba(6, 214, 160, 0.2);
-    }
-
-    .stat-card .stat-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.1rem;
-    }
-
-    .stat-card .stat-value {
-        font-size: 1.5rem;
-        font-weight: 800;
-        line-height: 1;
-        color: #f1f5f9;
-    }
-
-    .stat-card .stat-label {
-        font-size: 0.8rem;
-        color: #64748b;
-        margin-top: 0.15rem;
+        from { opacity: 0; transform: translateX(100px); }
+        to   { opacity: 1; transform: translateX(0); }
     }
 </style>
 {% endblock %}
@@ -374,174 +239,314 @@
         <h1 class="card-title">
             <i class="fas fa-exclamation-triangle"></i> Clash Management
         </h1>
-        <div>
+        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
             <span class="badge badge-danger" style="padding: 0.5rem 1rem; font-size: 1rem;">
                 {{ clashes|length }} Active Clashes
             </span>
+            {% if resolved_clashes %}
+            <span class="badge badge-success" style="padding: 0.5rem 1rem; font-size: 1rem;">
+                {{ resolved_clashes|length }} Resolved
+            </span>
+            {% endif %}
         </div>
     </div>
 
     <!-- Stats Overview -->
     {% if clashes %}
     <div class="clash-stats">
-        {% set room_clashes = clashes|selectattr('clash_type', 'equalto', 'room')|list|length %}
-        {% set faculty_clashes = clashes|selectattr('clash_type', 'equalto', 'faculty')|list|length %}
-        {% set division_clashes = clashes|selectattr('clash_type', 'equalto', 'division')|list|length %}
-        
+        {% set room_c = clashes|selectattr('clash_type','equalto','room')|list|length %}
+        {% set fac_c  = clashes|selectattr('clash_type','equalto','faculty')|list|length %}
+        {% set div_c  = clashes|selectattr('clash_type','equalto','division')|list|length %}
         <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #fcd34d;">
-                <i class="fas fa-door-open"></i>
-            </div>
-            <div>
-                <div class="stat-value">{{ room_clashes }}</div>
-                <div class="stat-label">Room Clashes</div>
-            </div>
+            <div class="stat-icon" style="background: rgba(245,158,11,0.15); color: #fcd34d;"><i class="fas fa-door-open"></i></div>
+            <div><div class="stat-value">{{ room_c }}</div><div class="stat-label">Room Clashes</div></div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5;">
-                <i class="fas fa-user"></i>
-            </div>
-            <div>
-                <div class="stat-value">{{ faculty_clashes }}</div>
-                <div class="stat-label">Faculty Clashes</div>
-            </div>
+            <div class="stat-icon" style="background: rgba(239,68,68,0.15); color: #fca5a5;"><i class="fas fa-user"></i></div>
+            <div><div class="stat-value">{{ fac_c }}</div><div class="stat-label">Faculty Clashes</div></div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(124, 58, 237, 0.15); color: #c4b5fd;">
-                <i class="fas fa-users"></i>
-            </div>
-            <div>
-                <div class="stat-value">{{ division_clashes }}</div>
-                <div class="stat-label">Division Clashes</div>
-            </div>
+            <div class="stat-icon" style="background: rgba(124,58,237,0.15); color: #c4b5fd;"><i class="fas fa-users"></i></div>
+            <div><div class="stat-value">{{ div_c }}</div><div class="stat-label">Division Clashes</div></div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(34, 197, 94, 0.15); color: #86efac;">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <div>
-                <div class="stat-value">{{ resolved_clashes|length }}</div>
-                <div class="stat-label">Resolved</div>
-            </div>
+            <div class="stat-icon" style="background: rgba(34,197,94,0.15); color: #86efac;"><i class="fas fa-check-circle"></i></div>
+            <div><div class="stat-value">{{ resolved_clashes|length }}</div><div class="stat-label">Resolved</div></div>
         </div>
     </div>
     {% endif %}
-    
-    {% if clashes %}
-    <h3 style="margin-bottom: 1rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-exclamation-circle"></i> Active Clashes</h3>
-    
-    {% for clash in clashes %}
-    <div class="clash-card" id="clash-card-{{ clash.id }}">
-        <div class="d-flex justify-between align-center">
-            <div>
-                <span class="clash-type {{ clash.clash_type }}">
-                    <i class="fas fa-{% if clash.clash_type == 'faculty' %}user{% elif clash.clash_type == 'room' %}door-open{% else %}users{% endif %}"></i>
-                    {{ clash.clash_type|upper }} CLASH
-                </span>
-                <div style="margin-top: 0.5rem;">
-                    <span class="badge badge-warning">{{ clash.severity|upper }}</span>
-                    <span style="color: #64748b; margin-left: 1rem;">
-                        <i class="fas fa-clock"></i> Detected: {{ clash.detected_at.strftime('%Y-%m-%d %H:%M') }}
+
+    <!-- Tabs -->
+    <div class="clash-tabs">
+        <a class="clash-tab active" onclick="switchTab('active', this)" href="#">
+            <i class="fas fa-exclamation-circle"></i> Active Clashes ({{ clashes|length }})
+        </a>
+        <a class="clash-tab" onclick="switchTab('history', this)" href="#">
+            <i class="fas fa-history"></i> Clash History ({{ resolved_clashes|length }})
+        </a>
+    </div>
+
+    <!-- ─── ACTIVE CLASHES TAB ─── -->
+    <div id="tab-active" class="tab-pane active">
+
+        <!-- Filter bar for active clashes -->
+        <div class="filter-bar">
+            <select id="filter-type" onchange="filterClashes()">
+                <option value="">All Types</option>
+                <option value="faculty">Faculty</option>
+                <option value="room">Room</option>
+                <option value="division">Division</option>
+            </select>
+            <select id="filter-severity" onchange="filterClashes()">
+                <option value="">All Severities</option>
+                <option value="error">Error</option>
+                <option value="warning">Warning</option>
+            </select>
+            <input type="text" id="filter-search" placeholder="🔍 Search in clashes..." oninput="filterClashes()" style="min-width: 200px;">
+        </div>
+
+        {% if clashes %}
+        <div id="active-clash-list">
+        {% for clash in clashes %}
+        <div class="clash-card" id="clash-card-{{ clash.id }}"
+             data-type="{{ clash.clash_type }}"
+             data-severity="{{ clash.severity }}"
+             data-search="{{ clash.clash_type }} {{ clash.get_details().values()|join(' ')|lower }}">
+            <div class="clash-card-body">
+                <div class="d-flex justify-between align-center" style="flex-wrap: wrap; gap: 0.75rem;">
+                    <div>
+                        <span class="clash-type {{ clash.clash_type }}">
+                            <i class="fas fa-{% if clash.clash_type == 'faculty' %}user{% elif clash.clash_type == 'room' %}door-open{% else %}users{% endif %}"></i>
+                            {{ clash.clash_type|upper }} CLASH
+                        </span>
+                        <div style="margin-top: 0.5rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                            <span class="badge badge-warning">{{ clash.severity|upper }}</span>
+                            <span style="color: #64748b; font-size: 0.85rem;">
+                                <i class="fas fa-clock"></i> Detected: {{ clash.detected_at.strftime('%d %b %Y, %H:%M') }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="clash-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                        <button type="button" class="btn-ai" onclick="getAISuggestions({{ clash.id }})">
+                            <i class="fas fa-magic"></i> 🤖 Get AI Suggestions
+                        </button>
+                        <form method="POST" action="{{ url_for('resolve_clash', clash_id=clash.id) }}" style="display: inline;">
+                            <button type="submit" class="btn-resolve"
+                                    data-tooltip="Click to mark this clash as manually resolved">
+                                <i class="fas fa-check-circle"></i> Mark as Resolved
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="clash-details">
+                    {% set details = clash.get_details() %}
+                    {% if clash.clash_type == 'faculty' %}
+                        <p><strong>Faculty:</strong> {{ details.faculty_name }}</p>
+                        <p><strong>Subject:</strong> {{ details.subject }}</p>
+                        <p><strong>Division:</strong> {{ details.division }}</p>
+                        <p><strong>Room:</strong> {{ details.room }}</p>
+                        <p><strong>Time:</strong> {{ details.day }} — {{ details.time }}</p>
+                    {% elif clash.clash_type == 'room' %}
+                        <p><strong>Room:</strong> {{ details.room }}</p>
+                        <p><strong>Division:</strong> {{ details.division }}</p>
+                        <p><strong>Subject:</strong> {{ details.subject }}</p>
+                        <p><strong>Faculty:</strong> {{ details.faculty }}</p>
+                        <p><strong>Time:</strong> {{ details.day }} — {{ details.time }}</p>
+                    {% elif clash.clash_type == 'division' %}
+                        <p><strong>Division:</strong> {{ details.division }}</p>
+                        <p><strong>Subject:</strong> {{ details.subject }}</p>
+                        <p><strong>Faculty:</strong> {{ details.faculty }}</p>
+                        <p><strong>Room:</strong> {{ details.room }}</p>
+                        <p><strong>Time:</strong> {{ details.day }} — {{ details.time }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- AI Suggestions Container (loaded dynamically) -->
+                <div id="suggestions-{{ clash.id }}"></div>
+            </div>
+        </div>
+        {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 3rem; color: #64748b;">
+            <i class="fas fa-check-circle" style="font-size: 4rem; color: #22c55e; margin-bottom: 1rem;"></i>
+            <h3 style="color: #86efac;">No Active Clashes</h3>
+            <p>All timetable entries are conflict-free!</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ─── CLASH HISTORY TAB ─── -->
+    <div id="tab-history" class="tab-pane">
+        <!-- Filter bar for history -->
+        <div class="filter-bar">
+            <select id="hist-filter-type" onchange="filterHistory()">
+                <option value="">All Types</option>
+                <option value="faculty">Faculty</option>
+                <option value="room">Room</option>
+                <option value="division">Division</option>
+            </select>
+            <select id="hist-filter-method" onchange="filterHistory()">
+                <option value="">All Methods</option>
+                <option value="manual">Manual</option>
+                <option value="auto">Auto (AI)</option>
+            </select>
+            <input type="date" id="hist-filter-date" onchange="filterHistory()" title="Filter by date">
+            <input type="text" id="hist-filter-search" placeholder="🔍 Search history..." oninput="filterHistory()" style="min-width: 200px;">
+        </div>
+
+        {% if resolved_clashes %}
+        <div id="history-list">
+        {% for clash in resolved_clashes %}
+        {% set details = clash.get_details() %}
+        <div class="clash-card resolved" id="hist-card-{{ clash.id }}"
+             data-type="{{ clash.clash_type }}"
+             data-method="{{ clash.resolution_method or 'manual' }}"
+             data-date="{{ clash.detected_at.strftime('%Y-%m-%d') }}"
+             data-search="{{ clash.clash_type }} {{ details.values()|join(' ')|lower }}">
+            <div class="resolved-clash-header" onclick="toggleHistory({{ clash.id }})">
+                <div>
+                    <span class="clash-type {{ clash.clash_type }}">
+                        <i class="fas fa-{% if clash.clash_type == 'faculty' %}user{% elif clash.clash_type == 'room' %}door-open{% else %}users{% endif %}"></i>
+                        {{ clash.clash_type|upper }} CLASH
+                        <span style="margin-left: 0.4rem; background: rgba(34,197,94,0.2); color: #86efac; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.72rem; font-weight: 700;">✓ RESOLVED</span>
+                    </span>
+                    {% if clash.resolution_method == 'auto' %}
+                    <span style="margin-left: 0.5rem; background: rgba(124,58,237,0.2); color: #c4b5fd; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.72rem; font-weight: 700;">🤖 AUTO</span>
+                    {% endif %}
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="font-size: 0.8rem; color: #64748b;">
+                        <i class="fas fa-chevron-down" id="hist-icon-{{ clash.id }}"></i>
                     </span>
                 </div>
             </div>
-            <div class="clash-actions">
-                <button type="button" class="btn-ai" onclick="getAISuggestions({{ clash.id }})">
-                    <i class="fas fa-magic"></i> 🤖 Get AI Suggestions
-                </button>
-                <form method="POST" action="{{ url_for('resolve_clash', clash_id=clash.id) }}" style="display: inline;">
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-check"></i> Resolve
-                    </button>
-                </form>
-            </div>
-        </div>
-        
-        <div class="clash-details">
-            {% set details = clash.get_details() %}
-            
-            {% if clash.clash_type == 'faculty' %}
-                <p><strong>Faculty:</strong> {{ details.faculty_name }}</p>
-                <p><strong>Subject:</strong> {{ details.subject }}</p>
-                <p><strong>Division:</strong> {{ details.division }}</p>
-                <p><strong>Room:</strong> {{ details.room }}</p>
-                <p><strong>Time:</strong> {{ details.day }} - {{ details.time }}</p>
-            {% elif clash.clash_type == 'room' %}
-                <p><strong>Room:</strong> {{ details.room }}</p>
-                <p><strong>Division:</strong> {{ details.division }}</p>
-                <p><strong>Subject:</strong> {{ details.subject }}</p>
-                <p><strong>Faculty:</strong> {{ details.faculty }}</p>
-                <p><strong>Time:</strong> {{ details.day }} - {{ details.time }}</p>
-            {% elif clash.clash_type == 'division' %}
-                <p><strong>Division:</strong> {{ details.division }}</p>
-                <p><strong>Subject:</strong> {{ details.subject }}</p>
-                <p><strong>Faculty:</strong> {{ details.faculty }}</p>
-                <p><strong>Room:</strong> {{ details.room }}</p>
-                <p><strong>Time:</strong> {{ details.day }} - {{ details.time }}</p>
-            {% endif %}
-        </div>
 
-        <!-- AI Suggestions Container (loaded dynamically) -->
-        <div id="suggestions-{{ clash.id }}"></div>
-    </div>
-    {% endfor %}
-    {% else %}
-    <div style="text-align: center; padding: 3rem; color: #64748b;">
-        <i class="fas fa-check-circle" style="font-size: 4rem; color: #22c55e; margin-bottom: 1rem;"></i>
-        <h3 style="color: #86efac;">No Active Clashes</h3>
-        <p>All timetable entries are conflict-free!</p>
-    </div>
-    {% endif %}
-    
-    {% if resolved_clashes %}
-    <h3 style="margin-top: 3rem; margin-bottom: 1rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-check-circle"></i> Resolved Clashes</h3>
-    
-    {% for clash in resolved_clashes[:10] %}
-    <div class="clash-card resolved">
-        <div class="d-flex justify-between align-center">
-            <div>
-                <span class="clash-type {{ clash.clash_type }}">
-                    <i class="fas fa-{% if clash.clash_type == 'faculty' %}user{% elif clash.clash_type == 'room' %}door-open{% else %}users{% endif %}"></i>
-                    {{ clash.clash_type|upper }} CLASH (RESOLVED)
-                </span>
-                <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #64748b;">
-                    <i class="fas fa-clock"></i> Detected: {{ clash.detected_at.strftime('%Y-%m-%d %H:%M') }} | 
-                    <i class="fas fa-check"></i> Resolved: {{ clash.resolved_at.strftime('%Y-%m-%d %H:%M') if clash.resolved_at else 'N/A' }}
+            <div class="resolved-clash-body" id="hist-body-{{ clash.id }}">
+                <!-- Timeline -->
+                <div class="resolution-timeline">
+                    <span class="timeline-dot" style="background: #ef4444;"></span>
+                    <span style="color: #fca5a5;">Detected {{ clash.detected_at.strftime('%d %b %Y, %H:%M') }}</span>
+                    <span class="timeline-line"></span>
+                    {% if clash.get_duration() %}
+                    <span style="background: rgba(148,163,184,0.1); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">{{ clash.get_duration() }}</span>
+                    <span class="timeline-line"></span>
+                    {% endif %}
+                    <span class="timeline-dot" style="background: #22c55e;"></span>
+                    <span style="color: #86efac;">
+                        Resolved {{ clash.resolved_at.strftime('%d %b %Y, %H:%M') if clash.resolved_at else 'N/A' }}
+                        {% if clash.resolution_method %}
+                        — <em>{{ 'AI Auto-Fix' if clash.resolution_method == 'auto' else 'Manual' }}</em>
+                        {% endif %}
+                    </span>
+                </div>
+
+                <!-- Details -->
+                <div class="clash-details" style="margin-top: 0.75rem;">
+                    {% if clash.clash_type == 'faculty' %}
+                        <p><strong>Faculty:</strong> {{ details.faculty_name }}</p>
+                        <p><strong>Subject:</strong> {{ details.subject }}</p>
+                        <p><strong>Division:</strong> {{ details.division }}</p>
+                    {% elif clash.clash_type == 'room' %}
+                        <p><strong>Room:</strong> {{ details.room }}</p>
+                        <p><strong>Division:</strong> {{ details.division }}</p>
+                        <p><strong>Subject:</strong> {{ details.subject }}</p>
+                    {% elif clash.clash_type == 'division' %}
+                        <p><strong>Division:</strong> {{ details.division }}</p>
+                        <p><strong>Subject:</strong> {{ details.subject }}</p>
+                        <p><strong>Faculty:</strong> {{ details.faculty }}</p>
+                    {% endif %}
+                    <p><strong>Time:</strong> {{ details.day }} — {{ details.time }}</p>
+                    <p><strong>Severity:</strong> {{ clash.severity|upper }}</p>
+                    {% if clash.resolution_note %}
+                    <p><strong>Resolution Note:</strong> <span style="color: #86efac;">{{ clash.resolution_note }}</span></p>
+                    {% endif %}
                 </div>
             </div>
         </div>
+        {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 3rem; color: #64748b;">
+            <i class="fas fa-history" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <h3>No Resolved Clashes Yet</h3>
+            <p>Resolved clashes will appear here for reference.</p>
+        </div>
+        {% endif %}
     </div>
-    {% endfor %}
-    {% endif %}
 </div>
 
 <script>
-// Track which clashes have suggestions loaded
+// ─── Tab switching ───────────────────────────────────────────────────
+function switchTab(tabName, el) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.clash-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + tabName).classList.add('active');
+    el.classList.add('active');
+    return false;
+}
+
+// ─── Active clash filter ─────────────────────────────────────────────
+function filterClashes() {
+    const type = document.getElementById('filter-type').value.toLowerCase();
+    const sev  = document.getElementById('filter-severity').value.toLowerCase();
+    const txt  = document.getElementById('filter-search').value.toLowerCase();
+
+    document.querySelectorAll('#active-clash-list .clash-card').forEach(card => {
+        const matchType = !type || card.dataset.type === type;
+        const matchSev  = !sev  || card.dataset.severity === sev;
+        const matchTxt  = !txt  || (card.dataset.search || '').includes(txt);
+        card.style.display = (matchType && matchSev && matchTxt) ? '' : 'none';
+    });
+}
+
+// ─── History filter ──────────────────────────────────────────────────
+function filterHistory() {
+    const type   = document.getElementById('hist-filter-type').value.toLowerCase();
+    const method = document.getElementById('hist-filter-method').value.toLowerCase();
+    const date   = document.getElementById('hist-filter-date').value;
+    const txt    = document.getElementById('hist-filter-search').value.toLowerCase();
+
+    document.querySelectorAll('#history-list .clash-card').forEach(card => {
+        const matchType   = !type   || card.dataset.type === type;
+        const matchMethod = !method || (card.dataset.method || '').includes(method);
+        const matchDate   = !date   || (card.dataset.date || '').startsWith(date);
+        const matchTxt    = !txt    || (card.dataset.search || '').includes(txt);
+        card.style.display = (matchType && matchMethod && matchDate && matchTxt) ? '' : 'none';
+    });
+}
+
+// ─── Resolved clash accordion ────────────────────────────────────────
+function toggleHistory(clashId) {
+    const body = document.getElementById('hist-body-' + clashId);
+    const icon = document.getElementById('hist-icon-' + clashId);
+    const isOpen = body.classList.toggle('open');
+    icon.className = isOpen ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+}
+
+// ─── AI Suggestions ──────────────────────────────────────────────────
 const loadedSuggestions = {};
 
 function getAISuggestions(clashId) {
     const container = document.getElementById(`suggestions-${clashId}`);
-    
-    // Toggle if already loaded
+
     if (loadedSuggestions[clashId]) {
         container.innerHTML = '';
         loadedSuggestions[clashId] = false;
         return;
     }
-    
-    // Show loading state
+
     container.innerHTML = `
         <div class="ai-suggestions-panel">
-            <div class="ai-loading">
+            <div style="text-align:center; padding:1.5rem;">
                 <div class="ai-spinner"></div>
-                <div style="margin-top: 0.5rem; font-size: 0.9rem;">Analyzing clash & generating AI suggestions...</div>
+                <div style="margin-top:0.5rem; font-size:0.9rem;">Analyzing clash & generating AI suggestions...</div>
             </div>
-        </div>
-    `;
-    
-    // Fetch suggestions from API
+        </div>`;
+
     fetch(`/api/ml/clash-suggestions/${clashId}`)
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
             if (data.success && data.suggestions && data.suggestions.length > 0) {
                 renderSuggestions(clashId, data);
@@ -549,117 +554,94 @@ function getAISuggestions(clashId) {
             } else {
                 container.innerHTML = `
                     <div class="ai-suggestions-panel">
-                        <div class="ai-suggestions-header">
-                            <span class="ai-icon">🤖</span>
-                            AI Resolution Suggestions
-                        </div>
-                        <div class="no-suggestions">
-                            <i class="fas fa-info-circle"></i> No alternative suggestions found for this clash. 
+                        <div class="ai-suggestions-header"><span class="ai-icon">🤖</span> AI Resolution Suggestions</div>
+                        <div style="text-align:center; padding:1rem; opacity:0.8; font-style:italic;">
+                            <i class="fas fa-info-circle"></i> No alternative suggestions found.
                             You may need to manually adjust the timetable or add more resources.
                         </div>
-                    </div>
-                `;
+                    </div>`;
                 loadedSuggestions[clashId] = true;
             }
         })
         .catch(err => {
-            console.error('Error fetching suggestions:', err);
             container.innerHTML = `
                 <div class="ai-suggestions-panel">
-                    <div class="ai-suggestions-header">
-                        <span class="ai-icon">🤖</span>
-                        AI Resolution Suggestions
-                    </div>
-                    <div class="no-suggestions">
+                    <div style="text-align:center; padding:1rem; color:#fca5a5;">
                         <i class="fas fa-exclamation-triangle"></i> Error loading suggestions. Please try again.
                     </div>
-                </div>
-            `;
+                </div>`;
         });
 }
 
 function renderSuggestions(clashId, data) {
     const container = document.getElementById(`suggestions-${clashId}`);
-    
-    let clashTypeLabel = '';
-    let clashIcon = '';
-    
-    switch(data.clash_type) {
-        case 'room':
-            clashTypeLabel = 'Alternative Rooms Available';
-            clashIcon = '🏫';
-            break;
-        case 'faculty':
-            clashTypeLabel = 'Alternative Faculty Available';
-            clashIcon = '👨‍🏫';
-            break;
-        case 'division':
-            clashTypeLabel = 'Alternative Time Slots Available';
-            clashIcon = '📅';
-            break;
-    }
-    
+
+    const typeLabels = { room: 'Alternative Rooms/Faculty', faculty: 'Alternative Faculty', division: 'Alternative Time Slots' };
+    const clashTypeLabel = typeLabels[data.clash_type] || 'Suggestions';
+
     let suggestionsHtml = '';
-    
-    data.suggestions.forEach((suggestion, index) => {
-        const riskClass = suggestion.risk_level === 'low' ? 'risk-low' : 
-                          (suggestion.risk_level === 'medium' ? 'risk-medium' : 'risk-high');
-        
-        const riskLabel = suggestion.risk_level === 'low' ? '✓ Low Risk' : 
-                          (suggestion.risk_level === 'medium' ? '⚠ Medium' : '⚠ High Risk');
-        
+    const safeSugs = data.suggestions.filter(s => !s.would_cause_clash);
+    const warnSugs = data.suggestions.filter(s => s.would_cause_clash);
+
+    // Safe suggestions first
+    const allOrdered = [...safeSugs, ...warnSugs];
+
+    allOrdered.forEach((suggestion, index) => {
+        const riskClass = suggestion.risk_level === 'low' ? 'risk-low' : (suggestion.risk_level === 'medium' ? 'risk-medium' : 'risk-high');
+        const riskLabel = suggestion.risk_level === 'low' ? '✓ Low Risk' : (suggestion.risk_level === 'medium' ? '⚠ Medium' : '✗ High Risk');
         const riskPercent = Math.round(suggestion.risk_score * 100);
-        
-        const bestLabel = index === 0 ? '<span style="background: rgba(72,187,120,0.3); padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.72rem; margin-left: 0.5rem; font-weight: 700;">★ BEST MATCH</span>' : '';
+        const bestLabel = index === 0 && !suggestion.would_cause_clash
+            ? '<span style="background:rgba(72,187,120,0.3);padding:0.15rem 0.5rem;border-radius:4px;font-size:0.72rem;margin-left:0.5rem;font-weight:700;">★ BEST</span>' : '';
+
+        const clashWarningHtml = suggestion.would_cause_clash
+            ? `<div class="clash-warning-badge"><i class="fas fa-exclamation-triangle"></i> ${suggestion.clash_warning || 'May create new clash'}</div>` : '';
 
         let scoreHtml = '';
         if (suggestion.score !== undefined) {
-            const scoreColor = suggestion.score >= 80 ? 'rgba(72,187,120,0.9)' : 
-                              (suggestion.score >= 60 ? 'rgba(246,173,85,0.9)' : 'rgba(245,101,101,0.9)');
-            scoreHtml = `<div class="score-badge" style="background: ${scoreColor}; color: white;">${suggestion.score}%</div>`;
+            const scoreColor = suggestion.score >= 80 ? 'rgba(72,187,120,0.9)' : (suggestion.score >= 60 ? 'rgba(246,173,85,0.9)' : 'rgba(245,101,101,0.9)');
+            scoreHtml = `<div class="score-badge" style="background:${scoreColor};color:white;">${suggestion.score}%</div>`;
         }
-        
+
+        const applyDisabled = suggestion.would_cause_clash ? '' : '';
+        const applyStyle = suggestion.would_cause_clash ? 'opacity:0.65; background: rgba(245,158,11,0.9); color: #0a0e1a;' : '';
+
         suggestionsHtml += `
-            <div class="suggestion-item">
-                <div style="font-size: 1.3rem; flex-shrink: 0;">${suggestion.icon || clashIcon}</div>
+            <div class="suggestion-item ${suggestion.would_cause_clash ? 'has-clash-warning' : ''}">
+                <div style="font-size:1.3rem;flex-shrink:0;">${suggestion.icon || '💡'}</div>
                 <div class="suggestion-info">
-                    <div class="suggestion-description">
-                        ${suggestion.description}${bestLabel}
-                    </div>
-                    <div class="suggestion-detail">
-                        ${suggestion.detail}
-                    </div>
+                    <div class="suggestion-description">${suggestion.description}${bestLabel}</div>
+                    <div class="suggestion-detail">${suggestion.detail}</div>
+                    ${clashWarningHtml}
                 </div>
                 ${scoreHtml}
-                <span class="suggestion-risk-badge ${riskClass}">
-                    ${riskLabel} (${riskPercent}%)
-                </span>
-                <form method="POST" action="/admin/clashes/auto-resolve/${clashId}" style="display: inline; flex-shrink: 0;">
+                <span class="suggestion-risk-badge ${riskClass}">${riskLabel} (${riskPercent}%)</span>
+                <form method="POST" action="/admin/clashes/auto-resolve/${clashId}" style="display:inline;flex-shrink:0;">
                     <input type="hidden" name="action_type" value="${suggestion.action_type}">
                     <input type="hidden" name="action_value" value="${suggestion.action_value}">
-                    <button type="submit" class="apply-btn" onclick="this.innerHTML='<i class=\\'fas fa-spinner fa-spin\\'></i> Applying...'; this.disabled=true; this.form.submit();">
+                    <button type="submit" class="apply-btn" style="${applyStyle}"
+                        onclick="this.innerHTML='<i class=\\'fas fa-spinner fa-spin\\'></i> Applying...';this.disabled=true;this.form.submit();">
                         <i class="fas fa-check-circle"></i> Apply Fix
                     </button>
                 </form>
-            </div>
-        `;
+            </div>`;
     });
-    
+
     container.innerHTML = `
         <div class="ai-suggestions-panel">
             <div class="ai-suggestions-header">
                 <span class="ai-icon">🤖</span>
                 AI Resolution Suggestions — ${clashTypeLabel}
-                <span style="margin-left: auto; font-size: 0.8rem; opacity: 0.7; font-weight: 400;">
-                    ${data.total_suggestions} suggestion${data.total_suggestions !== 1 ? 's' : ''} found
+                <span style="margin-left:auto;font-size:0.8rem;opacity:0.7;font-weight:400;">
+                    ${safeSugs.length} safe · ${warnSugs.length} flagged
                 </span>
             </div>
             ${suggestionsHtml}
-            <div style="font-size: 0.75rem; opacity: 0.6; margin-top: 0.5rem; text-align: center;">
-                <i class="fas fa-info-circle"></i> Click "Apply Fix" to auto-update the timetable and resolve this clash
+            <div style="font-size:0.75rem;opacity:0.6;margin-top:0.5rem;text-align:center;">
+                <i class="fas fa-info-circle"></i>
+                Suggestions marked with ⚠ may create a secondary clash — review before applying.
+                Safe suggestions have been pre-validated.
             </div>
-        </div>
-    `;
+        </div>`;
 }
 </script>
 {% endblock %}

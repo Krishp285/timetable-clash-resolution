@@ -189,7 +189,7 @@
         </div>
     </div>
     
-    <div class="stats-grid">
+    <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
         <div class="stat-card purple">
             <div class="stat-number">{{ total_branches }}</div>
             <div class="stat-label">
@@ -200,6 +200,12 @@
             <div class="stat-number">{{ total_divisions }}</div>
             <div class="stat-label">
                 <i class="fas fa-users"></i> Divisions
+            </div>
+        </div>
+        <div class="stat-card orange" style="border-top: 3px solid var(--accent);">
+            <div class="stat-number">{{ total_rooms }}</div>
+            <div class="stat-label">
+                <i class="fas fa-door-open"></i> Rooms / Resources
             </div>
         </div>
         <div class="stat-card orange">
@@ -226,6 +232,10 @@
             <div><i class="fas fa-users"></i></div>
             <div>Manage Divisions</div>
         </a>
+        <a href="{{ url_for('manage_rooms') }}" class="action-btn">
+            <div><i class="fas fa-door-open"></i></div>
+            <div>Manage Rooms</div>
+        </a>
         <a href="{{ url_for('manage_subjects') }}" class="action-btn">
             <div><i class="fas fa-book"></i></div>
             <div>Manage Subjects</div>
@@ -241,6 +251,10 @@
         <a href="{{ url_for('timetable_select') }}" class="action-btn">
             <div><i class="fas fa-calendar-plus"></i></div>
             <div>Create Timetable</div>
+        </a>
+        <a href="{{ url_for('export_admin_timetable') }}" class="action-btn">
+            <div><i class="fas fa-file-export"></i></div>
+            <div>Export Timetable</div>
         </a>
         <a href="{{ url_for('view_clashes') }}" class="action-btn">
             <div><i class="fas fa-exclamation-triangle"></i></div>
@@ -318,9 +332,14 @@
                     {% endif %}
                 </span>
             </div>
-            <a href="{{ url_for('final_timetable_view', division_id=division.id) }}" class="btn btn-sm btn-primary" style="margin-top: 1rem; width: 100%;">
-                View Timetable
-            </a>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 1rem;">
+                <a href="{{ url_for('view_timetable', division_id=division.id) }}" class="btn btn-sm btn-primary" style="width: 100%;">
+                    View Timetable
+                </a>
+                <a href="{{ url_for('download_division_timetable', division_id=division.id) }}" class="btn btn-sm btn-success" style="width: 100%;">
+                    Download CSV
+                </a>
+            </div>
         </div>
         {% else %}
         <p style="color: #64748b;">No divisions created yet</p>
