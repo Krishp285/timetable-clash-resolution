@@ -4,9 +4,58 @@
 {% block extra_css %}
 <style>
     .timetable-container {
+        display: block;
+    }
+    
+    .add-entry-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
+        grid-template-columns: 1.2fr 1fr 1fr;
+        gap: 1.5rem;
+        align-items: start;
+        margin-top: 1rem;
+        border-top: 1px solid rgba(148, 163, 184, 0.1);
+        padding-top: 1.25rem;
+    }
+    
+    @media (max-width: 992px) {
+        .add-entry-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .faculty-column, .ml-column {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(148, 163, 184, 0.2) transparent;
+        border-left: 1px solid rgba(148, 163, 184, 0.1);
+        padding-left: 1rem;
+    }
+    
+    @media (max-width: 992px) {
+        .faculty-column, .ml-column {
+            border-left: none;
+            padding-left: 0;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+            padding-top: 1rem;
+        }
+    }
+
+    .faculty-column::-webkit-scrollbar, .ml-column::-webkit-scrollbar {
+        width: 4px;
+    }
+    .faculty-column::-webkit-scrollbar-thumb, .ml-column::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.2);
+        border-radius: 10px;
+    }
+    
+    .visiting-chip {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: 4px;
+        padding: 0.1rem 0.25rem;
+        font-size: 0.65rem;
+        font-weight: 600;
+        margin-left: 0.3rem;
     }
     
     @media (max-width: 1200px) {
@@ -386,6 +435,29 @@
         transform: translateY(-2px) scale(1.04);
         box-shadow: 0 10px 30px rgba(124,58,237,0.5);
     }
+    
+    .entry-type-btn {
+        background: rgba(30, 41, 59, 0.6);
+        border: 1px solid rgba(148, 163, 184, 0.15);
+        color: #94a3b8;
+        border-radius: 6px;
+        padding: 0.35rem 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .entry-type-btn:hover {
+        background: rgba(148, 163, 184, 0.1);
+        color: #f1f5f9;
+    }
+    .entry-type-btn.active {
+        background: linear-gradient(135deg, var(--primary) 0%, #0ea5e9 100%);
+        color: #0a0e1a;
+        border-color: var(--primary);
+        font-weight: 700;
+    }
 </style>
 {% endblock %}
 
@@ -417,60 +489,124 @@
     </h2>
     
     <div class="timetable-container">
-        <!-- LEFT SIDE: Time Slots -->
-        <div>
-            <h3 style="margin-bottom: 1rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-clock"></i> Time Slots</h3>
+        <h3 style="margin-bottom: 1.5rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-clock"></i> Time Slots</h3>
+        
+        {% for slot in timeslots %}
+        {% set entries = timetable_map.get(slot.id, []) %}
+        {% set st = slot_status[slot.id] %}
+        {% set has_full_div = st.has_full_div %}
+        {% set is_library_or_break = st.is_library_or_break %}
+        {% set all_batches_assigned = st.all_batches_assigned %}
+        <div class="time-slot-card {% if entries %}filled{% endif %}" id="slot-{{ slot.id }}">
+            <div class="time-header">
+                <i class="fas fa-clock"></i> {{ slot.time_range }}
+                {% if slot.slot_label %}
+                    <span style="font-size: 0.9rem; color: #64748b;"> - {{ slot.slot_label }}</span>
+                {% endif %}
+            </div>
             
-            {% for slot in timeslots %}
-            <div class="time-slot-card {% if timetable_map.get(slot.id) %}filled{% endif %}" id="slot-{{ slot.id }}">
-                <div class="time-header">
-                    <i class="fas fa-clock"></i> {{ slot.time_range }}
-                    {% if slot.slot_label %}
-                        <span style="font-size: 0.9rem; color: #64748b;"> - {{ slot.slot_label }}</span>
-                    {% endif %}
-                </div>
-                
-                {% set entry = timetable_map.get(slot.id) %}
-                {% if entry %}
-                    <div style="background: rgba(15, 23, 42, 0.5); padding: 1rem; border-radius: 10px; border: 1px solid rgba(148, 163, 184, 0.08);">
+            {# Show existing entries #}
+            {% if entries %}
+                {% for entry in entries %}
+                <div style="background: {% if entry.entry_type == 'library' %}rgba(59,130,246,0.08){% elif entry.entry_type == 'break' %}rgba(148,163,184,0.08){% else %}rgba(15, 23, 42, 0.5){% endif %}; padding: 1rem; border-radius: 10px; border: 1px solid {% if entry.entry_type == 'library' %}rgba(59,130,246,0.2){% elif entry.entry_type == 'break' %}rgba(148,163,184,0.15){% else %}rgba(148, 163, 184, 0.08){% endif %}; margin-bottom: 0.5rem;">
+                    {% if entry.entry_type in ['library', 'break'] %}
+                        <div style="font-weight: 700; color: {% if entry.entry_type == 'library' %}#60a5fa{% else %}#94a3b8{% endif %}; font-size: 1.1rem; text-align: center;">
+                            <i class="fas {% if entry.entry_type == 'library' %}fa-book-reader{% else %}fa-coffee{% endif %}"></i>
+                            {{ entry.entry_type.upper() }}
+                        </div>
+                    {% else %}
                         <div style="font-weight: 600; margin-bottom: 0.5rem; color: #f1f5f9;">
-                            <i class="fas fa-book"></i> {{ entry.subject.name }}
+                            {% if entry.batch %}
+                                <span class="badge" style="background: rgba(124,58,237,0.2); color: #c4b5fd; border: 1px solid rgba(124,58,237,0.3); font-size: 0.7rem; margin-right: 0.3rem;">{{ entry.batch.name }}</span>
+                            {% endif %}
+                            {% if entry.entry_type == 'lab' %}
+                                <span class="badge" style="background: rgba(245,158,11,0.15); color: #fbbf24; font-size: 0.65rem;">LAB</span>
+                            {% endif %}
+                            <i class="fas fa-book"></i> {{ entry.subject.name if entry.subject else '—' }}
                         </div>
                         <div style="color: #64748b; font-size: 0.9rem;">
-                            <i class="fas fa-user"></i> {{ entry.faculty.user.full_name }}<br>
-                            <i class="fas fa-door-open"></i> Room {{ entry.room_number }}
+                            <i class="fas fa-user"></i> {{ entry.faculty.user.full_name if entry.faculty else 'N/A' }}<br>
+                            <i class="fas fa-door-open"></i> Room {{ entry.room_number or 'N/A' }}
                         </div>
-                        <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
-                            <a href="{{ url_for('edit_timetable_entry', entry_id=entry.id) }}" class="btn btn-sm btn-primary">
-                                <i class="fas fa-edit"></i> Edit
-                            </a>
-                            <form method="POST" action="{{ url_for('delete_timetable_entry', entry_id=entry.id) }}" style="display: inline;" onsubmit="return confirm('Delete this entry?');">
-                                <button type="submit" class="btn btn-sm btn-danger">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
-                            </form>
-                        </div>
+                    {% endif %}
+                    <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
+                        {% if entry.entry_type not in ['library', 'break'] %}
+                        <a href="{{ url_for('edit_timetable_entry', entry_id=entry.id) }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        {% endif %}
+                        <form method="POST" action="{{ url_for('delete_timetable_entry', entry_id=entry.id) }}" style="display: inline;" onsubmit="return confirm('Delete this entry?');">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </form>
                     </div>
-                {% else %}
-                            <div class="add-entry-form">
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {# Show add form if slot is not fully occupied #}
+            {% if not is_library_or_break and not has_full_div and not all_batches_assigned %}
+                <div class="add-entry-form">
+                    {# Entry Type Selector #}
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap;" id="entry-type-bar-{{ slot.id }}">
+                        <button type="button" class="btn btn-sm entry-type-btn active" data-type="lecture" onclick="switchEntryType('{{ slot.id }}', 'lecture', this)" style="font-size: 0.8rem;">
+                            <i class="fas fa-chalkboard-teacher"></i> Lecture
+                        </button>
+                        {% if div_batches %}
+                            {% if st.is_lab_start_slot %}
+                            <button type="button" class="btn btn-sm entry-type-btn" data-type="lab" onclick="switchEntryType('{{ slot.id }}', 'lab', this)" style="font-size: 0.8rem;">
+                                <i class="fas fa-flask"></i> Lab (Batch)
+                            </button>
+                            {% else %}
+                            <button type="button" class="btn btn-sm entry-type-btn" disabled style="font-size: 0.8rem; opacity: 0.45; cursor: not-allowed;" title="Labs only start at 08:30, 10:30, or 13:00 (2-hr blocks before breaks)">
+                                <i class="fas fa-flask"></i> Lab (Starts 08:30/10:30/13:00 only)
+                            </button>
+                            {% endif %}
+                        {% endif %}
+                        <button type="button" class="btn btn-sm entry-type-btn" data-type="library" onclick="switchEntryType('{{ slot.id }}', 'library', this)" style="font-size: 0.8rem;">
+                            <i class="fas fa-book-reader"></i> Library
+                        </button>
+                        <button type="button" class="btn btn-sm entry-type-btn" data-type="break" onclick="switchEntryType('{{ slot.id }}', 'break', this)" style="font-size: 0.8rem;">
+                            <i class="fas fa-coffee"></i> Break
+                        </button>
+                    </div>
+
+                    <div class="add-entry-grid" id="add-entry-grid-{{ slot.id }}">
+                        {# COLUMN 1: Form Inputs #}
+                        <div style="min-width: 0;">
+                            {# --- LECTURE FORM (default) --- #}
+                            <div id="form-lecture-{{ slot.id }}" class="entry-type-form">
                                 <form method="POST" action="{{ url_for('add_timetable_entry') }}" onsubmit="return validateForm(this);" id="entry-form-{{ slot.id }}">
                                     <input type="hidden" name="division_id" value="{{ division.id }}">
                                     <input type="hidden" name="day" value="{{ current_day }}">
                                     <input type="hidden" name="time_slot_id" value="{{ slot.id }}">
+                                    <input type="hidden" name="entry_type" value="lecture">
+                                    <div class="form-error-banner" style="display: none; color: #fca5a5; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); padding: 0.6rem 0.8rem; border-radius: 6px; font-size: 0.85rem; margin-bottom: 1rem;"></div>
                                     
                                     <div class="form-group">
-                                        <label class="form-label">Subject</label>
+                                        <label class="form-label">Subject
+                                            {% if subject_load %}
+                                            <span style="font-weight:400; font-size:0.72rem; color:#94a3b8; margin-left:0.4rem;">— hours this week shown in [ ]</span>
+                                            {% endif %}
+                                        </label>
                                         <select name="subject_id" class="form-control" required onchange="filterFaculty(this, '{{ slot.id }}')">
                                             <option value="">-- Select Subject --</option>
+                                            {% set max_load = subject_load.values()|list|max if subject_load else 0 %}
                                             {% for subject in subjects %}
-                                            <option value="{{ subject.id }}" data-name="{{ subject.name }}">{{ subject.name }} ({{ subject.code }})</option>
+                                            {% set cnt = subject_load.get(subject.id, 0) %}
+                                            {% set is_heavy = (max_load > 1 and cnt == max_load) %}
+                                            <option value="{{ subject.id }}" data-name="{{ subject.name }}" data-code="{{ subject.code }}"
+                                                style="{% if is_heavy %}color: #f6ad55;{% endif %}">
+                                                {{ subject.name }} ({{ subject.code }}){% if cnt %} [{{ cnt }}×]{% endif %}{% if is_heavy %} ⚠ heavy{% endif %}
+                                            </option>
                                             {% endfor %}
                                         </select>
                                     </div>
                                     
                                     <div class="form-group">
                                         <label class="form-label">Faculty</label>
-                                        <select name="faculty_id" class="form-control faculty-select-{{ slot.id }}" required onchange="onFacultyChange(this, '{{ slot.id }}', {{ division.id }})">
+                                        <select name="faculty_id" class="form-control lecture-faculty-select-{{ slot.id }} faculty-select-{{ slot.id }}" required onchange="onFacultyChange(this, '{{ slot.id }}', {{ division.id }})">
                                             <option value="">-- First select subject --</option>
                                         </select>
                                     </div>
@@ -495,106 +631,214 @@
                                         <select name="room_number" class="form-control" required onchange="onRoomChange(this, '{{ slot.id }}', {{ division.id }})">
                                             <option value="">-- Select Room --</option>
                                             {% for room in rooms %}
-                                            <option value="{{ room.name }}">{{ room.name }} (Capacity: {{ room.capacity }}, {{ room.room_type }})</option>
+                                                {% if room.name not in occupied_rooms[slot.id] %}
+                                                <option value="{{ room.name }}">{{ room.name }} (Capacity: {{ room.capacity }}, {{ room.room_type }})</option>
+                                                {% endif %}
                                             {% endfor %}
                                         </select>
                                     </div>
                                     
                                     <button type="submit" class="btn btn-success" style="width: 100%;">
-                                        <i class="fas fa-plus"></i> Add Entry
+                                        <i class="fas fa-plus"></i> Add Lecture
                                     </button>
                                 </form>
                             </div>
-                {% endif %}
-            </div>
-            {% endfor %}
-        </div>
-        
-        <!-- RIGHT SIDE: Faculty Availability + ML Recommendations -->
-        <div>
-            <!-- ML Recommendations Panel -->
-            <div class="recommendations-panel" id="recommendationsPanel" style="display: none;">
-                <h3>
-                    <i class="fas fa-lightbulb"></i> 🤖 ML Recommendations
-                </h3>
-                
-                <!-- Slot Recommendations -->
-                <div id="slotRecommendations" style="margin-bottom: 1rem;">
-                    <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem;">
-                        <i class="fas fa-calendar"></i> Best Time Slots
-                    </h4>
-                    <div id="slotRecommendationsContent">
-                        <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">Select a subject to see recommendations</p>
-                    </div>
-                </div>
 
-                <!-- Faculty Recommendations -->
-                <div id="facultyRecommendations">
-                    <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem;">
-                        <i class="fas fa-user-check"></i> Recommended Faculty
-                    </h4>
-                    <div id="facultyRecommendationsContent">
-                        <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">Select a subject to see recommendations</p>
-                    </div>
-                </div>
-            </div>
+                            {# --- LAB (BATCH) FORM --- #}
+                            {% if div_batches %}
+                            <div id="form-lab-{{ slot.id }}" class="entry-type-form" style="display: none;">
+                                <form method="POST" action="{{ url_for('add_timetable_entry') }}" onsubmit="return validateForm(this);">
+                                    <input type="hidden" name="division_id" value="{{ division.id }}">
+                                    <input type="hidden" name="day" value="{{ current_day }}">
+                                    <input type="hidden" name="time_slot_id" value="{{ slot.id }}">
+                                    <input type="hidden" name="entry_type" value="lab">
+                                    <div class="form-error-banner" style="display: none; color: #fca5a5; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); padding: 0.6rem 0.8rem; border-radius: 6px; font-size: 0.85rem; margin-bottom: 1rem;"></div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Select Batch</label>
+                                        <select name="batch_id" class="form-control" required>
+                                            <option value="">-- Select Batch --</option>
+                                            {% for batch in div_batches %}
+                                                {% set batch_used = batch.id in st.assigned_batch_ids %}
+                                                <option value="{{ batch.id }}" {% if batch_used %}disabled{% endif %}>
+                                                    {{ batch.name }} ({{ batch.student_count }} students){% if batch_used %} — Already assigned{% endif %}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
 
-            <h3 style="margin-bottom: 1rem; color: #94a3b8; font-weight: 700;">
-                <i class="fas fa-users"></i> Faculty Availability for {{ current_day }}
-            </h3>
-            
-            {% for slot in timeslots %}
-            <div style="margin-bottom: 2rem;">
-                <h4 style="color: var(--primary); margin-bottom: 1rem; font-weight: 700;">
-                    {{ slot.time_range }}
-                    <button type="button" class="btn btn-sm btn-primary" onclick="showMLRecommendations({{ slot.id }}, '{{ current_day }}')" style="float: right;">
-                        <i class="fas fa-magic"></i> ML Suggestions
-                    </button>
-                </h4>
-                <div class="faculty-list" id="faculty-list-{{ slot.id }}">
-                    {% for faculty in faculty_availability[slot.id] %}
-                    <div class="faculty-card {% if faculty.is_available %}available{% else %}busy{% endif %}"
-                         onclick="{% if faculty.is_available %}selectFacultyWithRisk({{ slot.id }}, {{ faculty.faculty_id }}, '{{ faculty.name|replace("'", "\\'") }}', '{{ division.id }}'){% endif %}"
-                         id="faculty-{{ slot.id }}-{{ faculty.faculty_id }}">
-                        <div class="d-flex justify-between align-center">
-                            <div>
-                                <div class="faculty-name">
-                                    <i class="fas fa-user"></i> {{ faculty.name }}
-                                    {% if faculty.is_visiting %}
-                                    <span class="visiting-chip" style="margin-left:0.4rem;">
-                                        <i class="fas fa-star"></i> Visiting
-                                    </span>
+                                    <div class="form-group">
+                                        <label class="form-label">Subject
+                                            {% if subject_load %}
+                                            <span style="font-weight:400; font-size:0.72rem; color:#94a3b8; margin-left:0.4rem;">— [ ] = times scheduled</span>
+                                            {% endif %}
+                                        </label>
+                                        <select name="subject_id" class="form-control" required onchange="filterLabFaculty(this, '{{ slot.id }}')">
+                                            <option value="">-- Select Subject --</option>
+                                            {% set max_load = subject_load.values()|list|max if subject_load else 0 %}
+                                            {% for subject in subjects %}
+                                            {% set cnt = subject_load.get(subject.id, 0) %}
+                                            {% set is_heavy = (max_load > 1 and cnt == max_load) %}
+                                            <option value="{{ subject.id }}" data-name="{{ subject.name }}" data-code="{{ subject.code }}"
+                                                style="{% if is_heavy %}color: #f6ad55;{% endif %}">
+                                                {{ subject.name }} ({{ subject.code }}){% if cnt %} [{{ cnt }}×]{% endif %}{% if is_heavy %} ⚠ heavy{% endif %}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Faculty
+                                            <span style="font-weight:400; font-size:0.72rem; color:#94a3b8; margin-left:0.3rem;">— Lab needs 2 hrs</span>
+                                        </label>
+                                        <select name="faculty_id" class="form-control lab-faculty-select-{{ slot.id }} faculty-select-{{ slot.id }}" id="lab-faculty-select-{{ slot.id }}" required>
+                                            <option value="">-- Select Faculty --</option>
+                                            {% for fac in lab_faculty_availability[slot.id] %}
+                                                <option value="{{ fac.faculty_id }}"
+                                                    data-subjects="{{ fac.subjects|join('||') }}"
+                                                    data-available="{{ 'true' if fac.is_available else 'false' }}"
+                                                    {% if not fac.is_available %}disabled{% endif %}>
+                                                    {{ fac.name }}
+                                                    {%- if not fac.is_available -%}
+                                                        {%- if fac.lab_blocked_next %} (Busy in next slot){%- else %} (Busy){%- endif -%}
+                                                    {%- endif %}
+                                                    {%- if workload.get(fac.faculty_id) %} [{{ workload[fac.faculty_id].total_hours }}h]{% endif %}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Lab Room</label>
+                                        <select name="room_number" class="form-control" required>
+                                            <option value="">-- Select Lab --</option>
+                                            {% for room in rooms %}
+                                                {% if room.name not in occupied_rooms[slot.id] %}
+                                                <option value="{{ room.name }}">{{ room.name }} ({{ room.room_type }}, Cap: {{ room.capacity }})</option>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group" style="margin-top: 0.5rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                                        <input type="checkbox" name="autofill_next_slot" id="autofill_next_slot_{{ slot.id }}" value="1" checked style="width: auto; cursor: pointer; height: auto;">
+                                        <label for="autofill_next_slot_{{ slot.id }}" style="margin-bottom: 0; cursor: pointer; font-size: 0.85rem; color: #94a3b8; font-weight: normal;">
+                                            Also assign to next time slot (2-hour Lab session)
+                                        </label>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-success" style="width: 100%;">
+                                        <i class="fas fa-flask"></i> Add Lab Entry
+                                    </button>
+                                </form>
+                            </div>
+                            {% endif %}
+
+                            {# --- LIBRARY FORM --- #}
+                            <div id="form-library-{{ slot.id }}" class="entry-type-form" style="display: none;">
+                                <form method="POST" action="{{ url_for('add_timetable_entry') }}">
+                                    <input type="hidden" name="division_id" value="{{ division.id }}">
+                                    <input type="hidden" name="day" value="{{ current_day }}">
+                                    <input type="hidden" name="time_slot_id" value="{{ slot.id }}">
+                                    <input type="hidden" name="entry_type" value="library">
+                                    <div style="text-align: center; padding: 1.5rem; color: #60a5fa;">
+                                        <i class="fas fa-book-reader" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                                        <p>Mark this slot as <strong>Library Period</strong><br><small style="color: #94a3b8;">No faculty or subject will be assigned</small></p>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                        <i class="fas fa-book-reader"></i> Set as Library
+                                    </button>
+                                </form>
+                            </div>
+
+                            {# --- BREAK FORM --- #}
+                            <div id="form-break-{{ slot.id }}" class="entry-type-form" style="display: none;">
+                                <form method="POST" action="{{ url_for('add_timetable_entry') }}">
+                                    <input type="hidden" name="division_id" value="{{ division.id }}">
+                                    <input type="hidden" name="day" value="{{ current_day }}">
+                                    <input type="hidden" name="time_slot_id" value="{{ slot.id }}">
+                                    <input type="hidden" name="entry_type" value="break">
+                                    <div style="text-align: center; padding: 1.5rem; color: #94a3b8;">
+                                        <i class="fas fa-coffee" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                                        <p>Mark this slot as <strong>Break</strong><br><small>No classes during this time</small></p>
+                                    </div>
+                                    <button type="submit" class="btn btn-secondary" style="width: 100%;">
+                                        <i class="fas fa-coffee"></i> Set as Break
+                                    </button>
+                                </form>
+                            </div>
+                        </div> {# end of COLUMN 1 #}
+
+                        {# COLUMN 2: Faculty Availability #}
+                        <div class="faculty-column" id="faculty-column-{{ slot.id }}" style="max-height: 380px; overflow-y: auto; padding-right: 0.5rem; min-width: 0;">
+                            <h4 style="color: var(--primary); font-size: 0.95rem; margin-bottom: 0.75rem; font-weight: 700; position: sticky; top: 0; background: #1e293b; padding: 0.25rem 0; z-index: 10;">
+                                <i class="fas fa-users"></i> Available Faculty
+                            </h4>
+                            <div class="faculty-list-scroll">
+                                {% for faculty in faculty_availability[slot.id] %}
+                                <div class="faculty-card {% if faculty.is_available %}available{% else %}busy{% endif %}"
+                                     onclick="{% if faculty.is_available %}selectFacultyWithRisk({{ slot.id }}, {{ faculty.faculty_id }}, '{{ faculty.name|replace("'", "\\'") }}', '{{ division.id }}'){% endif %}"
+                                     id="faculty-{{ slot.id }}-{{ faculty.faculty_id }}"
+                                     style="padding: 0.6rem 0.75rem; margin-bottom: 0.5rem; font-size: 0.85rem; border-radius: 8px;">
+                                    <div class="d-flex justify-between align-center" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                        <div style="min-width: 0; flex: 1;">
+                                            <div class="faculty-name" style="font-size: 0.82rem; font-weight: 600; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+                                                👤 {{ faculty.name }}
+                                                {% if faculty.is_visiting %}
+                                                <span class="visiting-chip" style="font-size: 0.55rem; padding: 0.05rem 0.2rem; margin-left: 0.2rem;">V</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="faculty-subjects" style="font-size: 0.75rem; margin-top: 0.2rem; display: flex; gap: 0.2rem; flex-wrap: wrap;">
+                                                {% if faculty.subjects %}
+                                                    {% for subject in faculty.subjects %}
+                                                        <span class="badge badge-info" style="font-size: 0.6rem; padding: 0.05rem 0.2rem; background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.2);">{{ subject }}</span>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
+                                            <div id="risk-{{ slot.id }}-{{ faculty.faculty_id }}" style="margin-top: 0.25rem;"></div>
+                                        </div>
+                                        <div style="margin-left: 0.5rem;">
+                                            {% if faculty.is_available %}
+                                                <span class="badge badge-success" style="font-size: 0.65rem; background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); padding: 0.2rem 0.4rem; border-radius: 4px;">Free</span>
+                                            {% else %}
+                                                <span class="badge badge-danger" style="font-size: 0.65rem; background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.2); padding: 0.2rem 0.4rem; border-radius: 4px;">Busy</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% if not faculty.is_available and faculty.clash_details %}
+                                    <div style="margin-top: 0.4rem; padding: 0.4rem; background: rgba(239,68,68,0.08); border-radius: 6px; font-size: 0.75rem; color: #fca5a5; border: 1px solid rgba(239,68,68,0.15); word-break: break-all;">
+                                        Busy: {{ faculty.clash_details.subject }} ({{ faculty.clash_details.division }})
+                                    </div>
                                     {% endif %}
                                 </div>
-                                <div class="faculty-subjects">
-                                    {% if faculty.subjects %}
-                                        {% for subject in faculty.subjects[:3] %}
-                                            <span class="badge badge-info">{{ subject }}</span>
-                                        {% endfor %}
-                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        {# COLUMN 3: ML Recommendations #}
+                        <div class="ml-column" id="ml-column-{{ slot.id }}" style="max-height: 380px; overflow-y: auto; padding-right: 0.5rem; min-width: 0;">
+                            <h4 style="color: #c4b5fd; font-size: 0.95rem; margin-bottom: 0.75rem; font-weight: 700; position: sticky; top: 0; background: #1e293b; padding: 0.25rem 0; z-index: 10;">
+                                <i class="fas fa-magic"></i> ML Recommendations
+                            </h4>
+                            
+                            <div class="recommendations-box-{{ slot.id }}">
+                                <!-- Faculty Suggestions for this slot -->
+                                <div id="facultyRecommendationsContent-{{ slot.id }}" style="margin-bottom: 1rem;">
+                                    <p style="color: rgba(255,255,255,0.4); font-size: 0.78rem;"><i class="fas fa-info-circle"></i> Select subject to see recommended faculty</p>
                                 </div>
-                                <div id="risk-{{ slot.id }}-{{ faculty.faculty_id }}" style="margin-top: 0.25rem;"></div>
-                            </div>
-                            <div>
-                                {% if faculty.is_available %}
-                                    <span class="badge badge-success"><i class="fas fa-check"></i> Available</span>
-                                {% else %}
-                                    <span class="badge badge-danger"><i class="fas fa-times"></i> Busy</span>
-                                {% endif %}
+                                
+                                <!-- Slot Suggestions for this slot -->
+                                <div id="slotRecommendationsContent-{{ slot.id }}">
+                                    <p style="color: rgba(255,255,255,0.4); font-size: 0.78rem;"><i class="fas fa-info-circle"></i> Select subject to see best alternative slots</p>
+                                </div>
                             </div>
                         </div>
-                        {% if not faculty.is_available and faculty.clash_details %}
-                        <div style="margin-top: 0.5rem; padding: 0.5rem; background: rgba(239,68,68,0.08); border-radius: 6px; font-size: 0.85rem; color: #fca5a5; border: 1px solid rgba(239,68,68,0.15);">
-                            {{ faculty.clash_details.subject }} - {{ faculty.clash_details.division }}
-                        </div>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
+                    </div> {# end of add-entry-grid #}
                 </div>
-            </div>
-            {% endfor %}
+            {% endif %}
         </div>
-    </div>
+        {% endfor %}
+    </div> </div>
 </div>
 
 <!-- ─── Faculty Board floating button ─── -->
@@ -647,14 +891,62 @@ let currentDay = "{{ current_day }}";
 let currentSlotId = null;
 let currentSubjectId = null;
 
+// Switch form entry type (Lecture / Lab / Library / Break)
+function switchEntryType(slotId, type, btn) {
+    // Hide all forms for this slot
+    const slotCard = document.getElementById('slot-' + slotId);
+    if (!slotCard) return;
+    const forms = slotCard.querySelectorAll('.entry-type-form');
+    forms.forEach(f => f.style.display = 'none');
+    
+    // Show selected form
+    const activeForm = document.getElementById(`form-${type}-${slotId}`);
+    if (activeForm) {
+        activeForm.style.display = 'block';
+    }
+    
+    // Toggle active class on buttons
+    const buttons = document.getElementById(`entry-type-bar-${slotId}`).querySelectorAll('.entry-type-btn');
+    buttons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+// Handle ML recommendations when subject changes in Lab form
+function filterLabFaculty(selectElement, slotId) {
+    const subjectId = selectElement.value;
+    currentSubjectId = subjectId;
+    currentSlotId = slotId;
+    if (subjectId) {
+        showMLRecommendations(slotId, currentDay);
+    }
+}
+
 // Enhanced selectFaculty with ML risk prediction
 function selectFacultyWithRisk(slotId, facultyId, facultyName, divId) {
     selectFaculty(slotId, facultyId, facultyName);
     
+    // Explicitly update select value on the active form & dispatch change event
+    const activeForm = document.querySelector(`#add-entry-grid-${slotId} .entry-type-form:not([style*="display: none"])`);
+    if (activeForm) {
+        const select = activeForm.querySelector('select[name="faculty_id"]');
+        if (select) {
+            let option = select.querySelector(`option[value="${facultyId}"]`);
+            if (!option && !select.classList.contains(`lab-faculty-select-${slotId}`)) {
+                option = document.createElement('option');
+                option.value = facultyId;
+                option.textContent = facultyName;
+                select.appendChild(option);
+            }
+            if (option && !option.disabled) {
+                select.value = facultyId;
+                select.dispatchEvent(new Event('change'));
+            }
+        }
+    }
+
     // Predict risk for this combination
     if (currentSubjectId) {
         predictClashRisk(slotId, facultyId, divId);
-        // Also update the detailed panel
         const roomInput = document.querySelector(`#entry-form-${slotId} [name="room_number"]`);
         const room = roomInput ? (roomInput.value || '101') : '101';
         updateClashRiskPanel(slotId, facultyId, divId, room);
@@ -753,36 +1045,65 @@ function updateClashRiskPanel(slotId, facultyId, divId, room) {
     });
 }
 
-// Original selectFaculty function
+// Select faculty across forms
 function selectFaculty(slotId, facultyId, facultyName) {
-    const select = document.querySelector('.faculty-select-' + slotId);
-    if (select) {
-        // Add option if not exists
+    const selects = document.querySelectorAll('.faculty-select-' + slotId);
+    selects.forEach(select => {
         let option = select.querySelector('option[value="' + facultyId + '"]');
         if (!option) {
-            option = document.createElement('option');
-            option.value = facultyId;
-            option.textContent = facultyName;
-            select.appendChild(option);
+            if (!select.classList.contains('lab-faculty-select-' + slotId)) {
+                option = document.createElement('option');
+                option.value = facultyId;
+                option.textContent = facultyName;
+                select.appendChild(option);
+            }
         }
-        select.value = facultyId;
-        
-        // Scroll to form with null check
-        const slotEl = document.getElementById('slot-' + slotId);
-        if (slotEl) {
-            slotEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (option && !option.disabled) {
+            select.value = facultyId;
         }
+    });
+    
+    const slotEl = document.getElementById('slot-' + slotId);
+    if (slotEl) {
+        slotEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
+}
+
+// Helper for flexible subject matching (acronym, short code, or full name)
+function doesFacultyTeachSubject(facSubjects, subjectName, subjectCode) {
+    if (!subjectName && !subjectCode) return true;
+    if (!facSubjects || facSubjects.length === 0) return true;
+    
+    const sNameLower = (subjectName || '').toLowerCase();
+    const sCodeLower = (subjectCode || '').toLowerCase();
+    
+    const parenMatch = sNameLower.match(/\(([^)]+)\)/);
+    const parenCode = parenMatch ? parenMatch[1].trim().toLowerCase() : '';
+
+    for (let fs of facSubjects) {
+        fs = fs.trim().toLowerCase();
+        if (!fs) continue;
+        
+        if (fs === sCodeLower) return true;
+        if (parenCode && (fs === parenCode || parenCode.includes(fs) || fs.includes(parenCode))) return true;
+        if (sNameLower.includes(fs) || fs.includes(sNameLower)) return true;
+    }
+    return false;
 }
 
 function filterFaculty(selectElement, slotId) {
     const subjectId = selectElement.value;
-    const subjectName = selectElement.options[selectElement.selectedIndex].getAttribute('data-name');
-    const facultySelect = document.querySelector('.faculty-select-' + slotId);
+    const selectedOpt = selectElement.options[selectElement.selectedIndex];
+    const subjectName = selectedOpt ? selectedOpt.getAttribute('data-name') : '';
+    const subjectCode = selectedOpt ? selectedOpt.getAttribute('data-code') : '';
+    const facultySelect = document.querySelector('.lecture-faculty-select-' + slotId) || document.querySelector('.faculty-select-' + slotId);
     
-    // Store current subject for risk prediction
     currentSubjectId = subjectId;
     currentSlotId = slotId;
+
+    if (!facultySelect) return;
+    
+    const prevValue = facultySelect.value;
     
     if (!subjectName) {
         facultySelect.innerHTML = '<option value="">-- First select subject --</option>';
@@ -791,44 +1112,120 @@ function filterFaculty(selectElement, slotId) {
     
     facultySelect.innerHTML = '<option value="">-- Loading... --</option>';
     
-    // Get faculty who teach this subject from the faculty availability data
-    const facultyCards = document.querySelectorAll('.faculty-card.available');
+    const facultyCards = document.querySelectorAll(`#faculty-column-${slotId} .faculty-card.available`);
     facultySelect.innerHTML = '<option value="">-- Select Faculty --</option>';
     
     facultyCards.forEach(card => {
         const badges = card.querySelectorAll('.badge-info');
-        let hasSubject = false;
+        const facSubjects = Array.from(badges).map(b => b.textContent.trim());
         
-        badges.forEach(badge => {
-            if (badge.textContent.trim() === subjectName) {
-                hasSubject = true;
-            }
-        });
-        
-        if (hasSubject) {
-            const facultyName = card.querySelector('.faculty-name').textContent.trim().replace('👤 ', '').replace('✓ ', '');
+        if (doesFacultyTeachSubject(facSubjects, subjectName, subjectCode)) {
+            const nameEl = card.querySelector('.faculty-name');
+            const facultyName = nameEl ? nameEl.textContent.trim().replace('👤 ', '').replace('✓ ', '').split(' V')[0].trim() : 'Faculty';
             const option = document.createElement('option');
-            option.value = card.getAttribute('onclick').match(/\d+/g)[1];
+            const onclickAttr = card.getAttribute('onclick');
+            if (onclickAttr) {
+                const matches = onclickAttr.match(/\d+/g);
+                if (matches && matches.length > 1) {
+                    option.value = matches[1];
+                }
+            }
             option.textContent = facultyName;
-            facultySelect.appendChild(option);
+            if (option.value) {
+                facultySelect.appendChild(option);
+            }
         }
     });
     
     if (facultySelect.options.length === 1) {
         facultySelect.innerHTML = '<option value="">-- No faculty available for this subject --</option>';
+    } else if (prevValue && facultySelect.querySelector(`option[value="${prevValue}"]`)) {
+        facultySelect.value = prevValue;
     }
 
-    // AUTO-TRIGGER ML Recommendations when subject is selected
+    if (subjectId) {
+        showMLRecommendations(slotId, currentDay);
+    }
+}
+
+function filterLabFaculty(selectElement, slotId) {
+    const subjectId = selectElement.value;
+    const selectedOpt = selectElement.options[selectElement.selectedIndex];
+    const subjectName = selectedOpt ? selectedOpt.getAttribute('data-name') : '';
+    const subjectCode = selectedOpt ? selectedOpt.getAttribute('data-code') : '';
+    const labSelect = document.getElementById('lab-faculty-select-' + slotId) || document.querySelector('.lab-faculty-select-' + slotId);
+    
+    currentSubjectId = subjectId;
+    currentSlotId = slotId;
+
+    if (!labSelect) return;
+    
+    const prevValue = labSelect.value;
+    let prevStillValid = false;
+
+    const options = labSelect.querySelectorAll('option');
+    options.forEach(opt => {
+        if (!opt.value) return; // skip placeholder "-- Select Faculty --"
+        
+        const subjectsData = opt.getAttribute('data-subjects') || '';
+        const subjectsList = subjectsData.split('||').map(s => s.trim());
+        const isAvailable = opt.getAttribute('data-available') === 'true';
+        const teachesSubject = doesFacultyTeachSubject(subjectsList, subjectName, subjectCode);
+        
+        if (teachesSubject) {
+            opt.hidden = false;
+            opt.disabled = !isAvailable;
+            opt.removeAttribute('data-mismatch');
+            if (opt.value === prevValue && isAvailable) {
+                prevStillValid = true;
+            }
+        } else {
+            opt.hidden = true;
+            opt.disabled = false;
+            opt.setAttribute('data-mismatch', 'true');
+        }
+    });
+
+    if (!prevStillValid) {
+        labSelect.value = ''; // Reset selection if previous faculty doesn't teach this subject
+    }
+
     if (subjectId) {
         showMLRecommendations(slotId, currentDay);
     }
 }
 
 function validateForm(form) {
-    const faculty = form.querySelector('select[name="faculty_id"]').value;
+    const errorBanner = form.querySelector('.form-error-banner');
+    const showError = (msg) => {
+        if (errorBanner) {
+            errorBanner.textContent = msg;
+            errorBanner.style.display = 'block';
+            errorBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    };
+    
+    if (errorBanner) {
+        errorBanner.style.display = 'none';
+        errorBanner.textContent = '';
+    }
+
+    const facultySelect = form.querySelector('select[name="faculty_id"]');
+    const faculty = facultySelect ? facultySelect.value : null;
     if (!faculty) {
-        alert('Please select a faculty member');
+        showError('Please select a faculty member.');
         return false;
+    }
+    const selectedOption = facultySelect.options[facultySelect.selectedIndex];
+    if (selectedOption) {
+        if (selectedOption.hasAttribute('data-mismatch') || selectedOption.hidden) {
+            showError('Selected faculty member does not teach this subject. Please choose an appropriate faculty member.');
+            return false;
+        }
+        if (selectedOption.disabled) {
+            showError('Selected faculty member is not available for this session (busy or blocked in next slot). Please choose an available faculty member.');
+            return false;
+        }
     }
     return true;
 }
@@ -878,55 +1275,59 @@ function predictClashRisk(slotId, facultyId, divisionId) {
 
 // Show ML recommendations for a time slot
 function showMLRecommendations(slotId, day) {
-    const panel = document.getElementById('recommendationsPanel');
     currentSlotId = slotId;
-    
-    panel.style.display = 'block';
-    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     
     // Always load faculty recommendations when subject is selected
     if (currentSubjectId) {
         loadFacultyRecommendations(slotId, day);
         loadSlotRecommendations(slotId, day);
     } else {
-        document.getElementById('facultyRecommendationsContent').innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;"><i class="fas fa-info-circle"></i> Select a subject first to see faculty recommendations</p>';
-        document.getElementById('slotRecommendationsContent').innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;"><i class="fas fa-info-circle"></i> Select a subject first to see slot recommendations</p>';
+        const facContent = document.getElementById('facultyRecommendationsContent-' + slotId);
+        if (facContent) facContent.innerHTML = '<p style="color: rgba(255,255,255,0.4); font-size: 0.78rem;"><i class="fas fa-info-circle"></i> Select subject to see recommended faculty</p>';
+        const slotContent = document.getElementById('slotRecommendationsContent-' + slotId);
+        if (slotContent) slotContent.innerHTML = '<p style="color: rgba(255,255,255,0.4); font-size: 0.78rem;"><i class="fas fa-info-circle"></i> Select subject to see best alternative slots</p>';
     }
 }
 
 // Load and display slot recommendations
 function loadSlotRecommendations(slotId, day) {
-    const container = document.getElementById('slotRecommendationsContent');
-    container.innerHTML = '<div style="text-align: center; padding: 1rem;"><div class="spinner"></div><div style="margin-top: 0.5rem; font-size: 0.85rem; opacity: 0.8;">Analyzing time slots...</div></div>';
+    const container = document.getElementById('slotRecommendationsContent-' + slotId);
+    if (!container) return;
+    container.innerHTML = '<div style="text-align: center; padding: 1rem;"><div class="spinner"></div><div style="margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.8;">Analyzing slots...</div></div>';
     
     if (!currentSubjectId) {
-        container.innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;"><i class="fas fa-info-circle"></i> Select a subject to get slot recommendations</p>';
+        container.innerHTML = '<p style="color: rgba(255,255,255,0.4); font-size: 0.78rem;"><i class="fas fa-info-circle"></i> Select subject first</p>';
         return;
     }
     
-    // Try to find faculty from the form dropdown, or use first available faculty
-    const facultySelect = document.querySelector(`.faculty-select-${slotId}`);
+    // Try to find faculty from the form dropdowns
+    const selects = document.querySelectorAll(`.faculty-select-${slotId}`);
     let facultyId = null;
     
-    if (facultySelect) {
-        // Check if a faculty is currently selected
-        if (facultySelect.value) {
-            facultyId = facultySelect.value;
-        } else {
-            // Auto-pick the first available faculty option
-            const options = facultySelect.querySelectorAll('option');
+    for (let s of selects) {
+        if (s.value) {
+            facultyId = s.value;
+            break;
+        }
+    }
+    
+    // Fallback if no faculty selected
+    if (!facultyId) {
+        for (let s of selects) {
+            const options = s.querySelectorAll('option');
             for (let i = 0; i < options.length; i++) {
                 if (options[i].value && options[i].value !== '') {
                     facultyId = options[i].value;
                     break;
                 }
             }
+            if (facultyId) break;
         }
     }
     
-    // If still no faculty, try to find any available faculty from the page
+    // If still no faculty, try to find any available faculty from the list
     if (!facultyId) {
-        const availableCards = document.querySelectorAll('.faculty-card.available');
+        const availableCards = document.querySelectorAll(`#faculty-column-${slotId} .faculty-card.available`);
         if (availableCards.length > 0) {
             const onclickAttr = availableCards[0].getAttribute('onclick');
             if (onclickAttr) {
@@ -939,7 +1340,7 @@ function loadSlotRecommendations(slotId, day) {
     }
     
     if (!facultyId) {
-        container.innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;"><i class="fas fa-info-circle"></i> No faculty available to analyze slots</p>';
+        container.innerHTML = '<p style="color: rgba(255,255,255,0.4); font-size: 0.78rem;"><i class="fas fa-info-circle"></i> Select a faculty to analyze alternative slots</p>';
         return;
     }
     
@@ -947,17 +1348,17 @@ function loadSlotRecommendations(slotId, day) {
         .then(response => response.json())
         .then(data => {
             if (data.success && data.recommendations && data.recommendations.length > 0) {
-                let html = '';
-                data.recommendations.slice(0, 5).forEach((rec, idx) => {
+                let html = '<h5 style="color: #c4b5fd; font-size: 0.8rem; margin-top: 0.5rem; margin-bottom: 0.4rem;">Alternative Slots:</h5>';
+                data.recommendations.slice(0, 3).forEach((rec, idx) => {
                     let statusColor = rec.clash_risk < 0.3 ? '#48bb78' : (rec.clash_risk < 0.7 ? '#f6ad55' : '#f56565');
                     let statusIcon = rec.clash_risk < 0.3 ? '✓' : (rec.clash_risk < 0.7 ? '⚠' : '✗');
-                    let bestTag = idx === 0 ? ' <span style="background: rgba(72,187,120,0.3); padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.7rem;">★ BEST</span>' : '';
+                    let bestTag = idx === 0 ? ' <span style="background: rgba(72,187,120,0.3); padding: 0.05rem 0.25rem; border-radius: 3px; font-size: 0.65rem;">★ BEST</span>' : '';
                     html += `
-                        <div class="recommendation-item">
+                        <div class="recommendation-item" style="padding: 0.4rem; margin-bottom: 0.3rem; font-size: 0.75rem; cursor: default; border-radius: 6px;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span><strong>${rec.day}</strong> — ${rec.time_range}${bestTag}</span>
-                                <span style="background-color: ${statusColor}; padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">
-                                    ${statusIcon} ${(rec.clash_risk * 100).toFixed(0)}% risk
+                                <span style="background-color: ${statusColor}; padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600; color: white;">
+                                    ${statusIcon} ${(rec.clash_risk * 100).toFixed(0)}%
                                 </span>
                             </div>
                         </div>
@@ -965,22 +1366,23 @@ function loadSlotRecommendations(slotId, day) {
                 });
                 container.innerHTML = html;
             } else {
-                container.innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;"><i class="fas fa-check-circle"></i> All time slots have similar risk levels</p>';
+                container.innerHTML = '<p style="color: rgba(255,255,255,0.4); font-size: 0.78rem;"><i class="fas fa-check-circle"></i> Similar risk levels</p>';
             }
         })
         .catch(err => {
             console.error('Slot recommendations error:', err);
-            container.innerHTML = '<p style="color: #fca5a5; font-size: 0.9rem;"><i class="fas fa-exclamation-triangle"></i> Could not load slot recommendations</p>';
+            container.innerHTML = '<p style="color: #fca5a5; font-size: 0.78rem;"><i class="fas fa-exclamation-triangle"></i> Error loading slots</p>';
         });
 }
 
 // Load and display faculty recommendations
 function loadFacultyRecommendations(slotId, day) {
-    const container = document.getElementById('facultyRecommendationsContent');
-    container.innerHTML = '<div style="text-align: center; padding: 1rem;"><div class="spinner"></div><div style="margin-top: 0.5rem; font-size: 0.85rem; opacity: 0.8;">Finding best faculty...</div></div>';
+    const container = document.getElementById('facultyRecommendationsContent-' + slotId);
+    if (!container) return;
+    container.innerHTML = '<div style="text-align: center; padding: 1rem;"><div class="spinner"></div><div style="margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.8;">Finding best faculty...</div></div>';
     
     if (!currentSubjectId) {
-        container.innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;"><i class="fas fa-info-circle"></i> Select a subject to get faculty recommendations</p>';
+        container.innerHTML = '<p style="color: rgba(255,255,255,0.4); font-size: 0.78rem;"><i class="fas fa-info-circle"></i> Select subject first</p>';
         return;
     }
     
@@ -988,37 +1390,37 @@ function loadFacultyRecommendations(slotId, day) {
         .then(response => response.json())
         .then(data => {
             if (data.success && data.recommendations && data.recommendations.length > 0) {
-                let html = '';
-                data.recommendations.slice(0, 5).forEach((rec, idx) => {
+                let html = '<h5 style="color: #c4b5fd; font-size: 0.8rem; margin-bottom: 0.4rem;">Suggested Faculty:</h5>';
+                data.recommendations.slice(0, 3).forEach((rec, idx) => {
                     const scorePercent = (rec.overall_score * 100).toFixed(0);
                     let scoreColor = scorePercent >= 80 ? '#48bb78' : (scorePercent >= 60 ? '#f6ad55' : '#f56565');
-                    let availTag = rec.availability_score > 0 ? '<span style="color: #48bb78;">✓ Free</span>' : '<span style="color: #f56565;">✗ Busy</span>';
-                    let expertTag = rec.subject_match >= 0.8 ? '<span style="background: rgba(72,187,120,0.3); padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.7rem;">EXPERT</span>' : '';
-                    let bestTag = idx === 0 ? ' <span style="background: rgba(72,187,120,0.3); padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.7rem;">★ TOP PICK</span>' : '';
+                    let availTag = rec.availability_score > 0 ? '<span style="color: #48bb78;">Free</span>' : '<span style="color: #f56565;">Busy</span>';
+                    let expertTag = rec.subject_match >= 0.8 ? '<span style="background: rgba(72,187,120,0.3); padding: 0.05rem 0.25rem; border-radius: 3px; font-size: 0.65rem;">EXPERT</span>' : '';
+                    let bestTag = idx === 0 ? ' <span style="background: rgba(72,187,120,0.3); padding: 0.05rem 0.25rem; border-radius: 3px; font-size: 0.65rem;">★ TOP</span>' : '';
                     html += `
                         <div class="recommendation-item" onclick="recommendFacultyToForm(${slotId}, ${rec.faculty_id}, '${rec.faculty_name.replace(/'/g, "\\'")}')"
-                             style="cursor: pointer;" title="Click to assign this faculty">
+                             style="cursor: pointer; padding: 0.4rem; margin-bottom: 0.3rem; font-size: 0.75rem; border-radius: 6px;" title="Click to assign this faculty">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <div>
                                     <strong>${rec.faculty_name}</strong>${bestTag} ${expertTag}<br>
-                                    <small>${availTag} | Workload: ${rec.current_workload || 0} classes | Match: ${(rec.subject_match * 100).toFixed(0)}%</small>
+                                    <small>${availTag} | Load: ${rec.current_workload || 0}h | Match: ${(rec.subject_match * 100).toFixed(0)}%</small>
                                 </div>
-                                <span style="background-color: ${scoreColor}; padding: 0.4rem 0.6rem; border-radius: 8px; font-weight: bold; color: white; min-width: 45px; text-align: center;">
+                                <span style="background-color: ${scoreColor}; padding: 0.15rem 0.35rem; border-radius: 4px; font-weight: bold; color: white; font-size: 0.75rem;">
                                     ${scorePercent}%
                                 </span>
                             </div>
                         </div>
                     `;
                 });
-                html += '<p style="font-size: 0.75rem; opacity: 0.6; margin-top: 0.5rem; text-align: center;"><i class="fas fa-mouse-pointer"></i> Click a faculty to auto-fill the form</p>';
+                html += '<p style="font-size: 0.65rem; opacity: 0.5; margin-top: 0.25rem; text-align: center;"><i class="fas fa-mouse-pointer"></i> Click to assign</p>';
                 container.innerHTML = html;
             } else {
-                container.innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;"><i class="fas fa-info-circle"></i> No faculty recommendations available for this subject</p>';
+                container.innerHTML = '<p style="color: rgba(255,255,255,0.4); font-size: 0.78rem;"><i class="fas fa-info-circle"></i> No recommendations</p>';
             }
         })
         .catch(err => {
             console.error('Faculty recommendations error:', err);
-            container.innerHTML = '<p style="color: #fca5a5; font-size: 0.9rem;"><i class="fas fa-exclamation-triangle"></i> Could not load faculty recommendations</p>';
+            container.innerHTML = '<p style="color: #fca5a5; font-size: 0.78rem;"><i class="fas fa-exclamation-triangle"></i> Error loading faculty recommendations</p>';
         });
 }
 

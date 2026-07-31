@@ -18,7 +18,7 @@
     <form method="POST" action="{{ url_for('add_division') }}"
         style="background: rgba(30, 41, 59, 0.5); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid rgba(148, 163, 184, 0.08);">
         <h3 style="margin-bottom: 1rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-plus-circle"></i> Add New Division</h3>
-        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 1rem; align-items: end;">
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr auto; gap: 1rem; align-items: end;">
             <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Branch</label>
                 <select name="branch_id" class="form-control" required>
@@ -40,6 +40,14 @@
                 <label class="form-label">Academic Year</label>
                 <input type="text" name="academic_year" class="form-control" placeholder="2024-2025" required>
             </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Students</label>
+                <input type="number" name="student_count" class="form-control" min="1" value="60" placeholder="60">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Lab Batches</label>
+                <input type="number" name="num_batches" class="form-control" min="1" max="10" value="1" placeholder="1" title="Number of lab batches (1 = no splitting)">
+            </div>
             <button type="submit" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Add
             </button>
@@ -55,6 +63,7 @@
                     <th>Branch</th>
                     <th>Semester</th>
                     <th>Academic Year</th>
+                    <th>Students / Batches</th>
                     <th>Created Date</th>
                     <th>Actions</th>
                 </tr>
@@ -66,6 +75,12 @@
                     <td>{{ division.branch.name }}</td>
                     <td>{{ division.semester }}</td>
                     <td>{{ division.academic_year }}</td>
+                    <td>
+                        {{ division.student_count or 60 }} students
+                        {% if division.num_batches and division.num_batches > 1 %}
+                            <br><span class="badge" style="background: rgba(124,58,237,0.15); color: #c4b5fd; border: 1px solid rgba(124,58,237,0.3); font-size: 0.75rem;">{{ division.num_batches }} batches ({% for b in division.batches %}{{ b.name }}{% if not loop.last %}, {% endif %}{% endfor %})</span>
+                        {% endif %}
+                    </td>
                     <td>{{ division.created_at.strftime('%Y-%m-%d') }}</td>
                     <td>
                         <a href="{{ url_for('view_timetable', division_id=division.id) }}"
@@ -77,7 +92,9 @@
                                 '{{ division.branch_id }}',
                                 '{{ division.name }}',
                                 '{{ division.semester }}',
-                                '{{ division.academic_year }}'
+                                '{{ division.academic_year }}',
+                                '{{ division.student_count or 60 }}',
+                                '{{ division.num_batches or 1 }}'
                             )">
                             <i class="fas fa-edit"></i>
                         </button>
@@ -91,7 +108,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="6" style="text-align: center; color: #64748b;">No divisions added yet</td>
+                    <td colspan="7" style="text-align: center; color: #64748b;">No divisions added yet</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -132,6 +149,17 @@
                 <input type="text" name="academic_year" id="edit_academic_year" class="form-control" required>
             </div>
 
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Student Count</label>
+                    <input type="number" name="student_count" id="edit_student_count" class="form-control" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Lab Batches</label>
+                    <input type="number" name="num_batches" id="edit_num_batches" class="form-control" min="1" max="10" required title="Number of lab batches (1 = no splitting)">
+                </div>
+            </div>
+
             <div style="display:flex; gap:1rem; justify-content:flex-end;">
                 <button type="button" class="btn btn-secondary" onclick="closeEditDivisionModal()">Cancel</button>
                 <button type="submit" class="btn btn-primary">
@@ -144,12 +172,14 @@
 </div>
 {% block extra_js %}
 <script>
-function openEditDivisionModal(id, branchId, name, semester, academicYear) {
+function openEditDivisionModal(id, branchId, name, semester, academicYear, studentCount, numBatches) {
     document.getElementById('edit_division_id').value = id;
     document.getElementById('edit_branch_id').value = branchId;
     document.getElementById('edit_division_name').value = name;
     document.getElementById('edit_semester').value = semester;
     document.getElementById('edit_academic_year').value = academicYear;
+    document.getElementById('edit_student_count').value = studentCount || 60;
+    document.getElementById('edit_num_batches').value = numBatches || 1;
 
     document.getElementById('editDivisionModal').style.display = 'block';
 }

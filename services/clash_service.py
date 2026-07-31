@@ -4,7 +4,7 @@ Handles all timetable conflict detection logic
 Enhanced with ML predictions and intelligent recommendations
 """
 
-from models import Timetable, Faculty, Division, TimeSlot, ClashLog, db, Subject
+from models import Timetable, Faculty, Division, TimeSlot, ClashLog, db, Subject, Batch
 from datetime import datetime
 from services.ml_clash_predictor import ml_predictor
 
@@ -115,24 +115,42 @@ class ClashService:
         return False, None
     
     @staticmethod
-    def check_division_clash(division_id, day, time_slot_id, exclude_entry_id=None):
+    def check_division_clash(division_id, day, time_slot_id, batch_id=None, exclude_entry_id=None):
         """
-        Check if division already has a class
+        Check if division already has a class (batch-aware).
+        
+        - Full-division entries (batch_id=None) clash with ANY entry for this division.
+        - Batch entries clash only with same-batch entries OR full-division entries.
+        - Different batches (D1 vs D2) can coexist at the same time slot.
         
         Args:
             division_id: ID of the division
             day: Day of the week
             time_slot_id: ID of the time slot
+            batch_id: ID of the batch (None for full-division entries)
             exclude_entry_id: Exclude this entry (for updates)
         
         Returns:
             tuple: (has_clash, clash_details)
         """
-        query = Timetable.query.filter(
-            Timetable.division_id == division_id,
-            Timetable.day == day,
-            Timetable.time_slot_id == time_slot_id
-        )
+        if batch_id:
+            # Batch entry: clashes with same-batch entries OR full-division entries
+            query = Timetable.query.filter(
+                Timetable.division_id == division_id,
+                Timetable.day == day,
+                Timetable.time_slot_id == time_slot_id,
+                db.or_(
+                    Timetable.batch_id == batch_id,
+                    Timetable.batch_id.is_(None)
+                )
+            )
+        else:
+            # Full-division entry: clashes with ANY entry for this division at this slot
+            query = Timetable.query.filter(
+                Timetable.division_id == division_id,
+                Timetable.day == day,
+                Timetable.time_slot_id == time_slot_id,
+            )
         
         if exclude_entry_id:
             query = query.filter(Timetable.id != exclude_entry_id)
@@ -140,12 +158,15 @@ class ClashService:
         existing = query.first()
         
         if existing:
+            batch_label = ''
+            if existing.batch:
+                batch_label = f' [{existing.batch.name}]'
             details = {
                 'type': 'division_clash',
-                'division': existing.division.full_name,
-                'subject': existing.subject.name,
-                'faculty': existing.faculty.user.full_name,
-                'room': existing.room_number,
+                'division': existing.division.full_name + batch_label,
+                'subject': existing.subject.name if existing.subject else existing.entry_type.upper(),
+                'faculty': existing.faculty.user.full_name if existing.faculty else 'N/A',
+                'room': existing.room_number or 'N/A',
                 'day': existing.day,
                 'time': existing.time_slot.time_range
             }
@@ -154,58 +175,152 @@ class ClashService:
         return False, None
     
     @staticmethod
-    def validate_and_detect_clashes(faculty_id, division_id, room_number, day, time_slot_id, exclude_entry_id=None):
+    def validate_and_detect_clashes(faculty_id, division_id, room_number, day, time_slot_id, exclude_entry_id=None, batch_id=None, entry_type='lecture', subject_id=None):
         """
-        Comprehensive clash detection
+        Comprehensive clash detection (batch-aware, library/break aware)
         
         Args:
-            faculty_id: ID of the faculty
+            faculty_id: ID of the faculty (None for library/break)
             division_id: ID of the division
-            room_number: Room number
+            room_number: Room number (None for library/break)
             day: Day of the week
             time_slot_id: ID of the time slot
             exclude_entry_id: Exclude this entry (for updates)
+            batch_id: ID of the batch (None for full-division entries)
+            entry_type: 'lecture', 'lab', 'library', or 'break'
         
         Returns:
             tuple: (is_valid, clash_list)
         """
         clashes = []
         
+        # Library and Break entries skip faculty/room clash checks
+        if entry_type in ('library', 'break'):
+            # Only check division clash (can't have library AND lecture at same slot)
+            has_clash, details = ClashService.check_division_clash(
+                division_id, day, time_slot_id, batch_id=None, exclude_entry_id=exclude_entry_id
+            )
+            if has_clash:
+                clashes.append(details)
+            return len(clashes) == 0, clashes
+        
         # Check faculty clash
-        has_clash, details = ClashService.check_faculty_clash(
-            faculty_id, day, time_slot_id, exclude_entry_id
+        if faculty_id:
+            has_clash, details = ClashService.check_faculty_clash(
+                faculty_id, day, time_slot_id, exclude_entry_id
+            )
+            if has_clash:
+                clashes.append(details)
+                
+            # Check faculty availability (working hours or visiting slots)
+            faculty = Faculty.query.get(faculty_id)
+            time_slot = TimeSlot.query.get(time_slot_id)
+            if faculty and time_slot:
+                if not faculty.is_available_for_slot(day, time_slot):
+                    clashes.append({
+                        'type': 'faculty_availability_clash',
+                        'message': f"Faculty {faculty.user.full_name} is not available on {day} at {time_slot.time_range}.",
+                        'faculty_name': faculty.user.full_name,
+                        'day': day,
+                        'time_slot': time_slot.time_range
+                    })
+        
+        # Check room clash
+        if room_number:
+            has_clash, details = ClashService.check_room_clash(
+                room_number, day, time_slot_id, exclude_entry_id
+            )
+            if has_clash:
+                clashes.append(details)
+        
+        # Check division clash (batch-aware)
+        has_clash, details = ClashService.check_division_clash(
+            division_id, day, time_slot_id, batch_id=batch_id, exclude_entry_id=exclude_entry_id
         )
         if has_clash:
             clashes.append(details)
             
-        # Check faculty availability (working hours or visiting slots)
-        faculty = Faculty.query.get(faculty_id)
-        time_slot = TimeSlot.query.get(time_slot_id)
-        if faculty and time_slot:
-            if not faculty.is_available_for_slot(day, time_slot):
+        # Check weekly lab limit for this batch: at most 1 lab session of this subject per week
+        if entry_type == 'lab' and batch_id and subject_id:
+            existing_lab = Timetable.query.filter(
+                Timetable.division_id == division_id,
+                Timetable.batch_id == batch_id,
+                Timetable.subject_id == subject_id,
+                Timetable.entry_type == 'lab',
+                Timetable.day != day
+            ).first()
+            if existing_lab and (exclude_entry_id is None or existing_lab.id != exclude_entry_id):
+                batch_obj = Batch.query.get(batch_id)
+                batch_name = batch_obj.name if batch_obj else str(batch_id)
                 clashes.append({
-                    'type': 'faculty_availability_clash',
-                    'message': f"Faculty {faculty.user.full_name} is not available on {day} at {time_slot.time_range}.",
-                    'faculty_name': faculty.user.full_name,
-                    'day': day,
-                    'time_slot': time_slot.time_range
+                    'type': 'batch_lab_limit_clash',
+                    'message': f"Batch {batch_name} already has a lab for this subject on {existing_lab.day}.",
+                    'batch_id': batch_id,
+                    'subject_id': subject_id,
+                    'day': existing_lab.day,
+                    'time_slot': TimeSlot.query.get(existing_lab.time_slot_id).time_range
                 })
         
-        # Check room clash
-        has_clash, details = ClashService.check_room_clash(
-            room_number, day, time_slot_id, exclude_entry_id
-        )
-        if has_clash:
-            clashes.append(details)
-        
-        # Check division clash
-        has_clash, details = ClashService.check_division_clash(
-            division_id, day, time_slot_id, exclude_entry_id
-        )
-        if has_clash:
-            clashes.append(details)
-        
+        # For lab entries: faculty must also be free in the NEXT consecutive slot (lab = 2 hrs)
+        if entry_type == 'lab' and faculty_id:
+            current_slot = TimeSlot.query.get(time_slot_id)
+            if current_slot:
+                next_slot = TimeSlot.query.filter(
+                    TimeSlot.start_time >= current_slot.end_time
+                ).order_by(TimeSlot.start_time).first()
+                if next_slot:
+                    has_clash_next, details_next = ClashService.check_faculty_clash(
+                        faculty_id, day, next_slot.id, exclude_entry_id
+                    )
+                    if has_clash_next:
+                        faculty = Faculty.query.get(faculty_id)
+                        fname = faculty.user.full_name if faculty else str(faculty_id)
+                        clashes.append({
+                            'type': 'faculty_next_slot_clash',
+                            'message': (
+                                f"{fname} is busy in the next slot ({next_slot.time_range}), "
+                                f"so cannot be assigned for this 2-hour lab starting at {current_slot.time_range}."
+                            ),
+                            'faculty_name': fname,
+                            'next_slot': next_slot.time_range,
+                            'conflicting_subject': details_next.get('subject', '') if details_next else '',
+                        })
+
         return len(clashes) == 0, clashes
+    
+    @staticmethod
+    def get_faculty_workload():
+        """
+        Calculate workload for all faculty members.
+        
+        Returns:
+            dict: {faculty_id: {'name': str, 'department': str, 'total_entries': int,
+                   'lectures': int, 'labs': int, 'total_hours': float}}
+        """
+        workload = {}
+        all_faculty = Faculty.query.all()
+        
+        for fac in all_faculty:
+            entries = Timetable.query.filter(
+                Timetable.faculty_id == fac.id,
+                Timetable.entry_type.in_(['lecture', 'lab'])
+            ).all()
+            
+            lectures = sum(1 for e in entries if e.entry_type == 'lecture')
+            labs = sum(1 for e in entries if e.entry_type == 'lab')
+            # Approximate: each entry = 1 hour (slot duration varies but this is a count)
+            total_hours = lectures + labs
+            
+            workload[fac.id] = {
+                'name': fac.user.full_name,
+                'department': fac.department or '',
+                'total_entries': len(entries),
+                'lectures': lectures,
+                'labs': labs,
+                'total_hours': total_hours
+            }
+        
+        return workload
     
     @staticmethod
     def get_faculty_free_slots(faculty_id, day):

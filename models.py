@@ -144,10 +144,38 @@ class Faculty(db.Model):
             working_hours = self.get_working_hours()
             if not working_hours:
                 return True  # No hours set = always available
-            from datetime import datetime as dt
+            
+            def parse_time_str(t_str, is_end=False):
+                if not t_str:
+                    return None
+                t_str = str(t_str).strip().upper()
+                from datetime import datetime as dt, time
+                
+                has_ampm = 'AM' in t_str or 'PM' in t_str
+                parsed_time = None
+                
+                for fmt in ('%I:%M %p', '%I:%M%p', '%H:%M:%S', '%H:%M'):
+                    try:
+                        parsed_time = dt.strptime(t_str, fmt).time()
+                        break
+                    except ValueError:
+                        continue
+                
+                if parsed_time:
+                    h = parsed_time.hour
+                    m = parsed_time.minute
+                    if not has_ampm:
+                        if h < 12:
+                            if is_end or h < 7:
+                                h += 12
+                    return time(h, m)
+                return None
+
             try:
-                start = dt.strptime(working_hours['start'], '%H:%M').time()
-                end = dt.strptime(working_hours['end'], '%H:%M').time()
+                start = parse_time_str(working_hours.get('start'))
+                end = parse_time_str(working_hours.get('end'), is_end=True)
+                if not start or not end:
+                    return True
                 return start <= time_slot.start_time and time_slot.end_time <= end
             except Exception:
                 return True
@@ -182,6 +210,8 @@ class Division(db.Model):
     name = db.Column(db.String(50), nullable=False)  # e.g., "A", "B", "C"
     semester = db.Column(db.Integer, nullable=False)  # 1-8
     academic_year = db.Column(db.String(20))  # e.g., "2024-2025"
+    student_count = db.Column(db.Integer, default=60)
+    num_batches = db.Column(db.Integer, default=1)  # 1 = no batches (regular)
     
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -191,6 +221,7 @@ class Division(db.Model):
     
     # Relationships
     timetable_entries = db.relationship('Timetable', backref='division', lazy='dynamic', cascade='all, delete-orphan')
+    batches = db.relationship('Batch', backref='division', lazy='dynamic', cascade='all, delete-orphan')
     
     @property
     def full_name(self):
@@ -198,6 +229,30 @@ class Division(db.Model):
     
     def __repr__(self):
         return f'<Division {self.full_name}>'
+
+
+class Batch(db.Model):
+    """Lab batches within a division (e.g., D1, D2, D3 of CSE-A)"""
+    __tablename__ = 'batches'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    division_id = db.Column(db.Integer, db.ForeignKey('divisions.id'), nullable=False)
+    name = db.Column(db.String(20), nullable=False)  # e.g., "D1", "D2", "D3"
+    student_count = db.Column(db.Integer, default=20)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Unique per division
+    __table_args__ = (db.UniqueConstraint('division_id', 'name'),)
+    
+    # Relationships
+    timetable_entries = db.relationship('Timetable', backref='batch', lazy='dynamic')
+    
+    @property
+    def full_label(self):
+        return f"{self.division.full_name}-{self.name}"
+    
+    def __repr__(self):
+        return f'<Batch {self.full_label}>'
 
 
 class TimeSlot(db.Model):
@@ -255,12 +310,14 @@ class Timetable(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     division_id = db.Column(db.Integer, db.ForeignKey('divisions.id'), nullable=False)
-    subject_id = db.Column(db.Integer, db.ForeignKey('subjects.id'), nullable=False)
-    faculty_id = db.Column(db.Integer, db.ForeignKey('faculty.id'), nullable=False)
+    subject_id = db.Column(db.Integer, db.ForeignKey('subjects.id'), nullable=True)  # Nullable for library/break
+    faculty_id = db.Column(db.Integer, db.ForeignKey('faculty.id'), nullable=True)   # Nullable for library/break
     time_slot_id = db.Column(db.Integer, db.ForeignKey('time_slots.id'), nullable=False)
+    batch_id = db.Column(db.Integer, db.ForeignKey('batches.id'), nullable=True)  # NULL = full-division
     
     day = db.Column(db.String(20), nullable=False)  # Monday-Saturday
-    room_number = db.Column(db.String(50), nullable=False)
+    room_number = db.Column(db.String(50), nullable=True)  # Nullable for library/break
+    entry_type = db.Column(db.String(20), default='lecture')  # 'lecture', 'lab', 'library', 'break'
     
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -269,6 +326,25 @@ class Timetable(db.Model):
     # Relationships
     subject = db.relationship('Subject')
     time_slot = db.relationship('TimeSlot')
+    
+    @property
+    def is_special(self):
+        """Returns True for library/break entries that have no faculty/subject."""
+        return self.entry_type in ('library', 'break')
+    
+    @property
+    def display_label(self):
+        """Human-readable label for the entry."""
+        if self.entry_type == 'library':
+            return 'LIBRARY'
+        elif self.entry_type == 'break':
+            return 'BREAK'
+        elif self.subject:
+            label = self.subject.name
+            if self.batch:
+                label = f"{self.batch.name}: {label}"
+            return label
+        return '—'
     
     def __repr__(self):
         return f'<Timetable {self.division.full_name} - {self.day}>'
@@ -279,7 +355,7 @@ class ClashLog(db.Model):
     __tablename__ = 'clash_logs'
     
     id = db.Column(db.Integer, primary_key=True)
-    clash_type = db.Column(db.String(20), nullable=False)  # faculty, room, division
+    clash_type = db.Column(db.String(50), nullable=False)  # faculty, room, division
     severity = db.Column(db.String(20), default='warning')  # warning, error
     
     # Details stored as JSON

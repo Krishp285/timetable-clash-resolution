@@ -8,7 +8,7 @@ import io
 import zipfile
 from flask import Flask
 from extensions import db
-from models import ClashLog, User, Faculty, Branch, Division, Subject, TimeSlot, Timetable, Room
+from models import ClashLog, User, Faculty, Branch, Division, Subject, TimeSlot, Timetable, Room, Batch
 from services.clash_service import ClashService
 from flask import render_template, request, redirect, url_for, flash, session, jsonify, make_response
 from functools import wraps
@@ -110,7 +110,8 @@ def build_division_timetable_csv(division, entries):
     output = io.StringIO()
     writer = csv.writer(output)
 
-    writer.writerow([f'{division.full_name} Timetable'])
+    branch_name = division.branch.name if division.branch else ""
+    writer.writerow([f'{division.full_name} (Semester {division.semester}) Timetable - {branch_name}'])
     writer.writerow(['Time'] + days)
 
     for slot in timeslots:
@@ -118,10 +119,19 @@ def build_division_timetable_csv(division, entries):
         for day in days:
             day_entries = cell_map[slot.id][day]
             if day_entries:
-                row.append('\n'.join(
-                    f"{entry.subject.name} | {entry.faculty.user.full_name} | Room {entry.room_number}"
-                    for entry in day_entries
-                ))
+                cell_texts = []
+                for entry in day_entries:
+                    if entry.entry_type == 'library':
+                        cell_texts.append("LIBRARY")
+                    elif entry.entry_type == 'break':
+                        cell_texts.append("BREAK")
+                    else:
+                        sub = entry.subject.name if entry.subject else "—"
+                        fac = entry.faculty.user.full_name if entry.faculty else "N/A"
+                        room = f"Room {entry.room_number}" if entry.room_number else "N/A"
+                        batch_str = f"[{entry.batch.name}] " if entry.batch else ""
+                        cell_texts.append(f"{batch_str}{sub} | {fac} | {room}")
+                row.append('\n'.join(cell_texts))
             else:
                 row.append('')
         writer.writerow(row)
@@ -142,7 +152,7 @@ def build_timetable_zip_response(divisions, filename):
                 .all()
             )
             csv_content = build_division_timetable_csv(division, entries)
-            safe_name = division.full_name.lower().replace(' ', '_').replace('/', '_')
+            safe_name = f"{division.full_name}_sem{division.semester}".lower().replace(' ', '_').replace('/', '_')
             archive.writestr(f'{safe_name}_timetable.csv', csv_content)
 
     response = make_response(output.getvalue())
@@ -300,9 +310,45 @@ def download_division_timetable(division_id):
     )
 
     csv_content = build_division_timetable_csv(division, entries)
-    safe_name = division.full_name.lower().replace(' ', '_').replace('/', '_')
+    safe_name = f"{division.full_name}_sem{division.semester}".lower().replace(' ', '_').replace('/', '_')
     response = make_response(csv_content)
     response.headers['Content-Disposition'] = f'attachment; filename={safe_name}_timetable.csv'
+    response.headers['Content-Type'] = 'text/csv; charset=utf-8'
+    return response
+
+
+@app.route('/timetable/export-master-csv')
+@admin_required
+def export_master_timetable_csv():
+    divisions = [
+        division for division in Division.query.order_by(Division.branch_id, Division.semester, Division.name).all()
+        if division.timetable_entries.count() > 0
+    ]
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['==========================================================='])
+    writer.writerow(['MASTER TIMETABLE - ALL SEMESTERS AND DIVISIONS'])
+    writer.writerow(['==========================================================='])
+    writer.writerow([])
+
+    for division in divisions:
+        entries = (
+            Timetable.query
+            .filter_by(division_id=division.id)
+            .join(TimeSlot)
+            .order_by(TimeSlot.start_time, Timetable.day)
+            .all()
+        )
+        div_csv = build_division_timetable_csv(division, entries)
+        for line in div_csv.splitlines():
+            writer.writerow([line])
+        writer.writerow([])
+        writer.writerow(['-----------------------------------------------------------'])
+        writer.writerow([])
+
+    response = make_response(output.getvalue())
+    response.headers['Content-Disposition'] = 'attachment; filename=all_semesters_master_timetable.csv'
     response.headers['Content-Type'] = 'text/csv; charset=utf-8'
     return response
 
@@ -423,14 +469,31 @@ def add_division():
         name = request.form.get('name')
         semester = request.form.get('semester', type=int)
         academic_year = request.form.get('academic_year')
+        student_count = request.form.get('student_count', type=int) or 60
+        num_batches = request.form.get('num_batches', type=int) or 1
         
         division = Division(
             branch_id=branch_id,
             name=name,
             semester=semester,
-            academic_year=academic_year
+            academic_year=academic_year,
+            student_count=student_count,
+            num_batches=num_batches
         )
         db.session.add(division)
+        db.session.flush()  # Get the division.id
+        
+        # Auto-create batch rows if num_batches > 1
+        if num_batches > 1:
+            batch_size = student_count // num_batches
+            for i in range(1, num_batches + 1):
+                batch = Batch(
+                    division_id=division.id,
+                    name=f'D{i}',
+                    student_count=batch_size
+                )
+                db.session.add(batch)
+        
         db.session.commit()
         
         flash('Division added successfully', 'success')
@@ -453,6 +516,8 @@ def edit_division():
     name = request.form.get('name')
     semester = request.form.get('semester', type=int)
     academic_year = request.form.get('academic_year')
+    student_count = request.form.get('student_count', type=int) or 60
+    num_batches = request.form.get('num_batches', type=int) or 1
 
     division = Division.query.get_or_404(division_id)
 
@@ -460,6 +525,32 @@ def edit_division():
     division.name = name
     division.semester = semester
     division.academic_year = academic_year
+    division.student_count = student_count
+    division.num_batches = num_batches
+    
+    # Sync batches: delete old, create new if needed
+    old_batch_count = division.batches.count()
+    if num_batches != old_batch_count or (num_batches > 1 and old_batch_count == 0):
+        # Only recreate if no timetable entries reference existing batches
+        has_batch_entries = Timetable.query.filter(
+            Timetable.batch_id.isnot(None),
+            Timetable.division_id == division_id
+        ).first()
+        
+        if not has_batch_entries:
+            # Safe to recreate batches
+            Batch.query.filter_by(division_id=division_id).delete()
+            if num_batches > 1:
+                batch_size = student_count // num_batches
+                for i in range(1, num_batches + 1):
+                    batch = Batch(
+                        division_id=division_id,
+                        name=f'D{i}',
+                        student_count=batch_size
+                    )
+                    db.session.add(batch)
+        else:
+            flash('Cannot change batch count: existing lab entries use current batches.', 'warning')
 
     db.session.commit()
 
@@ -485,6 +576,7 @@ def delete_division(division_id):
 
     try:
         # ✅ DELETE CHILD RECORDS FIRST
+        Batch.query.filter_by(division_id=division.id).delete()
         Timetable.query.filter_by(division_id=division.id).delete()
         ClashLog.query.filter_by(division_id=division.id).delete()
 
@@ -812,7 +904,8 @@ def manage_faculty():
         search=search,
         dept_filter=dept_filter,
         visiting_filter=visiting_filter,
-        all_depts=all_depts
+        all_depts=all_depts,
+        workload=ClashService.get_faculty_workload()
     )
 
 @app.route('/admin/faculty/delete/<int:faculty_id>', methods=['POST'])
@@ -860,45 +953,170 @@ def timetable_create():
         day=day
     ).all()
 
-    timetable_map = {entry.time_slot_id: entry for entry in timetable_entries}
+    # Build multi-entry map: {slot_id: [entries]} to support batches
+    timetable_map = {}
+    for slot in timeslots:
+        timetable_map[slot.id] = []
+    for entry in timetable_entries:
+        timetable_map.setdefault(entry.time_slot_id, []).append(entry)
+
+    # Build next-slot map: slot_id -> next consecutive slot
+    # Used so that lab (2-hr) checks faculty availability in BOTH slots
+    next_slot_map = {}
+    for i, slot in enumerate(timeslots):
+        if i + 1 < len(timeslots):
+            next_slot_map[slot.id] = timeslots[i + 1]
+        else:
+            next_slot_map[slot.id] = None
 
     faculty_availability = {}
+    lab_faculty_availability = {}   # faculty checked against slot + next-slot
+    occupied_rooms = {}
     for slot in timeslots:
-        faculty_availability[slot.id] = ClashService.get_all_faculty_availability(day, slot.id)
+        avail = ClashService.get_all_faculty_availability(day, slot.id)
+        faculty_availability[slot.id] = avail
 
-    # ✅ THIS WAS MISSING
+        # For lab form: mark unavailable if busy in EITHER this slot OR the next slot
+        next_slot = next_slot_map.get(slot.id)
+        if next_slot:
+            next_avail_map = {
+                f['faculty_id']: f['is_available']
+                for f in ClashService.get_all_faculty_availability(day, next_slot.id)
+            }
+            lab_avail = []
+            for f in avail:
+                free_next = next_avail_map.get(f['faculty_id'], True)
+                lab_avail.append(dict(f, is_available=f['is_available'] and free_next,
+                                      lab_blocked_next=(not free_next and f['is_available'])))
+            lab_faculty_availability[slot.id] = lab_avail
+        else:
+            # Last slot: no next slot, normal availability
+            lab_faculty_availability[slot.id] = [
+                dict(f, lab_blocked_next=False) for f in avail
+            ]
+
+        # Find all occupied rooms in this slot (any entry where room_number is not null)
+        occupied_entries = Timetable.query.filter(
+            Timetable.day == day,
+            Timetable.time_slot_id == slot.id,
+            Timetable.room_number.isnot(None)
+        ).all()
+        occupied_rooms[slot.id] = {entry.room_number for entry in occupied_entries}
+
     subjects = Subject.query.order_by(Subject.name).all()
     rooms = Room.query.order_by(Room.name).all()
 
+    # Subject load for this division (count of scheduled lectures per subject)
+    subject_load = {}
+    for entry in Timetable.query.filter_by(division_id=division_id, entry_type='lecture').all():
+        if entry.subject_id:
+            subject_load[entry.subject_id] = subject_load.get(entry.subject_id, 0) + 1
+
+    # Get batches for this division
+    div_batches = division.batches.order_by(Batch.name).all() if division.num_batches and division.num_batches > 1 else []
+
+    # Calculate exact slot status for UI form rendering
+    slot_status = {}
+    for slot in timeslots:
+        entries = timetable_map.get(slot.id, [])
+        has_full_div = any(e.batch_id is None for e in entries)
+        is_library_or_break = any(e.entry_type in ('library', 'break') for e in entries)
+        assigned_batch_ids = {e.batch_id for e in entries if e.batch_id is not None}
+        all_batches_assigned = bool(div_batches and len(assigned_batch_ids) >= len(div_batches))
+        is_fully_occupied = is_library_or_break or has_full_div or all_batches_assigned
+        
+        t_str = str(slot.start_time).strip()
+        is_lab_start_slot = any(t_str.startswith(t) for t in ('08:30', '10:30', '13:00', '8:30'))
+
+        slot_status[slot.id] = {
+            'has_full_div': has_full_div,
+            'is_library_or_break': is_library_or_break,
+            'assigned_batch_ids': assigned_batch_ids,
+            'all_batches_assigned': all_batches_assigned,
+            'is_fully_occupied': is_fully_occupied,
+            'is_lab_start_slot': is_lab_start_slot
+        }
+
+    # Faculty workload for display
+    workload = ClashService.get_faculty_workload()
+
     return render_template(
-    'timetable_create.html',
-    division=division,
-    days=days,
-    current_day=day,
-    timeslots=timeslots,
-    timetable_map=timetable_map,
-    faculty_availability=faculty_availability,
-    subjects=subjects,
-    rooms=rooms
-)
+        'timetable_create.html',
+        division=division,
+        days=days,
+        current_day=day,
+        timeslots=timeslots,
+        timetable_map=timetable_map,
+        faculty_availability=faculty_availability,
+        lab_faculty_availability=lab_faculty_availability,
+        subjects=subjects,
+        rooms=rooms,
+        div_batches=div_batches,
+        workload=workload,
+        occupied_rooms=occupied_rooms,
+        subject_load=subject_load,
+        slot_status=slot_status
+    )
 
 @app.route('/timetable/add-entry', methods=['POST'])
 @admin_required
 def add_timetable_entry():
 
     division_id = request.form.get('division_id', type=int)
-    subject_id = request.form.get('subject_id', type=int)
-    faculty_id = request.form.get('faculty_id', type=int)  # from dropdown
     time_slot_id = request.form.get('time_slot_id', type=int)
     day = request.form.get('day')
+    entry_type = request.form.get('entry_type', 'lecture')
+    batch_id = request.form.get('batch_id', type=int) or None
+
+    # Enforce lab start slot restrictions (labs only start at 08:30, 10:30, 13:00)
+    if entry_type == 'lab':
+        slot_obj = TimeSlot.query.get(time_slot_id)
+        t_str = str(slot_obj.start_time).strip() if slot_obj else ''
+        if not any(t_str.startswith(t) for t in ('08:30', '10:30', '13:00', '8:30')):
+            flash('Labs can only start at 08:30, 10:30, or 13:00 (2-hour blocks before breaks).', 'danger')
+            return redirect(url_for('timetable_create', division_id=division_id, day=day))
+
+    # Library / Break entries: no faculty, subject, or room needed
+    if entry_type in ('library', 'break'):
+        # Check division clash (can't overlap with existing entries)
+        is_valid, clashes = ClashService.validate_and_detect_clashes(
+            faculty_id=None, division_id=division_id, room_number=None,
+            day=day, time_slot_id=time_slot_id,
+            entry_type=entry_type
+        )
+        if not is_valid:
+            for clash in clashes:
+                flash(f"Clash detected: {clash['type']}", 'danger')
+            return redirect(url_for('timetable_create', division_id=division_id, day=day))
+
+        entry = Timetable(
+            division_id=division_id,
+            subject_id=None,
+            faculty_id=None,
+            time_slot_id=time_slot_id,
+            batch_id=None,
+            day=day,
+            room_number=None,
+            entry_type=entry_type,
+            created_by=session['user_id']
+        )
+        db.session.add(entry)
+        db.session.commit()
+        flash(f'{entry_type.capitalize()} period added!', 'success')
+        return redirect(url_for('timetable_create', division_id=division_id, day=day))
+
+    # Normal lecture / lab entry
+    subject_id = request.form.get('subject_id', type=int)
+    faculty_id = request.form.get('faculty_id', type=int)
     room_number = request.form.get('room_number')
 
-    # ✅ GET FACULTY OBJECT
+    # GET FACULTY OBJECT
     faculty = Faculty.query.get_or_404(faculty_id)
 
-    # Validate clashes (PASS faculty.id)
+    # Validate clashes (batch-aware)
     is_valid, clashes = ClashService.validate_and_detect_clashes(
-        faculty.id, division_id, room_number, day, time_slot_id
+        faculty.id, division_id, room_number, day, time_slot_id,
+        batch_id=batch_id, entry_type=entry_type, subject_id=subject_id
     )
 
     if not is_valid:
@@ -910,7 +1128,23 @@ def add_timetable_entry():
                 faculty_id=faculty.id,
                 severity='error'
             )
-            flash(f"Clash detected: {clash['type']}", 'danger')
+            # Build a descriptive flash message
+            ct = clash.get('type', '')
+            if ct == 'faculty_clash':
+                msg = f"Faculty clash: {clash.get('faculty_name')} is already teaching {clash.get('subject')} ({clash.get('division')}) at {clash.get('time')}."
+            elif ct == 'faculty_next_slot_clash':
+                msg = clash.get('message', 'Faculty is busy in the next slot — cannot assign for a 2-hour lab.')
+            elif ct == 'room_clash':
+                msg = f"Room clash: {clash.get('room')} is already occupied by {clash.get('division')} at {clash.get('time')}."
+            elif ct == 'division_clash':
+                msg = f"Division clash: {clash.get('division')} already has {clash.get('subject')} at {clash.get('time')}."
+            elif ct == 'faculty_availability_clash':
+                msg = clash.get('message', 'Faculty is unavailable at this time.')
+            elif ct == 'batch_lab_limit_clash':
+                msg = clash.get('message', 'Batch weekly lab limit reached.')
+            else:
+                msg = f"Clash detected: {ct}"
+            flash(msg, 'danger')
 
         return redirect(url_for(
             'timetable_create',
@@ -918,19 +1152,82 @@ def add_timetable_entry():
             day=day
         ))
 
-    # ✅ SAVE faculty.id (THIS IS THE KEY)
     entry = Timetable(
         division_id=division_id,
         subject_id=subject_id,
-        faculty_id=faculty.id,   # ✅ FIXED
+        faculty_id=faculty.id,
         time_slot_id=time_slot_id,
+        batch_id=batch_id,
         day=day,
         room_number=room_number,
+        entry_type=entry_type,
         created_by=session['user_id']
     )
 
     db.session.add(entry)
     db.session.commit()
+
+    autofill_next_slot = request.form.get('autofill_next_slot') == '1'
+    if entry_type == 'lab' and autofill_next_slot:
+        current_slot = TimeSlot.query.get(time_slot_id)
+        if current_slot:
+            next_slot = TimeSlot.query.filter(
+                TimeSlot.start_time >= current_slot.end_time
+            ).order_by(TimeSlot.start_time).first()
+            
+            if next_slot:
+                # Validate clashes for the next slot as a single slot (second hour of lab)
+                is_valid_next, clashes_next = ClashService.validate_and_detect_clashes(
+                    faculty.id, division_id, room_number, day, next_slot.id,
+                    batch_id=batch_id, entry_type='lecture', subject_id=subject_id
+                )
+                if is_valid_next:
+                    next_entry = Timetable(
+                        division_id=division_id,
+                        subject_id=subject_id,
+                        faculty_id=faculty.id,
+                        time_slot_id=next_slot.id,
+                        batch_id=batch_id,
+                        day=day,
+                        room_number=room_number,
+                        entry_type=entry_type,
+                        created_by=session['user_id']
+                    )
+                    db.session.add(next_entry)
+                    db.session.commit()
+                    flash(f'Timetable entry and next slot ({next_slot.time_range}) added successfully!', 'success')
+                    return redirect(url_for('timetable_create', division_id=division_id, day=day))
+                else:
+                    for clash in clashes_next:
+                        ClashService.log_clash(
+                            clash_type=clash['type'].replace('_clash', ''),
+                            details=clash,
+                            division_id=division_id,
+                            faculty_id=faculty.id,
+                            severity='warning'
+                        )
+                    
+                    clash_messages = []
+                    for c in clashes_next:
+                        ct = c.get('type', '')
+                        if ct == 'faculty_clash':
+                            clash_messages.append(f"Faculty {c.get('faculty_name', 'N/A')} is busy")
+                        elif ct == 'faculty_next_slot_clash':
+                            clash_messages.append(c.get('message', f"Faculty {c.get('faculty_name', 'N/A')} is busy in the next slot"))
+                        elif ct == 'room_clash':
+                            clash_messages.append(f"Room {c.get('room', 'N/A')} is occupied")
+                        elif ct == 'division_clash':
+                            clash_messages.append(f"Division/Batch {c.get('division', 'N/A')} already has an entry")
+                        elif ct == 'faculty_availability_clash':
+                            clash_messages.append(c.get('message', 'Faculty is unavailable'))
+                        elif ct == 'batch_lab_limit_clash':
+                            clash_messages.append(c.get('message', 'Batch weekly lab limit reached'))
+                        else:
+                            clash_messages.append(c.get('message', ct.replace('_', ' ').title() if ct else 'Schedule conflict'))
+                    
+                    clash_str = ", ".join(clash_messages) if clash_messages else "Schedule conflict"
+                    flash(f'Main entry added, but could not auto-fill next slot ({next_slot.time_range}) due to: {clash_str}.', 'warning')
+                    return redirect(url_for('timetable_create', division_id=division_id, day=day))
 
     flash('Timetable entry added successfully!', 'success')
     return redirect(url_for(
@@ -951,7 +1248,9 @@ def edit_timetable_entry(entry_id):
         # Validate clashes (excluding current entry)
         is_valid, clashes = ClashService.validate_and_detect_clashes(
             faculty_id, entry.division_id, room_number,
-            entry.day, entry.time_slot_id, entry.id
+            entry.day, entry.time_slot_id, entry.id,
+            batch_id=entry.batch_id, entry_type=entry.entry_type,
+            subject_id=entry.subject_id
         )
         
         if not is_valid:
@@ -1007,15 +1306,15 @@ def view_timetable(division_id):
     # Get all entries
     entries = Timetable.query.filter_by(division_id=division_id).all()
     
-    # Create grid: grid[day][time_slot_id] = entry
+    # Create grid: grid[day][time_slot_id] = list of entries
     grid = {}
     for day in days:
         grid[day] = {}
         for slot in timeslots:
-            grid[day][slot.id] = None
+            grid[day][slot.id] = []
     
     for entry in entries:
-        grid[entry.day][entry.time_slot_id] = entry
+        grid[entry.day][entry.time_slot_id].append(entry)
     
     user = User.query.get(session['user_id'])
     
@@ -1647,6 +1946,15 @@ try:
             "ALTER TABLE clash_logs ADD COLUMN resolved_by INT",
             "ALTER TABLE clash_logs ADD COLUMN resolution_method VARCHAR(20)",
             "ALTER TABLE clash_logs ADD COLUMN resolution_note TEXT",
+            "ALTER TABLE clash_logs MODIFY COLUMN clash_type VARCHAR(50)",
+            # Batch / Library / Workload migrations
+            "ALTER TABLE divisions ADD COLUMN student_count INT DEFAULT 60",
+            "ALTER TABLE divisions ADD COLUMN num_batches INT DEFAULT 1",
+            "ALTER TABLE timetable ADD COLUMN batch_id INT",
+            "ALTER TABLE timetable ADD COLUMN entry_type VARCHAR(20) DEFAULT 'lecture'",
+            "ALTER TABLE timetable MODIFY COLUMN subject_id INT NULL",
+            "ALTER TABLE timetable MODIFY COLUMN faculty_id INT NULL",
+            "ALTER TABLE timetable MODIFY COLUMN room_number VARCHAR(50) NULL",
         ]
         for stmt in migrations:
             try:

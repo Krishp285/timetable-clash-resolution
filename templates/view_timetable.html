@@ -21,12 +21,27 @@
         <tr>
             <th>{{ day }}</th>
             {% for slot in timeslots %}
-                {% set entry = grid[day][slot.id] %}
+                {% set entries = grid[day][slot.id] %}
                 <td>
-                    {% if entry %}
-                        <strong style="color: #06d6a0;">{{ entry.subject.name }}</strong><br>
-                        <span style="color: #94a3b8;">{{ entry.faculty.user.full_name }}</span><br>
-                        <span style="color: #64748b;">Room: {{ entry.room_number }}</span>
+                    {% if entries %}
+                        {% for entry in entries %}
+                            <div style="{% if not loop.last %}margin-bottom: 0.6rem; padding-bottom: 0.6rem; border-bottom: 1px dashed rgba(148,163,184,0.15);{% endif %}">
+                                {% if entry.entry_type == 'library' %}
+                                    <strong style="color: #60a5fa; font-size: 0.9rem;"><i class="fas fa-book-reader"></i> LIBRARY</strong>
+                                {% elif entry.entry_type == 'break' %}
+                                    <strong style="color: #94a3b8; font-size: 0.9rem;"><i class="fas fa-coffee"></i> BREAK</strong>
+                                {% else %}
+                                    <strong style="color: #06d6a0;">
+                                        {% if entry.batch %}
+                                            <span style="color: #c4b5fd; font-weight: bold;">{{ entry.batch.name }}:</span>
+                                        {% endif %}
+                                        {{ entry.subject.name }}
+                                    </strong><br>
+                                    <span style="color: #94a3b8; font-size: 0.85rem;">{{ entry.faculty.user.full_name }}</span><br>
+                                    <span style="color: #64748b; font-size: 0.8rem;">Room: {{ entry.room_number }}</span>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
                     {% else %}
                         <span style="color: #475569;">—</span>
                     {% endif %}
