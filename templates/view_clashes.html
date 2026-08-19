@@ -248,6 +248,13 @@
                 {{ resolved_clashes|length }} Resolved
             </span>
             {% endif %}
+            {% if clashes or resolved_clashes %}
+            <form method="POST" action="{{ url_for('clear_all_clashes') }}" style="display: inline;" onsubmit="return confirm('Clear all recorded clashes from history?');">
+                <button type="submit" class="btn btn-sm btn-secondary" style="border-radius: 8px;">
+                    <i class="fas fa-trash-can"></i> Clear All Logged Clashes
+                </button>
+            </form>
+            {% endif %}
         </div>
     </div>
 

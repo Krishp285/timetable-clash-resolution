@@ -66,58 +66,64 @@
     
     .day-tabs {
         display: flex;
-        gap: 0.5rem;
-        margin-bottom: 1.5rem;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
         flex-wrap: wrap;
     }
     
     .day-tab {
-        padding: 0.75rem 1.5rem;
-        border: 1px solid rgba(148, 163, 184, 0.15);
-        border-radius: 10px;
+        padding: 0.75rem 1.6rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
         background: rgba(30, 41, 59, 0.5);
         cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: var(--transition);
         text-decoration: none;
-        color: #94a3b8;
-        font-weight: 600;
-        font-size: 0.9rem;
+        color: var(--text-light);
+        font-weight: 700;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .day-tab:hover {
-        border-color: rgba(6, 214, 160, 0.3);
-        color: #f1f5f9;
-        background: rgba(6, 214, 160, 0.08);
+        border-color: var(--brand-indigo);
+        color: #ffffff;
+        background: rgba(99, 102, 241, 0.15);
     }
     
     .day-tab.active {
-        background: linear-gradient(135deg, var(--primary) 0%, #0ea5e9 100%);
-        color: #0a0e1a;
-        border-color: var(--primary);
-        box-shadow: 0 4px 15px var(--primary-glow);
-        font-weight: 700;
+        background: linear-gradient(135deg, var(--brand-indigo) 0%, var(--brand-purple) 100%);
+        color: #ffffff !important;
+        border-color: var(--brand-indigo);
+        box-shadow: 0 4px 20px var(--glow-indigo);
+        font-weight: 800;
     }
     
     .time-slot-card {
-        background: rgba(30, 41, 59, 0.5);
-        padding: 1.5rem;
-        border-radius: 14px;
-        margin-bottom: 1rem;
-        border: 1px solid rgba(148, 163, 184, 0.1);
-        transition: all 0.3s ease;
+        background: rgba(17, 24, 39, 0.6);
+        padding: 1.6rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 1.25rem;
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
     }
     
     .time-slot-card.filled {
-        background: rgba(6, 214, 160, 0.06);
-        border-color: rgba(34, 197, 94, 0.25);
-        box-shadow: 0 0 20px rgba(34, 197, 94, 0.05);
+        background: rgba(16, 185, 129, 0.05);
+        border-color: rgba(16, 185, 129, 0.3);
+        box-shadow: 0 0 25px rgba(16, 185, 129, 0.06);
     }
     
     .time-header {
-        font-size: 1.05rem;
-        font-weight: 700;
-        color: var(--primary);
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: var(--brand-indigo);
         margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
     }
     
     .faculty-list {
@@ -453,10 +459,11 @@
         color: #f1f5f9;
     }
     .entry-type-btn.active {
-        background: linear-gradient(135deg, var(--primary) 0%, #0ea5e9 100%);
-        color: #0a0e1a;
-        border-color: var(--primary);
+        background: linear-gradient(135deg, var(--brand-indigo) 0%, var(--brand-purple) 100%);
+        color: #ffffff !important;
+        border-color: var(--brand-indigo);
         font-weight: 700;
+        box-shadow: 0 2px 10px var(--glow-indigo);
     }
 </style>
 {% endblock %}
@@ -468,24 +475,30 @@
             <h1 class="card-title">
                 <i class="fas fa-calendar-alt"></i> {{ division.full_name }} Timetable
             </h1>
-            <p style="color: #64748b; margin-top: 0.5rem;">Semester {{ division.semester }} | {{ division.academic_year }}</p>
+            <p style="color: var(--text-sub); margin-top: 0.5rem; font-size: 0.9rem;">Semester {{ division.semester }} | {{ division.academic_year }}</p>
         </div>
-        <a href="{{ url_for('view_timetable', division_id=division.id) }}" class="btn btn-outline">
-            <i class="fas fa-eye"></i> View Full Timetable
-        </a>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button type="button" onclick="confirmAutoGenerate('{{ division.id }}')" 
+               class="btn btn-success">
+                <i class="fas fa-wand-magic-sparkles"></i> ✨ Auto-Generate (AI)
+            </button>
+            <a href="{{ url_for('view_timetable', division_id=division.id) }}" class="btn btn-outline">
+                <i class="fas fa-eye"></i> View Full Timetable
+            </a>
+        </div>
     </div>
     
     <div class="day-tabs">
         {% for day in days %}
         <a href="{{ url_for('timetable_create', division_id=division.id, day=day) }}" 
            class="day-tab {% if day == current_day %}active{% endif %}">
-            {{ day }}
+            <i class="fas fa-calendar-day"></i> {{ day }}
         </a>
         {% endfor %}
     </div>
     
-    <h2 style="margin-bottom: 1.5rem; color: var(--primary); font-weight: 800;">
-        <i class="fas fa-calendar-day"></i> {{ current_day }}
+    <h2 style="margin-bottom: 1.5rem; color: var(--brand-indigo); font-weight: 800; display: flex; align-items: center; gap: 0.65rem;">
+        <i class="fas fa-calendar-day" style="color: var(--brand-indigo);"></i> {{ current_day }} Schedule
     </h2>
     
     <div class="timetable-container">
@@ -559,8 +572,8 @@
                                 <i class="fas fa-flask"></i> Lab (Batch)
                             </button>
                             {% else %}
-                            <button type="button" class="btn btn-sm entry-type-btn" disabled style="font-size: 0.8rem; opacity: 0.45; cursor: not-allowed;" title="Labs only start at 08:30, 10:30, or 13:00 (2-hr blocks before breaks)">
-                                <i class="fas fa-flask"></i> Lab (Starts 08:30/10:30/13:00 only)
+                            <button type="button" class="btn btn-sm entry-type-btn" disabled style="font-size: 0.8rem; opacity: 0.45; cursor: not-allowed;" title="Labs can only start at the beginning of a 2-hour continuous block before a break">
+                                <i class="fas fa-flask"></i> Lab (2-Hr Block Start Only)
                             </button>
                             {% endif %}
                         {% endif %}
@@ -598,7 +611,7 @@
                                             {% set is_heavy = (max_load > 1 and cnt == max_load) %}
                                             <option value="{{ subject.id }}" data-name="{{ subject.name }}" data-code="{{ subject.code }}"
                                                 style="{% if is_heavy %}color: #f6ad55;{% endif %}">
-                                                {{ subject.name }} ({{ subject.code }}){% if cnt %} [{{ cnt }}×]{% endif %}{% if is_heavy %} ⚠ heavy{% endif %}
+                                                [Sem {{ subject.semester or 'All' }} - {{ subject.branch.short_name if subject.branch else 'All' }}] {{ subject.name }} ({{ subject.code }}){% if cnt %} [{{ cnt }}×]{% endif %}{% if is_heavy %} ⚠ heavy{% endif %}
                                             </option>
                                             {% endfor %}
                                         </select>
@@ -677,12 +690,14 @@
                                             <option value="">-- Select Subject --</option>
                                             {% set max_load = subject_load.values()|list|max if subject_load else 0 %}
                                             {% for subject in subjects %}
+                                            {% if subject.has_lab %}
                                             {% set cnt = subject_load.get(subject.id, 0) %}
                                             {% set is_heavy = (max_load > 1 and cnt == max_load) %}
                                             <option value="{{ subject.id }}" data-name="{{ subject.name }}" data-code="{{ subject.code }}"
                                                 style="{% if is_heavy %}color: #f6ad55;{% endif %}">
-                                                {{ subject.name }} ({{ subject.code }}){% if cnt %} [{{ cnt }}×]{% endif %}{% if is_heavy %} ⚠ heavy{% endif %}
+                                                [Sem {{ subject.semester or 'All' }} - {{ subject.branch.short_name if subject.branch else 'All' }}] {{ subject.name }} ({{ subject.code }}){% if cnt %} [{{ cnt }}×]{% endif %}{% if is_heavy %} ⚠ heavy{% endif %}
                                             </option>
+                                            {% endif %}
                                             {% endfor %}
                                         </select>
                                     </div>
@@ -1576,6 +1591,12 @@ function boardSelectFaculty(slotId, facultyId, facultyName) {
         const slotEl = document.getElementById('slot-' + slotId);
         if (slotEl) slotEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 200);
+}
+
+function confirmAutoGenerate(divId) {
+    const preserve = confirm('Click OK to PRESERVE all manually added timetable entries and auto-fill remaining slots.\n\nClick Cancel if you want to replace all entries with a fresh schedule.');
+    const overwriteParam = preserve ? '0' : '1';
+    window.location.href = `/timetable/auto-generate/${divId}?overwrite=${overwriteParam}`;
 }
 </script>
 {% endblock %}

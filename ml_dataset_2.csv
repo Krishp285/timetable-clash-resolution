@@ -1,0 +1,747 @@
+sample_id,faculty_id,faculty_name,division_id,division_name,subject_id,subject_name,time_slot_id,time_range,day,room_number,actual_clash_label,predicted_risk_score,predicted_risk_level,prediction_correct
+1,4,nimisha patel,8,Sem 5 (A),6,Image Processing(IP),5,10:30 - 11:30,Monday,46,0,0.4655,medium,YES
+2,4,nimisha patel,8,Sem 5 (A),6,Image Processing(IP),6,11:30 - 12:30,Monday,46,0,0.458,medium,YES
+3,6,ajeet patel,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),5,10:30 - 11:30,Monday,95,0,0.4423,medium,YES
+4,6,ajeet patel,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),6,11:30 - 12:30,Monday,95,0,0.4624,medium,YES
+5,7,chintan rana,8,Sem 5 (A),9,Data Security(DS),5,10:30 - 11:30,Monday,19,0,0.4016,medium,YES
+6,7,chintan rana,8,Sem 5 (A),9,Data Security(DS),6,11:30 - 12:30,Monday,19,0,0.4636,medium,YES
+7,5,divya sharma,8,Sem 5 (A),9,Data Security(DS),5,10:30 - 11:30,Tuesday,46,0,0.4182,medium,YES
+8,5,divya sharma,8,Sem 5 (A),9,Data Security(DS),6,11:30 - 12:30,Tuesday,46,0,0.4453,medium,YES
+9,9,neha gajjar,8,Sem 5 (A),10,Predictive Analytics(PA),5,10:30 - 11:30,Tuesday,95,0,0.4112,medium,YES
+10,9,neha gajjar,8,Sem 5 (A),10,Predictive Analytics(PA),6,11:30 - 12:30,Tuesday,95,0,0.4479,medium,YES
+11,8,khyati karia,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),5,10:30 - 11:30,Tuesday,19,0,0.452,medium,YES
+12,8,khyati karia,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),6,11:30 - 12:30,Tuesday,19,0,0.5007,medium,NO
+13,4,nimisha patel,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),5,10:30 - 11:30,Wednesday,46,0,0.5025,medium,NO
+14,4,nimisha patel,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),6,11:30 - 12:30,Wednesday,46,0,0.5132,medium,NO
+15,6,ajeet patel,8,Sem 5 (A),6,Image Processing(IP),5,10:30 - 11:30,Wednesday,95,0,0.4319,medium,YES
+16,6,ajeet patel,8,Sem 5 (A),6,Image Processing(IP),6,11:30 - 12:30,Wednesday,95,0,0.4289,medium,YES
+17,5,divya sharma,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),5,10:30 - 11:30,Wednesday,19,0,0.3256,medium,YES
+18,5,divya sharma,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),6,11:30 - 12:30,Wednesday,19,0,0.3535,medium,YES
+19,9,neha gajjar,8,Sem 5 (A),10,Predictive Analytics(PA),5,10:30 - 11:30,Thursday,46,0,0.3586,medium,YES
+20,9,neha gajjar,8,Sem 5 (A),10,Predictive Analytics(PA),6,11:30 - 12:30,Thursday,46,0,0.3947,medium,YES
+21,6,ajeet patel,8,Sem 5 (A),9,Data Security(DS),5,10:30 - 11:30,Thursday,95,0,0.3644,medium,YES
+22,6,ajeet patel,8,Sem 5 (A),9,Data Security(DS),6,11:30 - 12:30,Thursday,95,0,0.3846,medium,YES
+23,8,khyati karia,8,Sem 5 (A),10,Predictive Analytics(PA),5,10:30 - 11:30,Thursday,19,0,0.3605,medium,YES
+24,8,khyati karia,8,Sem 5 (A),10,Predictive Analytics(PA),6,11:30 - 12:30,Thursday,19,0,0.419,medium,YES
+25,5,divya sharma,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),5,10:30 - 11:30,Friday,46,0,0.3572,medium,YES
+26,5,divya sharma,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),6,11:30 - 12:30,Friday,46,0,0.3685,medium,YES
+27,8,khyati karia,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),5,10:30 - 11:30,Friday,95,0,0.374,medium,YES
+28,8,khyati karia,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),6,11:30 - 12:30,Friday,95,0,0.3963,medium,YES
+29,4,nimisha patel,8,Sem 5 (A),6,Image Processing(IP),5,10:30 - 11:30,Friday,19,0,0.2915,low,YES
+30,4,nimisha patel,8,Sem 5 (A),6,Image Processing(IP),6,11:30 - 12:30,Friday,19,0,0.2524,low,YES
+31,6,ajeet patel,8,Sem 5 (A),6,Image Processing(IP),3,08:30 - 09:25,Monday,102,0,0.297,low,YES
+32,7,chintan rana,8,Sem 5 (A),9,Data Security(DS),4,09:25 - 10:20,Monday,102,0,0.3281,medium,YES
+33,7,chintan rana,8,Sem 5 (A),10,Predictive Analytics(PA),7,13:00 - 14:00,Monday,101,0,0.5909,medium,NO
+34,8,khyati karia,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),8,14:00 - 15:00,Monday,102,0,0.4086,medium,YES
+35,8,khyati karia,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),3,08:30 - 09:25,Tuesday,102,0,0.4388,medium,YES
+36,6,ajeet patel,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),4,09:25 - 10:20,Tuesday,102,0,0.2231,low,YES
+37,9,neha gajjar,8,Sem 5 (A),10,Predictive Analytics(PA),7,13:00 - 14:00,Tuesday,101,0,0.4587,medium,YES
+38,8,khyati karia,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),8,14:00 - 15:00,Tuesday,101,0,0.5631,medium,NO
+39,9,neha gajjar,8,Sem 5 (A),10,Predictive Analytics(PA),3,08:30 - 09:25,Wednesday,102,0,0.4718,medium,YES
+40,6,ajeet patel,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),4,09:25 - 10:20,Wednesday,102,0,0.2084,low,YES
+41,9,neha gajjar,8,Sem 5 (A),10,Predictive Analytics(PA),7,13:00 - 14:00,Wednesday,101,0,0.4862,medium,YES
+42,9,neha gajjar,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),8,14:00 - 15:00,Wednesday,102,0,0.3608,medium,YES
+43,6,ajeet patel,8,Sem 5 (A),9,Data Security(DS),3,08:30 - 09:25,Thursday,102,0,0.1237,low,YES
+44,6,ajeet patel,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),4,09:25 - 10:20,Thursday,102,0,0.1268,low,YES
+45,9,neha gajjar,8,Sem 5 (A),10,Predictive Analytics(PA),7,13:00 - 14:00,Thursday,101,0,0.4032,medium,YES
+46,9,neha gajjar,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),8,14:00 - 15:00,Thursday,102,0,0.3797,medium,YES
+47,6,ajeet patel,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),3,08:30 - 09:25,Friday,102,0,0.1283,low,YES
+48,7,chintan rana,8,Sem 5 (A),9,Data Security(DS),4,09:25 - 10:20,Friday,102,0,0.2663,low,YES
+49,9,neha gajjar,8,Sem 5 (A),10,Predictive Analytics(PA),7,13:00 - 14:00,Friday,101,0,0.397,medium,YES
+50,6,ajeet patel,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),8,14:00 - 15:00,Friday,101,0,0.4953,medium,YES
+51,4,nimisha patel,10,Sem 3 (A),13,Web Application Development(WAD),3,08:30 - 09:25,Monday,101,0,0.6137,medium,NO
+52,6,ajeet patel,10,Sem 3 (A),23,Fundamentals of Artificial Intelligence(FAI),4,09:25 - 10:20,Monday,101,0,0.5019,medium,NO
+53,0,N/A,10,Sem 3 (A),0,N/A,7,13:00 - 14:00,Monday,101,0,0.9279,high,NO
+54,0,N/A,10,Sem 3 (A),0,N/A,8,14:00 - 15:00,Monday,101,0,0.9333,high,NO
+55,6,ajeet patel,10,Sem 3 (A),23,Fundamentals of Artificial Intelligence(FAI),3,08:30 - 09:25,Tuesday,101,0,0.5078,medium,NO
+56,4,nimisha patel,10,Sem 3 (A),17,Optimization Techniques(OT),4,09:25 - 10:20,Tuesday,101,0,0.7577,high,NO
+57,0,N/A,10,Sem 3 (A),0,N/A,7,13:00 - 14:00,Tuesday,101,0,0.9218,high,NO
+58,0,N/A,10,Sem 3 (A),0,N/A,8,14:00 - 15:00,Tuesday,101,0,0.9257,high,NO
+59,8,khyati karia,10,Sem 3 (A),17,Optimization Techniques(OT),3,08:30 - 09:25,Wednesday,101,0,0.7989,high,NO
+60,8,khyati karia,10,Sem 3 (A),13,Web Application Development(WAD),4,09:25 - 10:20,Wednesday,101,0,0.6227,medium,NO
+61,0,N/A,10,Sem 3 (A),0,N/A,7,13:00 - 14:00,Wednesday,101,0,0.9088,high,NO
+62,0,N/A,10,Sem 3 (A),0,N/A,8,14:00 - 15:00,Wednesday,101,0,0.9127,high,NO
+63,5,divya sharma,10,Sem 3 (A),13,Web Application Development(WAD),3,08:30 - 09:25,Thursday,101,0,0.5277,medium,NO
+64,5,divya sharma,10,Sem 3 (A),5,Integrated Personality Development Course(IPDC),4,09:25 - 10:20,Thursday,101,0,0.4932,medium,YES
+65,0,N/A,10,Sem 3 (A),0,N/A,7,13:00 - 14:00,Thursday,101,0,0.8605,high,NO
+66,0,N/A,10,Sem 3 (A),0,N/A,8,14:00 - 15:00,Thursday,101,0,0.8661,high,NO
+67,5,divya sharma,10,Sem 3 (A),23,Fundamentals of Artificial Intelligence(FAI),3,08:30 - 09:25,Friday,101,0,0.4623,medium,YES
+68,5,divya sharma,10,Sem 3 (A),14,Python Programming(PP),4,09:25 - 10:20,Friday,101,0,0.5427,medium,NO
+69,0,N/A,10,Sem 3 (A),0,N/A,7,13:00 - 14:00,Friday,101,0,0.9105,high,NO
+70,0,N/A,10,Sem 3 (A),0,N/A,8,14:00 - 15:00,Friday,101,0,0.9061,high,NO
+71,0,N/A,11,Sem 7 (A),0,N/A,3,08:30 - 09:25,Monday,101,0,0.8592,high,NO
+72,0,N/A,11,Sem 7 (A),0,N/A,4,09:25 - 10:20,Monday,101,0,0.8413,high,NO
+73,4,nimisha patel,11,Sem 7 (A),15,Deep Learning (DL),7,13:00 - 14:00,Monday,102,0,0.3084,medium,YES
+74,0,N/A,11,Sem 7 (A),0,N/A,8,14:00 - 15:00,Monday,101,0,0.9027,high,NO
+75,0,N/A,11,Sem 7 (A),0,N/A,3,08:30 - 09:25,Tuesday,101,0,0.8573,high,NO
+76,0,N/A,11,Sem 7 (A),0,N/A,4,09:25 - 10:20,Tuesday,101,0,0.8431,high,NO
+77,5,divya sharma,11,Sem 7 (A),18,Cryptography and Network Security (CNS),7,13:00 - 14:00,Tuesday,102,0,0.187,low,YES
+78,7,chintan rana,11,Sem 7 (A),20,Natural Language Processing (NLP),8,14:00 - 15:00,Tuesday,102,0,0.2385,low,YES
+79,0,N/A,11,Sem 7 (A),0,N/A,3,08:30 - 09:25,Wednesday,101,0,0.8713,high,NO
+80,0,N/A,11,Sem 7 (A),0,N/A,4,09:25 - 10:20,Wednesday,101,0,0.8564,high,NO
+81,7,chintan rana,11,Sem 7 (A),20,Natural Language Processing (NLP),7,13:00 - 14:00,Wednesday,102,0,0.1907,low,YES
+82,0,N/A,11,Sem 7 (A),0,N/A,8,14:00 - 15:00,Wednesday,101,0,0.9153,high,NO
+83,0,N/A,11,Sem 7 (A),0,N/A,3,08:30 - 09:25,Thursday,101,0,0.7447,high,NO
+84,0,N/A,11,Sem 7 (A),0,N/A,4,09:25 - 10:20,Thursday,101,0,0.735,high,NO
+85,6,ajeet patel,11,Sem 7 (A),22,Big Data Analytics (BDA),7,13:00 - 14:00,Thursday,102,0,0.1657,low,YES
+86,0,N/A,11,Sem 7 (A),0,N/A,8,14:00 - 15:00,Thursday,101,0,0.8574,high,NO
+87,0,N/A,11,Sem 7 (A),0,N/A,3,08:30 - 09:25,Friday,101,0,0.7725,high,NO
+88,0,N/A,11,Sem 7 (A),0,N/A,4,09:25 - 10:20,Friday,101,0,0.7737,high,NO
+89,8,khyati karia,11,Sem 7 (A),21,Enterprise Resource Planning (ERP),7,13:00 - 14:00,Friday,102,0,0.3737,medium,YES
+90,5,divya sharma,11,Sem 7 (A),18,Cryptography and Network Security (CNS),8,14:00 - 15:00,Friday,102,0,0.1518,low,YES
+91,0,N/A,10,Sem 3 (A),0,N/A,3,08:30 - 09:25,Monday,101,0,0.767,high,NO
+92,0,N/A,10,Sem 3 (A),0,N/A,4,09:25 - 10:20,Monday,101,0,0.7325,high,NO
+93,0,N/A,10,Sem 3 (A),0,N/A,7,13:00 - 14:00,Monday,101,0,0.9279,high,NO
+94,0,N/A,10,Sem 3 (A),0,N/A,8,14:00 - 15:00,Monday,101,0,0.9333,high,NO
+95,0,N/A,10,Sem 3 (A),0,N/A,3,08:30 - 09:25,Tuesday,101,0,0.7695,high,NO
+96,0,N/A,10,Sem 3 (A),0,N/A,4,09:25 - 10:20,Tuesday,101,0,0.7288,high,NO
+97,0,N/A,10,Sem 3 (A),0,N/A,7,13:00 - 14:00,Tuesday,101,0,0.9218,high,NO
+98,0,N/A,10,Sem 3 (A),0,N/A,8,14:00 - 15:00,Tuesday,101,0,0.9257,high,NO
+99,0,N/A,10,Sem 3 (A),0,N/A,3,08:30 - 09:25,Wednesday,101,0,0.7703,high,NO
+100,0,N/A,10,Sem 3 (A),0,N/A,4,09:25 - 10:20,Wednesday,101,0,0.7288,high,NO
+101,0,N/A,10,Sem 3 (A),0,N/A,7,13:00 - 14:00,Wednesday,101,0,0.9088,high,NO
+102,0,N/A,10,Sem 3 (A),0,N/A,8,14:00 - 15:00,Wednesday,101,0,0.9127,high,NO
+103,0,N/A,10,Sem 3 (A),0,N/A,3,08:30 - 09:25,Thursday,101,0,0.6106,medium,NO
+104,0,N/A,10,Sem 3 (A),0,N/A,4,09:25 - 10:20,Thursday,101,0,0.5634,medium,NO
+105,0,N/A,10,Sem 3 (A),0,N/A,7,13:00 - 14:00,Thursday,101,0,0.8605,high,NO
+106,0,N/A,10,Sem 3 (A),0,N/A,8,14:00 - 15:00,Thursday,101,0,0.8661,high,NO
+107,0,N/A,10,Sem 3 (A),0,N/A,3,08:30 - 09:25,Friday,101,0,0.6566,medium,NO
+108,0,N/A,10,Sem 3 (A),0,N/A,4,09:25 - 10:20,Friday,101,0,0.6104,medium,NO
+109,0,N/A,10,Sem 3 (A),0,N/A,7,13:00 - 14:00,Friday,101,0,0.9105,high,NO
+110,0,N/A,10,Sem 3 (A),0,N/A,8,14:00 - 15:00,Friday,101,0,0.9061,high,NO
+111,0,N/A,10,Sem 3 (A),0,N/A,3,08:30 - 09:25,Monday,101,0,0.767,high,NO
+112,0,N/A,10,Sem 3 (A),0,N/A,4,09:25 - 10:20,Monday,101,0,0.7325,high,NO
+113,0,N/A,10,Sem 3 (A),0,N/A,7,13:00 - 14:00,Monday,101,0,0.9279,high,NO
+114,0,N/A,10,Sem 3 (A),0,N/A,8,14:00 - 15:00,Monday,101,0,0.9333,high,NO
+115,0,N/A,10,Sem 3 (A),0,N/A,3,08:30 - 09:25,Tuesday,101,0,0.7695,high,NO
+116,0,N/A,10,Sem 3 (A),0,N/A,4,09:25 - 10:20,Tuesday,101,0,0.7288,high,NO
+117,0,N/A,10,Sem 3 (A),0,N/A,7,13:00 - 14:00,Tuesday,101,0,0.9218,high,NO
+118,0,N/A,10,Sem 3 (A),0,N/A,8,14:00 - 15:00,Tuesday,101,0,0.9257,high,NO
+119,0,N/A,10,Sem 3 (A),0,N/A,3,08:30 - 09:25,Wednesday,101,0,0.7703,high,NO
+120,0,N/A,10,Sem 3 (A),0,N/A,4,09:25 - 10:20,Wednesday,101,0,0.7288,high,NO
+121,0,N/A,10,Sem 3 (A),0,N/A,7,13:00 - 14:00,Wednesday,101,0,0.9088,high,NO
+122,0,N/A,10,Sem 3 (A),0,N/A,8,14:00 - 15:00,Wednesday,101,0,0.9127,high,NO
+123,0,N/A,10,Sem 3 (A),0,N/A,3,08:30 - 09:25,Thursday,101,0,0.6106,medium,NO
+124,0,N/A,10,Sem 3 (A),0,N/A,4,09:25 - 10:20,Thursday,101,0,0.5634,medium,NO
+125,0,N/A,10,Sem 3 (A),0,N/A,7,13:00 - 14:00,Thursday,101,0,0.8605,high,NO
+126,0,N/A,10,Sem 3 (A),0,N/A,8,14:00 - 15:00,Thursday,101,0,0.8661,high,NO
+127,0,N/A,10,Sem 3 (A),0,N/A,3,08:30 - 09:25,Friday,101,0,0.6566,medium,NO
+128,0,N/A,10,Sem 3 (A),0,N/A,4,09:25 - 10:20,Friday,101,0,0.6104,medium,NO
+129,0,N/A,10,Sem 3 (A),0,N/A,7,13:00 - 14:00,Friday,101,0,0.9105,high,NO
+130,0,N/A,10,Sem 3 (A),0,N/A,8,14:00 - 15:00,Friday,101,0,0.9061,high,NO
+131,0,N/A,64,Sem 1 (D),0,N/A,3,08:30 - 09:25,Monday,101,0,0.8848,high,NO
+132,0,N/A,64,Sem 1 (D),0,N/A,4,09:25 - 10:20,Monday,101,0,0.8629,high,NO
+133,0,N/A,64,Sem 1 (D),0,N/A,7,13:00 - 14:00,Monday,101,0,0.9059,high,NO
+134,0,N/A,64,Sem 1 (D),0,N/A,8,14:00 - 15:00,Monday,101,0,0.9071,high,NO
+135,0,N/A,64,Sem 1 (D),0,N/A,3,08:30 - 09:25,Tuesday,101,0,0.8634,high,NO
+136,0,N/A,64,Sem 1 (D),0,N/A,4,09:25 - 10:20,Tuesday,101,0,0.8452,high,NO
+137,0,N/A,64,Sem 1 (D),0,N/A,7,13:00 - 14:00,Tuesday,101,0,0.8955,high,NO
+138,0,N/A,64,Sem 1 (D),0,N/A,8,14:00 - 15:00,Tuesday,101,0,0.8967,high,NO
+139,0,N/A,64,Sem 1 (D),0,N/A,3,08:30 - 09:25,Wednesday,101,0,0.8934,high,NO
+140,0,N/A,64,Sem 1 (D),0,N/A,4,09:25 - 10:20,Wednesday,101,0,0.8744,high,NO
+141,0,N/A,64,Sem 1 (D),0,N/A,7,13:00 - 14:00,Wednesday,101,0,0.9065,high,NO
+142,0,N/A,64,Sem 1 (D),0,N/A,8,14:00 - 15:00,Wednesday,101,0,0.9177,high,NO
+143,0,N/A,64,Sem 1 (D),0,N/A,3,08:30 - 09:25,Thursday,101,0,0.7801,high,NO
+144,0,N/A,64,Sem 1 (D),0,N/A,4,09:25 - 10:20,Thursday,101,0,0.7764,high,NO
+145,0,N/A,64,Sem 1 (D),0,N/A,7,13:00 - 14:00,Thursday,101,0,0.8585,high,NO
+146,0,N/A,64,Sem 1 (D),0,N/A,8,14:00 - 15:00,Thursday,101,0,0.8689,high,NO
+147,0,N/A,64,Sem 1 (D),0,N/A,3,08:30 - 09:25,Friday,101,0,0.8106,high,NO
+148,0,N/A,64,Sem 1 (D),0,N/A,4,09:25 - 10:20,Friday,101,0,0.8178,high,NO
+149,0,N/A,64,Sem 1 (D),0,N/A,7,13:00 - 14:00,Friday,101,0,0.9045,high,NO
+150,0,N/A,64,Sem 1 (D),0,N/A,8,14:00 - 15:00,Friday,101,0,0.9149,high,NO
+151,8,khyati karia,10,Sem 3 (A),10,Predictive Analytics(PA),6,11:30 - 12:30,Tuesday,46,1,0.835,high,YES
+152,8,khyati karia,8,Sem 5 (A),16,Maths,6,11:30 - 12:30,Tuesday,101,1,0.9037,high,YES
+153,43,Unique Test Faculty 2,64,Sem 1 (D),22,Big Data Analytics (BDA),6,11:30 - 12:30,Tuesday,46,1,0.9456,high,YES
+154,9,neha gajjar,11,Sem 7 (A),20,Natural Language Processing (NLP),8,14:00 - 15:00,Wednesday,101,1,0.9708,high,YES
+155,9,neha gajjar,8,Sem 5 (A),17,Optimization Techniques(OT),8,14:00 - 15:00,Wednesday,46,1,0.9998,high,YES
+156,7,chintan rana,8,Sem 5 (A),6,Image Processing(IP),8,14:00 - 15:00,Wednesday,101,1,0.7867,high,YES
+157,9,neha gajjar,11,Sem 7 (A),10,Predictive Analytics(PA),7,13:00 - 14:00,Wednesday,46,1,0.9724,high,YES
+158,7,chintan rana,8,Sem 5 (A),16,Maths,7,13:00 - 14:00,Wednesday,101,1,0.9883,high,YES
+159,6,ajeet patel,11,Sem 7 (A),8,Agile Software Development & Devops(ASDD),7,13:00 - 14:00,Wednesday,101,1,0.9339,high,YES
+160,8,khyati karia,64,Sem 1 (D),23,Fundamentals of Artificial Intelligence(FAI),6,11:30 - 12:30,Friday,95,1,0.9536,high,YES
+161,43,Unique Test Faculty 2,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),6,11:30 - 12:30,Friday,102,1,0.5781,medium,YES
+162,5,divya sharma,11,Sem 7 (A),5,Integrated Personality Development Course(IPDC),6,11:30 - 12:30,Friday,46,1,0.8828,high,YES
+163,8,khyati karia,10,Sem 3 (A),23,Fundamentals of Artificial Intelligence(FAI),8,14:00 - 15:00,Tuesday,46,1,0.9769,high,YES
+164,9,neha gajjar,8,Sem 5 (A),16,Maths,8,14:00 - 15:00,Tuesday,101,1,0.9636,high,YES
+165,4,nimisha patel,11,Sem 7 (A),10,Predictive Analytics(PA),8,14:00 - 15:00,Tuesday,101,1,0.9394,high,YES
+166,0,N/A,10,Sem 3 (A),20,Natural Language Processing (NLP),4,09:25 - 10:20,Friday,46,1,0.9088,high,YES
+167,9,neha gajjar,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),4,09:25 - 10:20,Friday,101,1,0.8812,high,YES
+168,9,neha gajjar,10,Sem 3 (A),8,Agile Software Development & Devops(ASDD),4,09:25 - 10:20,Friday,101,1,0.77,high,YES
+169,0,N/A,64,Sem 1 (D),13,Web Application Development(WAD),4,09:25 - 10:20,Monday,101,1,0.8165,high,YES
+170,9,neha gajjar,8,Sem 5 (A),10,Predictive Analytics(PA),4,09:25 - 10:20,Monday,102,1,0.6866,medium,YES
+171,6,ajeet patel,10,Sem 3 (A),11,Cyber Crime and Mitigation(CCM),4,09:25 - 10:20,Monday,101,1,0.7048,high,YES
+172,9,neha gajjar,8,Sem 5 (A),23,Fundamentals of Artificial Intelligence(FAI),7,13:00 - 14:00,Wednesday,102,1,0.9383,high,YES
+173,7,chintan rana,8,Sem 5 (A),9,Data Security(DS),7,13:00 - 14:00,Wednesday,102,1,0.7477,high,YES
+174,8,khyati karia,8,Sem 5 (A),18,Cryptography and Network Security (CNS),7,13:00 - 14:00,Wednesday,101,1,0.9914,high,YES
+175,5,divya sharma,11,Sem 7 (A),18,Cryptography and Network Security (CNS),4,09:25 - 10:20,Thursday,102,1,0.5229,medium,YES
+176,42,Unique Test Faculty 1,8,Sem 5 (A),13,Web Application Development(WAD),4,09:25 - 10:20,Thursday,95,1,0.9107,high,YES
+177,9,neha gajjar,8,Sem 5 (A),17,Optimization Techniques(OT),4,09:25 - 10:20,Thursday,101,1,0.9843,high,YES
+178,0,N/A,11,Sem 7 (A),9,Data Security(DS),4,09:25 - 10:20,Friday,101,1,0.8588,high,YES
+179,8,khyati karia,8,Sem 5 (A),13,Web Application Development(WAD),4,09:25 - 10:20,Friday,95,1,0.927,high,YES
+180,9,neha gajjar,10,Sem 3 (A),22,Big Data Analytics (BDA),4,09:25 - 10:20,Friday,101,1,0.7889,high,YES
+181,0,N/A,8,Sem 5 (A),21,Enterprise Resource Planning (ERP),7,13:00 - 14:00,Monday,46,1,0.9787,high,YES
+182,5,divya sharma,8,Sem 5 (A),20,Natural Language Processing (NLP),7,13:00 - 14:00,Monday,46,1,0.9902,high,YES
+183,43,Unique Test Faculty 2,64,Sem 1 (D),10,Predictive Analytics(PA),7,13:00 - 14:00,Monday,101,1,0.6752,medium,YES
+184,0,N/A,11,Sem 7 (A),13,Web Application Development(WAD),4,09:25 - 10:20,Monday,95,1,0.9161,high,YES
+185,5,divya sharma,8,Sem 5 (A),10,Predictive Analytics(PA),4,09:25 - 10:20,Monday,102,1,0.6813,medium,YES
+186,8,khyati karia,10,Sem 3 (A),6,Image Processing(IP),4,09:25 - 10:20,Monday,101,1,0.7586,high,YES
+187,5,divya sharma,11,Sem 7 (A),22,Big Data Analytics (BDA),3,08:30 - 09:25,Thursday,95,1,0.9743,high,YES
+188,7,chintan rana,8,Sem 5 (A),21,Enterprise Resource Planning (ERP),3,08:30 - 09:25,Thursday,95,1,0.9893,high,YES
+189,42,Unique Test Faculty 1,10,Sem 3 (A),13,Web Application Development(WAD),3,08:30 - 09:25,Thursday,101,1,0.6485,medium,YES
+190,9,neha gajjar,64,Sem 1 (D),9,Data Security(DS),8,14:00 - 15:00,Thursday,95,1,0.9898,high,YES
+191,9,neha gajjar,8,Sem 5 (A),18,Cryptography and Network Security (CNS),8,14:00 - 15:00,Thursday,102,1,0.9149,high,YES
+192,43,Unique Test Faculty 2,8,Sem 5 (A),23,Fundamentals of Artificial Intelligence(FAI),8,14:00 - 15:00,Thursday,101,1,0.9948,high,YES
+193,8,khyati karia,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),6,11:30 - 12:30,Friday,101,1,0.4289,medium,NO
+194,5,divya sharma,8,Sem 5 (A),12,Machine Learning Essentials(MLE),6,11:30 - 12:30,Friday,102,1,0.7994,high,YES
+195,9,neha gajjar,11,Sem 7 (A),16,Maths,6,11:30 - 12:30,Friday,46,1,0.9559,high,YES
+196,4,nimisha patel,8,Sem 5 (A),20,Natural Language Processing (NLP),3,08:30 - 09:25,Monday,101,1,0.971,high,YES
+197,6,ajeet patel,8,Sem 5 (A),10,Predictive Analytics(PA),3,08:30 - 09:25,Monday,19,1,0.8222,high,YES
+198,8,khyati karia,64,Sem 1 (D),10,Predictive Analytics(PA),3,08:30 - 09:25,Monday,101,1,0.9112,high,YES
+199,5,divya sharma,11,Sem 7 (A),17,Optimization Techniques(OT),3,08:30 - 09:25,Thursday,95,1,0.9837,high,YES
+200,43,Unique Test Faculty 2,8,Sem 5 (A),23,Fundamentals of Artificial Intelligence(FAI),3,08:30 - 09:25,Thursday,19,1,1.0,high,YES
+201,5,divya sharma,11,Sem 7 (A),16,Maths,3,08:30 - 09:25,Thursday,101,1,0.8318,high,YES
+202,0,N/A,64,Sem 1 (D),21,Enterprise Resource Planning (ERP),4,09:25 - 10:20,Monday,95,1,0.9731,high,YES
+203,4,nimisha patel,8,Sem 5 (A),9,Data Security(DS),4,09:25 - 10:20,Monday,95,1,0.867,high,YES
+204,42,Unique Test Faculty 1,10,Sem 3 (A),12,Machine Learning Essentials(MLE),4,09:25 - 10:20,Monday,101,1,0.7077,high,YES
+205,9,neha gajjar,10,Sem 3 (A),14,Python Programming(PP),8,14:00 - 15:00,Thursday,102,1,0.6188,medium,YES
+206,7,chintan rana,8,Sem 5 (A),23,Fundamentals of Artificial Intelligence(FAI),8,14:00 - 15:00,Thursday,19,1,0.99,high,YES
+207,9,neha gajjar,8,Sem 5 (A),10,Predictive Analytics(PA),8,14:00 - 15:00,Thursday,101,1,0.5517,medium,YES
+208,5,divya sharma,11,Sem 7 (A),10,Predictive Analytics(PA),8,14:00 - 15:00,Friday,46,1,0.9816,high,YES
+209,9,neha gajjar,8,Sem 5 (A),17,Optimization Techniques(OT),8,14:00 - 15:00,Friday,101,1,0.9805,high,YES
+210,9,neha gajjar,11,Sem 7 (A),12,Machine Learning Essentials(MLE),8,14:00 - 15:00,Friday,101,1,0.9476,high,YES
+211,0,N/A,8,Sem 5 (A),19,AI in HealthCare & Fintech (AIH),4,09:25 - 10:20,Monday,95,1,0.9869,high,YES
+212,43,Unique Test Faculty 2,8,Sem 5 (A),22,Big Data Analytics (BDA),4,09:25 - 10:20,Monday,46,1,0.9965,high,YES
+213,43,Unique Test Faculty 2,11,Sem 7 (A),17,Optimization Techniques(OT),4,09:25 - 10:20,Monday,101,1,0.7872,high,YES
+214,4,nimisha patel,64,Sem 1 (D),19,AI in HealthCare & Fintech (AIH),3,08:30 - 09:25,Monday,95,1,0.9856,high,YES
+215,8,khyati karia,8,Sem 5 (A),21,Enterprise Resource Planning (ERP),3,08:30 - 09:25,Monday,101,1,0.9547,high,YES
+216,4,nimisha patel,11,Sem 7 (A),5,Integrated Personality Development Course(IPDC),3,08:30 - 09:25,Monday,101,1,0.8592,high,YES
+217,9,neha gajjar,64,Sem 1 (D),14,Python Programming(PP),8,14:00 - 15:00,Thursday,46,1,0.9948,high,YES
+218,42,Unique Test Faculty 1,8,Sem 5 (A),19,AI in HealthCare & Fintech (AIH),8,14:00 - 15:00,Thursday,102,1,0.9575,high,YES
+219,7,chintan rana,10,Sem 3 (A),16,Maths,8,14:00 - 15:00,Thursday,101,1,0.9629,high,YES
+220,0,N/A,10,Sem 3 (A),5,Integrated Personality Development Course(IPDC),4,09:25 - 10:20,Monday,101,1,0.7325,high,YES
+221,42,Unique Test Faculty 1,8,Sem 5 (A),23,Fundamentals of Artificial Intelligence(FAI),4,09:25 - 10:20,Monday,19,1,0.9965,high,YES
+222,9,neha gajjar,64,Sem 1 (D),9,Data Security(DS),4,09:25 - 10:20,Monday,101,1,0.8912,high,YES
+223,8,khyati karia,10,Sem 3 (A),10,Predictive Analytics(PA),8,14:00 - 15:00,Tuesday,101,1,0.849,high,YES
+224,8,khyati karia,8,Sem 5 (A),10,Predictive Analytics(PA),8,14:00 - 15:00,Tuesday,102,1,0.6578,medium,YES
+225,8,khyati karia,11,Sem 7 (A),12,Machine Learning Essentials(MLE),8,14:00 - 15:00,Tuesday,101,1,0.9514,high,YES
+226,8,khyati karia,10,Sem 3 (A),8,Agile Software Development & Devops(ASDD),6,11:30 - 12:30,Tuesday,101,1,0.6872,medium,YES
+227,6,ajeet patel,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),6,11:30 - 12:30,Tuesday,95,1,0.5259,medium,YES
+228,6,ajeet patel,11,Sem 7 (A),10,Predictive Analytics(PA),6,11:30 - 12:30,Tuesday,46,1,0.9281,high,YES
+229,8,khyati karia,11,Sem 7 (A),9,Data Security(DS),5,10:30 - 11:30,Friday,46,1,0.9262,high,YES
+230,43,Unique Test Faculty 2,8,Sem 5 (A),21,Enterprise Resource Planning (ERP),5,10:30 - 11:30,Friday,19,1,0.9889,high,YES
+231,43,Unique Test Faculty 2,10,Sem 3 (A),19,AI in HealthCare & Fintech (AIH),5,10:30 - 11:30,Friday,46,1,0.9469,high,YES
+232,4,nimisha patel,64,Sem 1 (D),21,Enterprise Resource Planning (ERP),4,09:25 - 10:20,Tuesday,95,1,0.9678,high,YES
+233,4,nimisha patel,8,Sem 5 (A),13,Web Application Development(WAD),4,09:25 - 10:20,Tuesday,19,1,0.9083,high,YES
+234,5,divya sharma,11,Sem 7 (A),19,AI in HealthCare & Fintech (AIH),4,09:25 - 10:20,Tuesday,101,1,0.8317,high,YES
+235,9,neha gajjar,10,Sem 3 (A),12,Machine Learning Essentials(MLE),7,13:00 - 14:00,Wednesday,102,1,0.7019,high,YES
+236,42,Unique Test Faculty 1,8,Sem 5 (A),18,Cryptography and Network Security (CNS),7,13:00 - 14:00,Wednesday,46,1,1.0,high,YES
+237,9,neha gajjar,8,Sem 5 (A),15,Deep Learning (DL),7,13:00 - 14:00,Wednesday,101,1,0.9474,high,YES
+238,8,khyati karia,64,Sem 1 (D),21,Enterprise Resource Planning (ERP),5,10:30 - 11:30,Friday,19,1,0.9663,high,YES
+239,7,chintan rana,8,Sem 5 (A),22,Big Data Analytics (BDA),5,10:30 - 11:30,Friday,101,1,0.8871,high,YES
+240,4,nimisha patel,8,Sem 5 (A),12,Machine Learning Essentials(MLE),5,10:30 - 11:30,Friday,46,1,0.8592,high,YES
+241,9,neha gajjar,64,Sem 1 (D),12,Machine Learning Essentials(MLE),7,13:00 - 14:00,Wednesday,102,1,0.7289,high,YES
+242,42,Unique Test Faculty 1,8,Sem 5 (A),16,Maths,7,13:00 - 14:00,Wednesday,95,1,0.998,high,YES
+243,9,neha gajjar,10,Sem 3 (A),13,Web Application Development(WAD),7,13:00 - 14:00,Wednesday,101,1,0.8477,high,YES
+244,9,neha gajjar,8,Sem 5 (A),6,Image Processing(IP),7,13:00 - 14:00,Wednesday,95,1,0.8047,high,YES
+245,5,divya sharma,8,Sem 5 (A),9,Data Security(DS),7,13:00 - 14:00,Wednesday,19,1,0.7059,high,YES
+246,43,Unique Test Faculty 2,64,Sem 1 (D),18,Cryptography and Network Security (CNS),7,13:00 - 14:00,Wednesday,101,1,0.9654,high,YES
+247,4,nimisha patel,11,Sem 7 (A),14,Python Programming(PP),3,08:30 - 09:25,Monday,95,1,0.9744,high,YES
+248,4,nimisha patel,8,Sem 5 (A),14,Python Programming(PP),3,08:30 - 09:25,Monday,101,1,0.9449,high,YES
+249,6,ajeet patel,10,Sem 3 (A),14,Python Programming(PP),3,08:30 - 09:25,Monday,101,1,0.7753,high,YES
+250,8,khyati karia,10,Sem 3 (A),20,Natural Language Processing (NLP),4,09:25 - 10:20,Wednesday,46,1,0.9784,high,YES
+251,6,ajeet patel,8,Sem 5 (A),22,Big Data Analytics (BDA),4,09:25 - 10:20,Wednesday,101,1,0.9558,high,YES
+252,4,nimisha patel,8,Sem 5 (A),16,Maths,4,09:25 - 10:20,Wednesday,101,1,0.9671,high,YES
+253,8,khyati karia,10,Sem 3 (A),12,Machine Learning Essentials(MLE),6,11:30 - 12:30,Tuesday,95,1,0.8813,high,YES
+254,42,Unique Test Faculty 1,8,Sem 5 (A),17,Optimization Techniques(OT),6,11:30 - 12:30,Tuesday,101,1,0.9171,high,YES
+255,43,Unique Test Faculty 2,64,Sem 1 (D),22,Big Data Analytics (BDA),6,11:30 - 12:30,Tuesday,46,1,0.9456,high,YES
+256,8,khyati karia,10,Sem 3 (A),15,Deep Learning (DL),5,10:30 - 11:30,Tuesday,19,1,0.9508,high,YES
+257,43,Unique Test Faculty 2,8,Sem 5 (A),5,Integrated Personality Development Course(IPDC),5,10:30 - 11:30,Tuesday,46,1,0.8742,high,YES
+258,4,nimisha patel,11,Sem 7 (A),5,Integrated Personality Development Course(IPDC),5,10:30 - 11:30,Tuesday,46,1,0.898,high,YES
+259,4,nimisha patel,64,Sem 1 (D),16,Maths,6,11:30 - 12:30,Wednesday,101,1,0.833,high,YES
+260,8,khyati karia,8,Sem 5 (A),18,Cryptography and Network Security (CNS),6,11:30 - 12:30,Wednesday,95,1,0.985,high,YES
+261,6,ajeet patel,10,Sem 3 (A),22,Big Data Analytics (BDA),6,11:30 - 12:30,Wednesday,46,1,0.9425,high,YES
+262,8,khyati karia,10,Sem 3 (A),21,Enterprise Resource Planning (ERP),6,11:30 - 12:30,Tuesday,101,1,0.699,medium,YES
+263,5,divya sharma,8,Sem 5 (A),14,Python Programming(PP),6,11:30 - 12:30,Tuesday,95,1,0.9455,high,YES
+264,7,chintan rana,10,Sem 3 (A),14,Python Programming(PP),6,11:30 - 12:30,Tuesday,46,1,0.9423,high,YES
+265,8,khyati karia,64,Sem 1 (D),22,Big Data Analytics (BDA),3,08:30 - 09:25,Wednesday,95,1,0.9692,high,YES
+266,9,neha gajjar,8,Sem 5 (A),18,Cryptography and Network Security (CNS),3,08:30 - 09:25,Wednesday,19,1,0.9979,high,YES
+267,6,ajeet patel,8,Sem 5 (A),13,Web Application Development(WAD),3,08:30 - 09:25,Wednesday,101,1,0.8747,high,YES
+268,8,khyati karia,11,Sem 7 (A),16,Maths,8,14:00 - 15:00,Tuesday,95,1,0.9965,high,YES
+269,8,khyati karia,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),8,14:00 - 15:00,Tuesday,95,1,0.6326,medium,YES
+270,6,ajeet patel,11,Sem 7 (A),17,Optimization Techniques(OT),8,14:00 - 15:00,Tuesday,101,1,0.9266,high,YES
+271,8,khyati karia,11,Sem 7 (A),9,Data Security(DS),3,08:30 - 09:25,Tuesday,46,1,0.9608,high,YES
+272,4,nimisha patel,8,Sem 5 (A),5,Integrated Personality Development Course(IPDC),3,08:30 - 09:25,Tuesday,101,1,0.9174,high,YES
+273,7,chintan rana,64,Sem 1 (D),10,Predictive Analytics(PA),3,08:30 - 09:25,Tuesday,101,1,0.8823,high,YES
+274,8,khyati karia,64,Sem 1 (D),9,Data Security(DS),6,11:30 - 12:30,Tuesday,19,1,0.9357,high,YES
+275,42,Unique Test Faculty 1,8,Sem 5 (A),22,Big Data Analytics (BDA),6,11:30 - 12:30,Tuesday,101,1,0.9279,high,YES
+276,9,neha gajjar,10,Sem 3 (A),14,Python Programming(PP),6,11:30 - 12:30,Tuesday,46,1,0.9514,high,YES
+277,9,neha gajjar,11,Sem 7 (A),22,Big Data Analytics (BDA),7,13:00 - 14:00,Wednesday,95,1,0.9855,high,YES
+278,43,Unique Test Faculty 2,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),7,13:00 - 14:00,Wednesday,19,1,0.8919,high,YES
+279,8,khyati karia,10,Sem 3 (A),11,Cyber Crime and Mitigation(CCM),7,13:00 - 14:00,Wednesday,101,1,0.8044,high,YES
+280,9,neha gajjar,64,Sem 1 (D),16,Maths,7,13:00 - 14:00,Thursday,102,1,0.7283,high,YES
+281,8,khyati karia,8,Sem 5 (A),20,Natural Language Processing (NLP),7,13:00 - 14:00,Thursday,46,1,0.9998,high,YES
+282,9,neha gajjar,10,Sem 3 (A),13,Web Application Development(WAD),7,13:00 - 14:00,Thursday,101,1,0.8394,high,YES
+283,4,nimisha patel,10,Sem 3 (A),5,Integrated Personality Development Course(IPDC),6,11:30 - 12:30,Monday,19,1,0.801,high,YES
+284,7,chintan rana,8,Sem 5 (A),6,Image Processing(IP),6,11:30 - 12:30,Monday,19,1,0.5062,medium,YES
+285,9,neha gajjar,11,Sem 7 (A),20,Natural Language Processing (NLP),6,11:30 - 12:30,Monday,46,1,0.9382,high,YES
+286,8,khyati karia,11,Sem 7 (A),14,Python Programming(PP),3,08:30 - 09:25,Wednesday,46,1,0.9679,high,YES
+287,7,chintan rana,8,Sem 5 (A),5,Integrated Personality Development Course(IPDC),3,08:30 - 09:25,Wednesday,101,1,0.9414,high,YES
+288,5,divya sharma,64,Sem 1 (D),11,Cyber Crime and Mitigation(CCM),3,08:30 - 09:25,Wednesday,101,1,0.9118,high,YES
+289,8,khyati karia,11,Sem 7 (A),9,Data Security(DS),6,11:30 - 12:30,Tuesday,102,1,0.8172,high,YES
+290,42,Unique Test Faculty 1,8,Sem 5 (A),22,Big Data Analytics (BDA),6,11:30 - 12:30,Tuesday,102,1,0.9412,high,YES
+291,9,neha gajjar,10,Sem 3 (A),21,Enterprise Resource Planning (ERP),6,11:30 - 12:30,Tuesday,46,1,0.9849,high,YES
+292,9,neha gajjar,8,Sem 5 (A),14,Python Programming(PP),7,13:00 - 14:00,Thursday,101,1,0.9423,high,YES
+293,9,neha gajjar,8,Sem 5 (A),10,Predictive Analytics(PA),7,13:00 - 14:00,Thursday,101,1,0.4032,medium,NO
+294,42,Unique Test Faculty 1,10,Sem 3 (A),19,AI in HealthCare & Fintech (AIH),7,13:00 - 14:00,Thursday,101,1,0.9237,high,YES
+295,5,divya sharma,11,Sem 7 (A),22,Big Data Analytics (BDA),4,09:25 - 10:20,Thursday,101,1,0.8345,high,YES
+296,7,chintan rana,8,Sem 5 (A),22,Big Data Analytics (BDA),4,09:25 - 10:20,Thursday,46,1,1.0,high,YES
+297,7,chintan rana,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),4,09:25 - 10:20,Thursday,101,1,0.8278,high,YES
+298,0,N/A,8,Sem 5 (A),17,Optimization Techniques(OT),7,13:00 - 14:00,Monday,101,1,0.9836,high,YES
+299,7,chintan rana,8,Sem 5 (A),18,Cryptography and Network Security (CNS),7,13:00 - 14:00,Monday,46,1,0.9965,high,YES
+300,7,chintan rana,11,Sem 7 (A),11,Cyber Crime and Mitigation(CCM),7,13:00 - 14:00,Monday,101,1,0.8941,high,YES
+301,5,divya sharma,11,Sem 7 (A),11,Cyber Crime and Mitigation(CCM),8,14:00 - 15:00,Friday,19,1,0.9372,high,YES
+302,6,ajeet patel,8,Sem 5 (A),13,Web Application Development(WAD),8,14:00 - 15:00,Friday,95,1,0.9051,high,YES
+303,8,khyati karia,64,Sem 1 (D),11,Cyber Crime and Mitigation(CCM),8,14:00 - 15:00,Friday,101,1,0.9175,high,YES
+304,8,khyati karia,64,Sem 1 (D),15,Deep Learning (DL),4,09:25 - 10:20,Wednesday,102,1,0.7943,high,YES
+305,8,khyati karia,8,Sem 5 (A),20,Natural Language Processing (NLP),4,09:25 - 10:20,Wednesday,19,1,0.9979,high,YES
+306,9,neha gajjar,8,Sem 5 (A),20,Natural Language Processing (NLP),4,09:25 - 10:20,Wednesday,101,1,0.9878,high,YES
+307,0,N/A,11,Sem 7 (A),18,Cryptography and Network Security (CNS),4,09:25 - 10:20,Friday,46,1,0.9348,high,YES
+308,43,Unique Test Faculty 2,8,Sem 5 (A),18,Cryptography and Network Security (CNS),4,09:25 - 10:20,Friday,102,1,0.8689,high,YES
+309,5,divya sharma,64,Sem 1 (D),8,Agile Software Development & Devops(ASDD),4,09:25 - 10:20,Friday,101,1,0.8359,high,YES
+310,8,khyati karia,64,Sem 1 (D),8,Agile Software Development & Devops(ASDD),6,11:30 - 12:30,Thursday,95,1,0.8998,high,YES
+311,6,ajeet patel,8,Sem 5 (A),6,Image Processing(IP),6,11:30 - 12:30,Thursday,46,1,0.4707,medium,NO
+312,43,Unique Test Faculty 2,8,Sem 5 (A),14,Python Programming(PP),6,11:30 - 12:30,Thursday,46,1,0.9529,high,YES
+313,4,nimisha patel,8,Sem 5 (A),10,Predictive Analytics(PA),5,10:30 - 11:30,Wednesday,19,1,0.49,medium,NO
+314,4,nimisha patel,8,Sem 5 (A),9,Data Security(DS),5,10:30 - 11:30,Wednesday,19,1,0.4346,medium,NO
+315,42,Unique Test Faculty 1,64,Sem 1 (D),6,Image Processing(IP),5,10:30 - 11:30,Wednesday,46,1,0.876,high,YES
+316,4,nimisha patel,8,Sem 5 (A),13,Web Application Development(WAD),4,09:25 - 10:20,Tuesday,95,1,0.9041,high,YES
+317,6,ajeet patel,8,Sem 5 (A),22,Big Data Analytics (BDA),4,09:25 - 10:20,Tuesday,101,1,0.9415,high,YES
+318,5,divya sharma,11,Sem 7 (A),8,Agile Software Development & Devops(ASDD),4,09:25 - 10:20,Tuesday,101,1,0.8457,high,YES
+319,8,khyati karia,11,Sem 7 (A),11,Cyber Crime and Mitigation(CCM),7,13:00 - 14:00,Friday,46,1,0.9248,high,YES
+320,8,khyati karia,8,Sem 5 (A),23,Fundamentals of Artificial Intelligence(FAI),7,13:00 - 14:00,Friday,102,1,0.9338,high,YES
+321,8,khyati karia,11,Sem 7 (A),17,Optimization Techniques(OT),7,13:00 - 14:00,Friday,101,1,0.9421,high,YES
+322,9,neha gajjar,10,Sem 3 (A),11,Cyber Crime and Mitigation(CCM),7,13:00 - 14:00,Thursday,102,1,0.7073,high,YES
+323,5,divya sharma,8,Sem 5 (A),19,AI in HealthCare & Fintech (AIH),7,13:00 - 14:00,Thursday,95,1,0.9985,high,YES
+324,4,nimisha patel,10,Sem 3 (A),18,Cryptography and Network Security (CNS),7,13:00 - 14:00,Thursday,101,1,0.9756,high,YES
+325,5,divya sharma,10,Sem 3 (A),10,Predictive Analytics(PA),3,08:30 - 09:25,Thursday,102,1,0.3973,medium,NO
+326,4,nimisha patel,8,Sem 5 (A),18,Cryptography and Network Security (CNS),3,08:30 - 09:25,Thursday,101,1,0.9552,high,YES
+327,42,Unique Test Faculty 1,11,Sem 7 (A),19,AI in HealthCare & Fintech (AIH),3,08:30 - 09:25,Thursday,101,1,0.9436,high,YES
+328,5,divya sharma,10,Sem 3 (A),22,Big Data Analytics (BDA),3,08:30 - 09:25,Friday,19,1,0.9275,high,YES
+329,5,divya sharma,8,Sem 5 (A),13,Web Application Development(WAD),3,08:30 - 09:25,Friday,102,1,0.7755,high,YES
+330,4,nimisha patel,10,Sem 3 (A),9,Data Security(DS),3,08:30 - 09:25,Friday,101,1,0.7459,high,YES
+331,8,khyati karia,11,Sem 7 (A),22,Big Data Analytics (BDA),3,08:30 - 09:25,Tuesday,19,1,0.9808,high,YES
+332,8,khyati karia,8,Sem 5 (A),9,Data Security(DS),3,08:30 - 09:25,Tuesday,46,1,0.8495,high,YES
+333,8,khyati karia,64,Sem 1 (D),11,Cyber Crime and Mitigation(CCM),3,08:30 - 09:25,Tuesday,101,1,0.9394,high,YES
+334,9,neha gajjar,8,Sem 5 (A),17,Optimization Techniques(OT),7,13:00 - 14:00,Wednesday,95,1,0.9998,high,YES
+335,7,chintan rana,8,Sem 5 (A),18,Cryptography and Network Security (CNS),7,13:00 - 14:00,Wednesday,46,1,1.0,high,YES
+336,42,Unique Test Faculty 1,64,Sem 1 (D),17,Optimization Techniques(OT),7,13:00 - 14:00,Wednesday,101,1,0.9734,high,YES
+337,9,neha gajjar,64,Sem 1 (D),17,Optimization Techniques(OT),8,14:00 - 15:00,Thursday,19,1,0.9865,high,YES
+338,5,divya sharma,8,Sem 5 (A),13,Web Application Development(WAD),8,14:00 - 15:00,Thursday,19,1,0.9704,high,YES
+339,5,divya sharma,11,Sem 7 (A),12,Machine Learning Essentials(MLE),8,14:00 - 15:00,Thursday,101,1,0.9539,high,YES
+340,0,N/A,11,Sem 7 (A),8,Agile Software Development & Devops(ASDD),7,13:00 - 14:00,Monday,102,1,0.611,medium,YES
+341,4,nimisha patel,8,Sem 5 (A),13,Web Application Development(WAD),7,13:00 - 14:00,Monday,95,1,0.9519,high,YES
+342,5,divya sharma,10,Sem 3 (A),23,Fundamentals of Artificial Intelligence(FAI),7,13:00 - 14:00,Monday,101,1,0.921,high,YES
+343,9,neha gajjar,8,Sem 5 (A),12,Machine Learning Essentials(MLE),7,13:00 - 14:00,Wednesday,46,1,0.9646,high,YES
+344,7,chintan rana,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),7,13:00 - 14:00,Wednesday,102,1,0.7375,high,YES
+345,43,Unique Test Faculty 2,8,Sem 5 (A),5,Integrated Personality Development Course(IPDC),7,13:00 - 14:00,Wednesday,101,1,0.8132,high,YES
+346,4,nimisha patel,11,Sem 7 (A),21,Enterprise Resource Planning (ERP),5,10:30 - 11:30,Wednesday,19,1,0.9731,high,YES
+347,9,neha gajjar,8,Sem 5 (A),17,Optimization Techniques(OT),5,10:30 - 11:30,Wednesday,19,1,0.9868,high,YES
+348,42,Unique Test Faculty 1,11,Sem 7 (A),16,Maths,5,10:30 - 11:30,Wednesday,46,1,0.9505,high,YES
+349,5,divya sharma,11,Sem 7 (A),11,Cyber Crime and Mitigation(CCM),3,08:30 - 09:25,Friday,19,1,0.9514,high,YES
+350,6,ajeet patel,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),3,08:30 - 09:25,Friday,95,1,0.7357,high,YES
+351,7,chintan rana,10,Sem 3 (A),13,Web Application Development(WAD),3,08:30 - 09:25,Friday,101,1,0.6425,medium,YES
+352,8,khyati karia,8,Sem 5 (A),22,Big Data Analytics (BDA),6,11:30 - 12:30,Thursday,102,1,0.9627,high,YES
+353,7,chintan rana,8,Sem 5 (A),14,Python Programming(PP),6,11:30 - 12:30,Thursday,101,1,0.8716,high,YES
+354,9,neha gajjar,8,Sem 5 (A),18,Cryptography and Network Security (CNS),6,11:30 - 12:30,Thursday,46,1,0.9888,high,YES
+355,9,neha gajjar,10,Sem 3 (A),8,Agile Software Development & Devops(ASDD),7,13:00 - 14:00,Tuesday,19,1,0.9714,high,YES
+356,43,Unique Test Faculty 2,8,Sem 5 (A),20,Natural Language Processing (NLP),7,13:00 - 14:00,Tuesday,95,1,1.0,high,YES
+357,5,divya sharma,64,Sem 1 (D),15,Deep Learning (DL),7,13:00 - 14:00,Tuesday,101,1,0.9553,high,YES
+358,8,khyati karia,10,Sem 3 (A),21,Enterprise Resource Planning (ERP),6,11:30 - 12:30,Tuesday,102,1,0.6147,medium,YES
+359,9,neha gajjar,8,Sem 5 (A),23,Fundamentals of Artificial Intelligence(FAI),6,11:30 - 12:30,Tuesday,101,1,0.8996,high,YES
+360,43,Unique Test Faculty 2,11,Sem 7 (A),6,Image Processing(IP),6,11:30 - 12:30,Tuesday,46,1,0.7318,high,YES
+361,4,nimisha patel,10,Sem 3 (A),5,Integrated Personality Development Course(IPDC),6,11:30 - 12:30,Wednesday,101,1,0.7343,high,YES
+362,8,khyati karia,8,Sem 5 (A),13,Web Application Development(WAD),6,11:30 - 12:30,Wednesday,46,1,0.8938,high,YES
+363,5,divya sharma,10,Sem 3 (A),14,Python Programming(PP),6,11:30 - 12:30,Wednesday,46,1,0.9294,high,YES
+364,8,khyati karia,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),7,13:00 - 14:00,Friday,95,1,0.5559,medium,YES
+365,42,Unique Test Faculty 1,8,Sem 5 (A),20,Natural Language Processing (NLP),7,13:00 - 14:00,Friday,19,1,1.0,high,YES
+366,9,neha gajjar,11,Sem 7 (A),9,Data Security(DS),7,13:00 - 14:00,Friday,101,1,0.9075,high,YES
+367,8,khyati karia,8,Sem 5 (A),16,Maths,8,14:00 - 15:00,Monday,101,1,0.9792,high,YES
+368,5,divya sharma,8,Sem 5 (A),19,AI in HealthCare & Fintech (AIH),8,14:00 - 15:00,Monday,95,1,0.9967,high,YES
+369,43,Unique Test Faculty 2,11,Sem 7 (A),6,Image Processing(IP),8,14:00 - 15:00,Monday,101,1,0.7147,high,YES
+370,5,divya sharma,11,Sem 7 (A),17,Optimization Techniques(OT),3,08:30 - 09:25,Thursday,95,1,0.9837,high,YES
+371,7,chintan rana,8,Sem 5 (A),15,Deep Learning (DL),3,08:30 - 09:25,Thursday,46,1,1.0,high,YES
+372,9,neha gajjar,11,Sem 7 (A),12,Machine Learning Essentials(MLE),3,08:30 - 09:25,Thursday,101,1,0.8485,high,YES
+373,8,khyati karia,11,Sem 7 (A),16,Maths,3,08:30 - 09:25,Tuesday,46,1,0.9882,high,YES
+374,43,Unique Test Faculty 2,8,Sem 5 (A),6,Image Processing(IP),3,08:30 - 09:25,Tuesday,19,1,0.9122,high,YES
+375,42,Unique Test Faculty 1,10,Sem 3 (A),21,Enterprise Resource Planning (ERP),3,08:30 - 09:25,Tuesday,101,1,0.8536,high,YES
+376,8,khyati karia,10,Sem 3 (A),14,Python Programming(PP),6,11:30 - 12:30,Thursday,95,1,0.916,high,YES
+377,8,khyati karia,8,Sem 5 (A),18,Cryptography and Network Security (CNS),6,11:30 - 12:30,Thursday,102,1,0.9768,high,YES
+378,7,chintan rana,11,Sem 7 (A),13,Web Application Development(WAD),6,11:30 - 12:30,Thursday,46,1,0.9339,high,YES
+379,5,divya sharma,8,Sem 5 (A),18,Cryptography and Network Security (CNS),4,09:25 - 10:20,Thursday,19,1,0.973,high,YES
+380,8,khyati karia,8,Sem 5 (A),17,Optimization Techniques(OT),4,09:25 - 10:20,Thursday,95,1,0.9908,high,YES
+381,8,khyati karia,11,Sem 7 (A),8,Agile Software Development & Devops(ASDD),4,09:25 - 10:20,Thursday,101,1,0.8815,high,YES
+382,9,neha gajjar,10,Sem 3 (A),10,Predictive Analytics(PA),8,14:00 - 15:00,Thursday,101,1,0.8278,high,YES
+383,7,chintan rana,8,Sem 5 (A),15,Deep Learning (DL),8,14:00 - 15:00,Thursday,102,1,0.8729,high,YES
+384,42,Unique Test Faculty 1,11,Sem 7 (A),9,Data Security(DS),8,14:00 - 15:00,Thursday,101,1,0.8878,high,YES
+385,5,divya sharma,64,Sem 1 (D),17,Optimization Techniques(OT),4,09:25 - 10:20,Thursday,19,1,0.9435,high,YES
+386,43,Unique Test Faculty 2,8,Sem 5 (A),6,Image Processing(IP),4,09:25 - 10:20,Thursday,95,1,0.9327,high,YES
+387,42,Unique Test Faculty 1,11,Sem 7 (A),6,Image Processing(IP),4,09:25 - 10:20,Thursday,101,1,0.8334,high,YES
+388,8,khyati karia,64,Sem 1 (D),11,Cyber Crime and Mitigation(CCM),6,11:30 - 12:30,Friday,95,1,0.8743,high,YES
+389,9,neha gajjar,8,Sem 5 (A),22,Big Data Analytics (BDA),6,11:30 - 12:30,Friday,95,1,0.9641,high,YES
+390,4,nimisha patel,11,Sem 7 (A),21,Enterprise Resource Planning (ERP),6,11:30 - 12:30,Friday,46,1,0.9157,high,YES
+391,4,nimisha patel,10,Sem 3 (A),23,Fundamentals of Artificial Intelligence(FAI),6,11:30 - 12:30,Monday,19,1,0.9451,high,YES
+392,43,Unique Test Faculty 2,8,Sem 5 (A),18,Cryptography and Network Security (CNS),6,11:30 - 12:30,Monday,95,1,0.9401,high,YES
+393,8,khyati karia,11,Sem 7 (A),19,AI in HealthCare & Fintech (AIH),6,11:30 - 12:30,Monday,46,1,0.9497,high,YES
+394,8,khyati karia,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),6,11:30 - 12:30,Thursday,95,1,0.4272,medium,NO
+395,7,chintan rana,8,Sem 5 (A),10,Predictive Analytics(PA),6,11:30 - 12:30,Thursday,102,1,0.5681,medium,YES
+396,6,ajeet patel,8,Sem 5 (A),16,Maths,6,11:30 - 12:30,Thursday,46,1,0.9764,high,YES
+397,4,nimisha patel,10,Sem 3 (A),12,Machine Learning Essentials(MLE),3,08:30 - 09:25,Monday,95,1,0.9193,high,YES
+398,6,ajeet patel,8,Sem 5 (A),16,Maths,3,08:30 - 09:25,Monday,46,1,0.9743,high,YES
+399,7,chintan rana,11,Sem 7 (A),15,Deep Learning (DL),3,08:30 - 09:25,Monday,101,1,0.8501,high,YES
+400,8,khyati karia,8,Sem 5 (A),12,Machine Learning Essentials(MLE),4,09:25 - 10:20,Wednesday,19,1,0.9369,high,YES
+401,6,ajeet patel,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),4,09:25 - 10:20,Wednesday,19,1,0.821,high,YES
+402,8,khyati karia,10,Sem 3 (A),15,Deep Learning (DL),4,09:25 - 10:20,Wednesday,101,1,0.7741,high,YES
+403,4,nimisha patel,64,Sem 1 (D),17,Optimization Techniques(OT),5,10:30 - 11:30,Monday,102,1,0.5205,medium,YES
+404,5,divya sharma,8,Sem 5 (A),23,Fundamentals of Artificial Intelligence(FAI),5,10:30 - 11:30,Monday,19,1,0.8887,high,YES
+405,43,Unique Test Faculty 2,64,Sem 1 (D),10,Predictive Analytics(PA),5,10:30 - 11:30,Monday,46,1,0.7172,high,YES
+406,8,khyati karia,64,Sem 1 (D),5,Integrated Personality Development Course(IPDC),8,14:00 - 15:00,Tuesday,95,1,0.98,high,YES
+407,42,Unique Test Faculty 1,8,Sem 5 (A),18,Cryptography and Network Security (CNS),8,14:00 - 15:00,Tuesday,95,1,0.9967,high,YES
+408,7,chintan rana,8,Sem 5 (A),5,Integrated Personality Development Course(IPDC),8,14:00 - 15:00,Tuesday,101,1,0.8636,high,YES
+409,4,nimisha patel,8,Sem 5 (A),12,Machine Learning Essentials(MLE),6,11:30 - 12:30,Wednesday,101,1,0.8944,high,YES
+410,5,divya sharma,8,Sem 5 (A),15,Deep Learning (DL),6,11:30 - 12:30,Wednesday,46,1,0.9717,high,YES
+411,4,nimisha patel,64,Sem 1 (D),14,Python Programming(PP),6,11:30 - 12:30,Wednesday,46,1,0.9724,high,YES
+412,8,khyati karia,64,Sem 1 (D),17,Optimization Techniques(OT),6,11:30 - 12:30,Tuesday,101,1,0.7864,high,YES
+413,4,nimisha patel,8,Sem 5 (A),18,Cryptography and Network Security (CNS),6,11:30 - 12:30,Tuesday,19,1,0.9282,high,YES
+414,6,ajeet patel,10,Sem 3 (A),18,Cryptography and Network Security (CNS),6,11:30 - 12:30,Tuesday,46,1,0.9431,high,YES
+415,8,khyati karia,64,Sem 1 (D),22,Big Data Analytics (BDA),4,09:25 - 10:20,Wednesday,95,1,0.9619,high,YES
+416,42,Unique Test Faculty 1,8,Sem 5 (A),23,Fundamentals of Artificial Intelligence(FAI),4,09:25 - 10:20,Wednesday,101,1,0.9614,high,YES
+417,9,neha gajjar,11,Sem 7 (A),11,Cyber Crime and Mitigation(CCM),4,09:25 - 10:20,Wednesday,101,1,0.8613,high,YES
+418,4,nimisha patel,10,Sem 3 (A),12,Machine Learning Essentials(MLE),3,08:30 - 09:25,Monday,95,1,0.9193,high,YES
+419,8,khyati karia,8,Sem 5 (A),12,Machine Learning Essentials(MLE),3,08:30 - 09:25,Monday,46,1,0.945,high,YES
+420,9,neha gajjar,8,Sem 5 (A),12,Machine Learning Essentials(MLE),3,08:30 - 09:25,Monday,101,1,0.9515,high,YES
+421,0,N/A,10,Sem 3 (A),23,Fundamentals of Artificial Intelligence(FAI),7,13:00 - 14:00,Monday,95,1,0.9515,high,YES
+422,6,ajeet patel,8,Sem 5 (A),20,Natural Language Processing (NLP),7,13:00 - 14:00,Monday,19,1,0.9745,high,YES
+423,8,khyati karia,8,Sem 5 (A),12,Machine Learning Essentials(MLE),7,13:00 - 14:00,Monday,101,1,0.8748,high,YES
+424,5,divya sharma,64,Sem 1 (D),5,Integrated Personality Development Course(IPDC),4,09:25 - 10:20,Thursday,102,1,0.4616,medium,NO
+425,9,neha gajjar,8,Sem 5 (A),15,Deep Learning (DL),4,09:25 - 10:20,Thursday,102,1,0.9307,high,YES
+426,9,neha gajjar,11,Sem 7 (A),21,Enterprise Resource Planning (ERP),4,09:25 - 10:20,Thursday,101,1,0.9314,high,YES
+427,4,nimisha patel,8,Sem 5 (A),19,AI in HealthCare & Fintech (AIH),5,10:30 - 11:30,Monday,101,1,0.9461,high,YES
+428,4,nimisha patel,8,Sem 5 (A),10,Predictive Analytics(PA),5,10:30 - 11:30,Monday,19,1,0.5964,medium,YES
+429,5,divya sharma,8,Sem 5 (A),5,Integrated Personality Development Course(IPDC),5,10:30 - 11:30,Monday,46,1,0.6416,medium,YES
+430,8,khyati karia,11,Sem 7 (A),12,Machine Learning Essentials(MLE),8,14:00 - 15:00,Tuesday,102,1,0.7832,high,YES
+431,42,Unique Test Faculty 1,8,Sem 5 (A),20,Natural Language Processing (NLP),8,14:00 - 15:00,Tuesday,19,1,0.99,high,YES
+432,5,divya sharma,11,Sem 7 (A),18,Cryptography and Network Security (CNS),8,14:00 - 15:00,Tuesday,101,1,0.9474,high,YES
+433,8,khyati karia,64,Sem 1 (D),23,Fundamentals of Artificial Intelligence(FAI),5,10:30 - 11:30,Friday,101,1,0.7043,high,YES
+434,4,nimisha patel,8,Sem 5 (A),10,Predictive Analytics(PA),5,10:30 - 11:30,Friday,95,1,0.5497,medium,YES
+435,7,chintan rana,64,Sem 1 (D),14,Python Programming(PP),5,10:30 - 11:30,Friday,46,1,0.9307,high,YES
+436,9,neha gajjar,10,Sem 3 (A),12,Machine Learning Essentials(MLE),8,14:00 - 15:00,Thursday,46,1,0.9562,high,YES
+437,5,divya sharma,8,Sem 5 (A),10,Predictive Analytics(PA),8,14:00 - 15:00,Thursday,46,1,0.751,high,YES
+438,4,nimisha patel,10,Sem 3 (A),9,Data Security(DS),8,14:00 - 15:00,Thursday,101,1,0.9381,high,YES
+439,9,neha gajjar,10,Sem 3 (A),11,Cyber Crime and Mitigation(CCM),7,13:00 - 14:00,Tuesday,46,1,0.9314,high,YES
+440,5,divya sharma,8,Sem 5 (A),12,Machine Learning Essentials(MLE),7,13:00 - 14:00,Tuesday,95,1,0.9361,high,YES
+441,5,divya sharma,10,Sem 3 (A),5,Integrated Personality Development Course(IPDC),7,13:00 - 14:00,Tuesday,101,1,0.9135,high,YES
+442,0,N/A,10,Sem 3 (A),19,AI in HealthCare & Fintech (AIH),4,09:25 - 10:20,Monday,95,1,0.9596,high,YES
+443,4,nimisha patel,8,Sem 5 (A),9,Data Security(DS),4,09:25 - 10:20,Monday,46,1,0.8204,high,YES
+444,42,Unique Test Faculty 1,8,Sem 5 (A),20,Natural Language Processing (NLP),4,09:25 - 10:20,Monday,101,1,0.9636,high,YES
+445,8,khyati karia,64,Sem 1 (D),15,Deep Learning (DL),5,10:30 - 11:30,Friday,19,1,0.9341,high,YES
+446,4,nimisha patel,8,Sem 5 (A),17,Optimization Techniques(OT),5,10:30 - 11:30,Friday,95,1,0.9286,high,YES
+447,42,Unique Test Faculty 1,11,Sem 7 (A),8,Agile Software Development & Devops(ASDD),5,10:30 - 11:30,Friday,46,1,0.8307,high,YES
+448,5,divya sharma,64,Sem 1 (D),11,Cyber Crime and Mitigation(CCM),3,08:30 - 09:25,Thursday,19,1,0.9495,high,YES
+449,8,khyati karia,8,Sem 5 (A),15,Deep Learning (DL),3,08:30 - 09:25,Thursday,102,1,0.8687,high,YES
+450,8,khyati karia,64,Sem 1 (D),15,Deep Learning (DL),3,08:30 - 09:25,Thursday,101,1,0.9059,high,YES
+451,8,khyati karia,8,Sem 5 (A),19,AI in HealthCare & Fintech (AIH),5,10:30 - 11:30,Thursday,102,1,0.9692,high,YES
+452,42,Unique Test Faculty 1,8,Sem 5 (A),23,Fundamentals of Artificial Intelligence(FAI),5,10:30 - 11:30,Thursday,102,1,0.9553,high,YES
+453,6,ajeet patel,64,Sem 1 (D),20,Natural Language Processing (NLP),5,10:30 - 11:30,Thursday,46,1,0.9195,high,YES
+454,8,khyati karia,64,Sem 1 (D),6,Image Processing(IP),6,11:30 - 12:30,Friday,19,1,0.9239,high,YES
+455,7,chintan rana,8,Sem 5 (A),5,Integrated Personality Development Course(IPDC),6,11:30 - 12:30,Friday,101,1,0.6921,medium,YES
+456,5,divya sharma,8,Sem 5 (A),17,Optimization Techniques(OT),6,11:30 - 12:30,Friday,46,1,0.9726,high,YES
+457,4,nimisha patel,11,Sem 7 (A),14,Python Programming(PP),6,11:30 - 12:30,Wednesday,102,1,0.462,medium,NO
+458,4,nimisha patel,8,Sem 5 (A),13,Web Application Development(WAD),6,11:30 - 12:30,Wednesday,46,1,0.899,high,YES
+459,42,Unique Test Faculty 1,64,Sem 1 (D),12,Machine Learning Essentials(MLE),6,11:30 - 12:30,Wednesday,46,1,0.9314,high,YES
+460,5,divya sharma,11,Sem 7 (A),15,Deep Learning (DL),8,14:00 - 15:00,Friday,19,1,0.9611,high,YES
+461,43,Unique Test Faculty 2,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),8,14:00 - 15:00,Friday,101,1,0.7181,high,YES
+462,8,khyati karia,64,Sem 1 (D),21,Enterprise Resource Planning (ERP),8,14:00 - 15:00,Friday,101,1,0.9536,high,YES
+463,5,divya sharma,8,Sem 5 (A),19,AI in HealthCare & Fintech (AIH),4,09:25 - 10:20,Thursday,95,1,0.9877,high,YES
+464,9,neha gajjar,8,Sem 5 (A),14,Python Programming(PP),4,09:25 - 10:20,Thursday,46,1,0.9752,high,YES
+465,5,divya sharma,8,Sem 5 (A),13,Web Application Development(WAD),4,09:25 - 10:20,Thursday,101,1,0.8385,high,YES
+466,4,nimisha patel,8,Sem 5 (A),13,Web Application Development(WAD),6,11:30 - 12:30,Wednesday,19,1,0.8636,high,YES
+467,7,chintan rana,8,Sem 5 (A),22,Big Data Analytics (BDA),6,11:30 - 12:30,Wednesday,95,1,0.9878,high,YES
+468,4,nimisha patel,64,Sem 1 (D),23,Fundamentals of Artificial Intelligence(FAI),6,11:30 - 12:30,Wednesday,46,1,0.977,high,YES
+469,9,neha gajjar,8,Sem 5 (A),15,Deep Learning (DL),8,14:00 - 15:00,Wednesday,101,1,0.9659,high,YES
+470,8,khyati karia,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),8,14:00 - 15:00,Wednesday,102,1,0.771,high,YES
+471,9,neha gajjar,64,Sem 1 (D),18,Cryptography and Network Security (CNS),8,14:00 - 15:00,Wednesday,101,1,0.9881,high,YES
+472,8,khyati karia,64,Sem 1 (D),21,Enterprise Resource Planning (ERP),3,08:30 - 09:25,Tuesday,19,1,0.9889,high,YES
+473,8,khyati karia,8,Sem 5 (A),12,Machine Learning Essentials(MLE),3,08:30 - 09:25,Tuesday,102,1,0.7245,high,YES
+474,7,chintan rana,11,Sem 7 (A),14,Python Programming(PP),3,08:30 - 09:25,Tuesday,101,1,0.8552,high,YES
+475,8,khyati karia,8,Sem 5 (A),10,Predictive Analytics(PA),5,10:30 - 11:30,Thursday,101,1,0.4403,medium,NO
+476,6,ajeet patel,8,Sem 5 (A),18,Cryptography and Network Security (CNS),5,10:30 - 11:30,Thursday,102,1,0.8462,high,YES
+477,7,chintan rana,10,Sem 3 (A),6,Image Processing(IP),5,10:30 - 11:30,Thursday,46,1,0.8359,high,YES
+478,8,khyati karia,64,Sem 1 (D),13,Web Application Development(WAD),6,11:30 - 12:30,Thursday,95,1,0.9579,high,YES
+479,9,neha gajjar,8,Sem 5 (A),21,Enterprise Resource Planning (ERP),6,11:30 - 12:30,Thursday,46,1,0.9914,high,YES
+480,7,chintan rana,64,Sem 1 (D),19,AI in HealthCare & Fintech (AIH),6,11:30 - 12:30,Thursday,46,1,0.9705,high,YES
+481,8,khyati karia,8,Sem 5 (A),15,Deep Learning (DL),5,10:30 - 11:30,Tuesday,102,1,0.9382,high,YES
+482,5,divya sharma,8,Sem 5 (A),20,Natural Language Processing (NLP),5,10:30 - 11:30,Tuesday,19,1,0.9212,high,YES
+483,6,ajeet patel,8,Sem 5 (A),14,Python Programming(PP),5,10:30 - 11:30,Tuesday,46,1,0.941,high,YES
+484,0,N/A,11,Sem 7 (A),9,Data Security(DS),4,09:25 - 10:20,Monday,46,1,0.9579,high,YES
+485,4,nimisha patel,8,Sem 5 (A),18,Cryptography and Network Security (CNS),4,09:25 - 10:20,Monday,101,1,0.9624,high,YES
+486,7,chintan rana,64,Sem 1 (D),16,Maths,4,09:25 - 10:20,Monday,101,1,0.8454,high,YES
+487,9,neha gajjar,10,Sem 3 (A),17,Optimization Techniques(OT),7,13:00 - 14:00,Wednesday,102,1,0.6856,medium,YES
+488,42,Unique Test Faculty 1,8,Sem 5 (A),21,Enterprise Resource Planning (ERP),7,13:00 - 14:00,Wednesday,95,1,1.0,high,YES
+489,6,ajeet patel,64,Sem 1 (D),9,Data Security(DS),7,13:00 - 14:00,Wednesday,101,1,0.9682,high,YES
+490,4,nimisha patel,10,Sem 3 (A),6,Image Processing(IP),6,11:30 - 12:30,Wednesday,95,1,0.8214,high,YES
+491,5,divya sharma,8,Sem 5 (A),20,Natural Language Processing (NLP),6,11:30 - 12:30,Wednesday,19,1,0.9448,high,YES
+492,6,ajeet patel,64,Sem 1 (D),6,Image Processing(IP),6,11:30 - 12:30,Wednesday,46,1,0.827,high,YES
+493,4,nimisha patel,64,Sem 1 (D),10,Predictive Analytics(PA),4,09:25 - 10:20,Tuesday,95,1,0.9519,high,YES
+494,4,nimisha patel,8,Sem 5 (A),14,Python Programming(PP),4,09:25 - 10:20,Tuesday,102,1,0.9526,high,YES
+495,42,Unique Test Faculty 1,11,Sem 7 (A),20,Natural Language Processing (NLP),4,09:25 - 10:20,Tuesday,101,1,0.9035,high,YES
+496,9,neha gajjar,10,Sem 3 (A),12,Machine Learning Essentials(MLE),7,13:00 - 14:00,Wednesday,95,1,0.9331,high,YES
+497,5,divya sharma,8,Sem 5 (A),16,Maths,7,13:00 - 14:00,Wednesday,46,1,0.9932,high,YES
+498,4,nimisha patel,11,Sem 7 (A),16,Maths,7,13:00 - 14:00,Wednesday,101,1,0.9568,high,YES
+499,0,N/A,11,Sem 7 (A),12,Machine Learning Essentials(MLE),4,09:25 - 10:20,Monday,46,1,0.9484,high,YES
+500,8,khyati karia,8,Sem 5 (A),17,Optimization Techniques(OT),4,09:25 - 10:20,Monday,46,1,0.9819,high,YES
+501,8,khyati karia,10,Sem 3 (A),10,Predictive Analytics(PA),4,09:25 - 10:20,Monday,101,1,0.7666,high,YES
+502,4,nimisha patel,8,Sem 5 (A),19,AI in HealthCare & Fintech (AIH),6,11:30 - 12:30,Monday,95,1,0.9799,high,YES
+503,6,ajeet patel,8,Sem 5 (A),9,Data Security(DS),6,11:30 - 12:30,Monday,102,1,0.6883,medium,YES
+504,42,Unique Test Faculty 1,10,Sem 3 (A),8,Agile Software Development & Devops(ASDD),6,11:30 - 12:30,Monday,46,1,0.8418,high,YES
+505,4,nimisha patel,11,Sem 7 (A),16,Maths,5,10:30 - 11:30,Wednesday,46,1,0.9765,high,YES
+506,6,ajeet patel,8,Sem 5 (A),16,Maths,5,10:30 - 11:30,Wednesday,95,1,0.9643,high,YES
+507,4,nimisha patel,8,Sem 5 (A),9,Data Security(DS),5,10:30 - 11:30,Wednesday,46,1,0.4924,medium,NO
+508,9,neha gajjar,64,Sem 1 (D),21,Enterprise Resource Planning (ERP),7,13:00 - 14:00,Tuesday,101,1,0.9554,high,YES
+509,6,ajeet patel,8,Sem 5 (A),12,Machine Learning Essentials(MLE),7,13:00 - 14:00,Tuesday,101,1,0.8996,high,YES
+510,8,khyati karia,64,Sem 1 (D),17,Optimization Techniques(OT),7,13:00 - 14:00,Tuesday,101,1,0.9657,high,YES
+511,8,khyati karia,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),6,11:30 - 12:30,Friday,101,1,0.6115,medium,YES
+512,8,khyati karia,8,Sem 5 (A),22,Big Data Analytics (BDA),6,11:30 - 12:30,Friday,101,1,0.8899,high,YES
+513,4,nimisha patel,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),6,11:30 - 12:30,Friday,46,1,0.4149,medium,NO
+514,4,nimisha patel,11,Sem 7 (A),19,AI in HealthCare & Fintech (AIH),6,11:30 - 12:30,Wednesday,101,1,0.8044,high,YES
+515,42,Unique Test Faculty 1,8,Sem 5 (A),6,Image Processing(IP),6,11:30 - 12:30,Wednesday,46,1,0.8038,high,YES
+516,43,Unique Test Faculty 2,10,Sem 3 (A),21,Enterprise Resource Planning (ERP),6,11:30 - 12:30,Wednesday,46,1,0.965,high,YES
+517,8,khyati karia,64,Sem 1 (D),8,Agile Software Development & Devops(ASDD),5,10:30 - 11:30,Thursday,46,1,0.9556,high,YES
+518,8,khyati karia,8,Sem 5 (A),19,AI in HealthCare & Fintech (AIH),5,10:30 - 11:30,Thursday,19,1,0.9868,high,YES
+519,43,Unique Test Faculty 2,8,Sem 5 (A),14,Python Programming(PP),5,10:30 - 11:30,Thursday,46,1,0.9623,high,YES
+520,8,khyati karia,8,Sem 5 (A),21,Enterprise Resource Planning (ERP),4,09:25 - 10:20,Wednesday,19,1,0.9712,high,YES
+521,4,nimisha patel,8,Sem 5 (A),10,Predictive Analytics(PA),4,09:25 - 10:20,Wednesday,101,1,0.8665,high,YES
+522,42,Unique Test Faculty 1,10,Sem 3 (A),23,Fundamentals of Artificial Intelligence(FAI),4,09:25 - 10:20,Wednesday,101,1,0.7784,high,YES
+523,0,N/A,64,Sem 1 (D),22,Big Data Analytics (BDA),7,13:00 - 14:00,Monday,95,1,0.9369,high,YES
+524,4,nimisha patel,8,Sem 5 (A),14,Python Programming(PP),7,13:00 - 14:00,Monday,102,1,0.9092,high,YES
+525,9,neha gajjar,64,Sem 1 (D),15,Deep Learning (DL),7,13:00 - 14:00,Monday,101,1,0.9533,high,YES
+526,8,khyati karia,10,Sem 3 (A),9,Data Security(DS),5,10:30 - 11:30,Tuesday,101,1,0.6704,medium,YES
+527,9,neha gajjar,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),5,10:30 - 11:30,Tuesday,19,1,0.5487,medium,YES
+528,42,Unique Test Faculty 1,64,Sem 1 (D),18,Cryptography and Network Security (CNS),5,10:30 - 11:30,Tuesday,46,1,0.9764,high,YES
+529,9,neha gajjar,11,Sem 7 (A),23,Fundamentals of Artificial Intelligence(FAI),7,13:00 - 14:00,Wednesday,46,1,0.9856,high,YES
+530,43,Unique Test Faculty 2,8,Sem 5 (A),23,Fundamentals of Artificial Intelligence(FAI),7,13:00 - 14:00,Wednesday,46,1,1.0,high,YES
+531,43,Unique Test Faculty 2,64,Sem 1 (D),11,Cyber Crime and Mitigation(CCM),7,13:00 - 14:00,Wednesday,101,1,0.786,high,YES
+532,4,nimisha patel,10,Sem 3 (A),5,Integrated Personality Development Course(IPDC),6,11:30 - 12:30,Wednesday,19,1,0.7628,high,YES
+533,42,Unique Test Faculty 1,8,Sem 5 (A),9,Data Security(DS),6,11:30 - 12:30,Wednesday,95,1,0.7026,high,YES
+534,7,chintan rana,8,Sem 5 (A),21,Enterprise Resource Planning (ERP),6,11:30 - 12:30,Wednesday,46,1,0.9816,high,YES
+535,4,nimisha patel,11,Sem 7 (A),22,Big Data Analytics (BDA),6,11:30 - 12:30,Wednesday,102,1,0.4061,medium,NO
+536,4,nimisha patel,8,Sem 5 (A),19,AI in HealthCare & Fintech (AIH),6,11:30 - 12:30,Wednesday,95,1,0.9662,high,YES
+537,7,chintan rana,11,Sem 7 (A),12,Machine Learning Essentials(MLE),6,11:30 - 12:30,Wednesday,46,1,0.947,high,YES
+538,9,neha gajjar,64,Sem 1 (D),21,Enterprise Resource Planning (ERP),7,13:00 - 14:00,Wednesday,19,1,0.9956,high,YES
+539,7,chintan rana,8,Sem 5 (A),14,Python Programming(PP),7,13:00 - 14:00,Wednesday,95,1,0.9958,high,YES
+540,6,ajeet patel,11,Sem 7 (A),15,Deep Learning (DL),7,13:00 - 14:00,Wednesday,101,1,0.9286,high,YES
+541,5,divya sharma,11,Sem 7 (A),21,Enterprise Resource Planning (ERP),3,08:30 - 09:25,Thursday,95,1,0.9847,high,YES
+542,4,nimisha patel,8,Sem 5 (A),23,Fundamentals of Artificial Intelligence(FAI),3,08:30 - 09:25,Thursday,46,1,0.9598,high,YES
+543,5,divya sharma,64,Sem 1 (D),9,Data Security(DS),3,08:30 - 09:25,Thursday,101,1,0.8174,high,YES
+544,0,N/A,11,Sem 7 (A),18,Cryptography and Network Security (CNS),7,13:00 - 14:00,Monday,102,1,0.362,medium,NO
+545,42,Unique Test Faculty 1,8,Sem 5 (A),18,Cryptography and Network Security (CNS),7,13:00 - 14:00,Monday,95,1,0.9965,high,YES
+546,42,Unique Test Faculty 1,10,Sem 3 (A),20,Natural Language Processing (NLP),7,13:00 - 14:00,Monday,101,1,0.9177,high,YES
+547,8,khyati karia,10,Sem 3 (A),21,Enterprise Resource Planning (ERP),3,08:30 - 09:25,Tuesday,101,1,0.828,high,YES
+548,8,khyati karia,8,Sem 5 (A),19,AI in HealthCare & Fintech (AIH),3,08:30 - 09:25,Tuesday,95,1,0.9993,high,YES
+549,7,chintan rana,8,Sem 5 (A),13,Web Application Development(WAD),3,08:30 - 09:25,Tuesday,101,1,0.9069,high,YES
+550,8,khyati karia,8,Sem 5 (A),22,Big Data Analytics (BDA),6,11:30 - 12:30,Friday,95,1,0.9727,high,YES
+551,42,Unique Test Faculty 1,8,Sem 5 (A),6,Image Processing(IP),6,11:30 - 12:30,Friday,95,1,0.746,high,YES
+552,43,Unique Test Faculty 2,11,Sem 7 (A),16,Maths,6,11:30 - 12:30,Friday,46,1,0.9322,high,YES
+553,8,khyati karia,64,Sem 1 (D),21,Enterprise Resource Planning (ERP),6,11:30 - 12:30,Friday,19,1,0.9648,high,YES
+554,6,ajeet patel,8,Sem 5 (A),17,Optimization Techniques(OT),6,11:30 - 12:30,Friday,46,1,0.9671,high,YES
+555,6,ajeet patel,8,Sem 5 (A),6,Image Processing(IP),6,11:30 - 12:30,Friday,46,1,0.4802,medium,NO
+556,8,khyati karia,10,Sem 3 (A),8,Agile Software Development & Devops(ASDD),5,10:30 - 11:30,Friday,95,1,0.8301,high,YES
+557,6,ajeet patel,8,Sem 5 (A),21,Enterprise Resource Planning (ERP),5,10:30 - 11:30,Friday,102,1,0.8368,high,YES
+558,6,ajeet patel,8,Sem 5 (A),19,AI in HealthCare & Fintech (AIH),5,10:30 - 11:30,Friday,46,1,0.9751,high,YES
+559,8,khyati karia,64,Sem 1 (D),21,Enterprise Resource Planning (ERP),6,11:30 - 12:30,Thursday,46,1,0.9825,high,YES
+560,6,ajeet patel,8,Sem 5 (A),5,Integrated Personality Development Course(IPDC),6,11:30 - 12:30,Thursday,102,1,0.6814,medium,YES
+561,8,khyati karia,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),6,11:30 - 12:30,Thursday,46,1,0.6134,medium,YES
+562,8,khyati karia,11,Sem 7 (A),16,Maths,8,14:00 - 15:00,Monday,19,1,0.9887,high,YES
+563,7,chintan rana,8,Sem 5 (A),16,Maths,8,14:00 - 15:00,Monday,102,1,0.9123,high,YES
+564,8,khyati karia,10,Sem 3 (A),22,Big Data Analytics (BDA),8,14:00 - 15:00,Monday,101,1,0.9229,high,YES
+565,0,N/A,8,Sem 5 (A),19,AI in HealthCare & Fintech (AIH),7,13:00 - 14:00,Monday,46,1,0.9887,high,YES
+566,8,khyati karia,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),7,13:00 - 14:00,Monday,19,1,0.8056,high,YES
+567,4,nimisha patel,64,Sem 1 (D),16,Maths,7,13:00 - 14:00,Monday,101,1,0.9479,high,YES
+568,9,neha gajjar,10,Sem 3 (A),22,Big Data Analytics (BDA),8,14:00 - 15:00,Wednesday,95,1,0.9915,high,YES
+569,4,nimisha patel,8,Sem 5 (A),5,Integrated Personality Development Course(IPDC),8,14:00 - 15:00,Wednesday,101,1,0.8995,high,YES
+570,9,neha gajjar,8,Sem 5 (A),6,Image Processing(IP),8,14:00 - 15:00,Wednesday,101,1,0.7963,high,YES
+571,0,N/A,64,Sem 1 (D),23,Fundamentals of Artificial Intelligence(FAI),4,09:25 - 10:20,Friday,101,1,0.742,high,YES
+572,8,khyati karia,8,Sem 5 (A),15,Deep Learning (DL),4,09:25 - 10:20,Friday,95,1,0.9846,high,YES
+573,42,Unique Test Faculty 1,64,Sem 1 (D),6,Image Processing(IP),4,09:25 - 10:20,Friday,101,1,0.8748,high,YES
+574,8,khyati karia,8,Sem 5 (A),19,AI in HealthCare & Fintech (AIH),8,14:00 - 15:00,Tuesday,46,1,1.0,high,YES
+575,4,nimisha patel,8,Sem 5 (A),14,Python Programming(PP),8,14:00 - 15:00,Tuesday,19,1,0.9802,high,YES
+576,4,nimisha patel,10,Sem 3 (A),13,Web Application Development(WAD),8,14:00 - 15:00,Tuesday,101,1,0.8999,high,YES
+577,0,N/A,10,Sem 3 (A),11,Cyber Crime and Mitigation(CCM),4,09:25 - 10:20,Friday,46,1,0.8603,high,YES
+578,5,divya sharma,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),4,09:25 - 10:20,Friday,19,1,0.6417,medium,YES
+579,4,nimisha patel,11,Sem 7 (A),12,Machine Learning Essentials(MLE),4,09:25 - 10:20,Friday,101,1,0.754,high,YES
+580,0,N/A,64,Sem 1 (D),18,Cryptography and Network Security (CNS),4,09:25 - 10:20,Friday,46,1,0.897,high,YES
+581,7,chintan rana,8,Sem 5 (A),16,Maths,4,09:25 - 10:20,Friday,46,1,0.99,high,YES
+582,6,ajeet patel,11,Sem 7 (A),11,Cyber Crime and Mitigation(CCM),4,09:25 - 10:20,Friday,101,1,0.8234,high,YES
+583,4,nimisha patel,8,Sem 5 (A),19,AI in HealthCare & Fintech (AIH),4,09:25 - 10:20,Tuesday,101,1,0.9535,high,YES
+584,4,nimisha patel,8,Sem 5 (A),17,Optimization Techniques(OT),4,09:25 - 10:20,Tuesday,101,1,0.9292,high,YES
+585,43,Unique Test Faculty 2,10,Sem 3 (A),14,Python Programming(PP),4,09:25 - 10:20,Tuesday,101,1,0.6852,medium,YES
+586,8,khyati karia,8,Sem 5 (A),14,Python Programming(PP),5,10:30 - 11:30,Tuesday,19,1,0.945,high,YES
+587,5,divya sharma,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),5,10:30 - 11:30,Tuesday,95,1,0.5599,medium,YES
+588,9,neha gajjar,8,Sem 5 (A),6,Image Processing(IP),5,10:30 - 11:30,Tuesday,46,1,0.6635,medium,YES
+589,0,N/A,8,Sem 5 (A),5,Integrated Personality Development Course(IPDC),4,09:25 - 10:20,Friday,19,1,0.7211,high,YES
+590,42,Unique Test Faculty 1,8,Sem 5 (A),12,Machine Learning Essentials(MLE),4,09:25 - 10:20,Friday,46,1,0.9229,high,YES
+591,42,Unique Test Faculty 1,11,Sem 7 (A),5,Integrated Personality Development Course(IPDC),4,09:25 - 10:20,Friday,101,1,0.8218,high,YES
+592,9,neha gajjar,10,Sem 3 (A),9,Data Security(DS),8,14:00 - 15:00,Thursday,102,1,0.8409,high,YES
+593,8,khyati karia,8,Sem 5 (A),10,Predictive Analytics(PA),8,14:00 - 15:00,Thursday,101,1,0.5817,medium,YES
+594,9,neha gajjar,64,Sem 1 (D),19,AI in HealthCare & Fintech (AIH),8,14:00 - 15:00,Thursday,101,1,0.974,high,YES
+595,9,neha gajjar,11,Sem 7 (A),15,Deep Learning (DL),8,14:00 - 15:00,Wednesday,95,1,0.9782,high,YES
+596,8,khyati karia,8,Sem 5 (A),13,Web Application Development(WAD),8,14:00 - 15:00,Wednesday,46,1,0.98,high,YES
+597,43,Unique Test Faculty 2,8,Sem 5 (A),17,Optimization Techniques(OT),8,14:00 - 15:00,Wednesday,101,1,0.9929,high,YES
+598,5,divya sharma,11,Sem 7 (A),21,Enterprise Resource Planning (ERP),8,14:00 - 15:00,Friday,19,1,0.9686,high,YES
+599,7,chintan rana,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),8,14:00 - 15:00,Friday,95,1,0.6112,medium,YES
+600,9,neha gajjar,64,Sem 1 (D),20,Natural Language Processing (NLP),8,14:00 - 15:00,Friday,101,1,0.9779,high,YES
+601,4,nimisha patel,64,Sem 1 (D),20,Natural Language Processing (NLP),5,10:30 - 11:30,Wednesday,19,1,0.9656,high,YES
+602,5,divya sharma,8,Sem 5 (A),21,Enterprise Resource Planning (ERP),5,10:30 - 11:30,Wednesday,101,1,0.9439,high,YES
+603,5,divya sharma,64,Sem 1 (D),8,Agile Software Development & Devops(ASDD),5,10:30 - 11:30,Wednesday,46,1,0.9068,high,YES
+604,8,khyati karia,64,Sem 1 (D),5,Integrated Personality Development Course(IPDC),6,11:30 - 12:30,Thursday,46,1,0.9314,high,YES
+605,6,ajeet patel,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),6,11:30 - 12:30,Thursday,95,1,0.4419,medium,NO
+606,42,Unique Test Faculty 1,8,Sem 5 (A),12,Machine Learning Essentials(MLE),6,11:30 - 12:30,Thursday,46,1,0.8583,high,YES
+607,5,divya sharma,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),3,08:30 - 09:25,Friday,46,1,0.7864,high,YES
+608,9,neha gajjar,8,Sem 5 (A),6,Image Processing(IP),3,08:30 - 09:25,Friday,101,1,0.908,high,YES
+609,7,chintan rana,11,Sem 7 (A),5,Integrated Personality Development Course(IPDC),3,08:30 - 09:25,Friday,101,1,0.8913,high,YES
+610,9,neha gajjar,64,Sem 1 (D),23,Fundamentals of Artificial Intelligence(FAI),8,14:00 - 15:00,Thursday,19,1,0.9973,high,YES
+611,7,chintan rana,8,Sem 5 (A),19,AI in HealthCare & Fintech (AIH),8,14:00 - 15:00,Thursday,46,1,1.0,high,YES
+612,7,chintan rana,10,Sem 3 (A),23,Fundamentals of Artificial Intelligence(FAI),8,14:00 - 15:00,Thursday,101,1,0.9272,high,YES
+613,9,neha gajjar,64,Sem 1 (D),16,Maths,8,14:00 - 15:00,Wednesday,46,1,0.9998,high,YES
+614,8,khyati karia,8,Sem 5 (A),5,Integrated Personality Development Course(IPDC),8,14:00 - 15:00,Wednesday,19,1,0.8762,high,YES
+615,6,ajeet patel,8,Sem 5 (A),22,Big Data Analytics (BDA),8,14:00 - 15:00,Wednesday,101,1,0.9897,high,YES
+616,9,neha gajjar,64,Sem 1 (D),5,Integrated Personality Development Course(IPDC),7,13:00 - 14:00,Wednesday,102,1,0.8348,high,YES
+617,9,neha gajjar,8,Sem 5 (A),6,Image Processing(IP),7,13:00 - 14:00,Wednesday,19,1,0.7739,high,YES
+618,8,khyati karia,10,Sem 3 (A),23,Fundamentals of Artificial Intelligence(FAI),7,13:00 - 14:00,Wednesday,101,1,0.9298,high,YES
+619,5,divya sharma,64,Sem 1 (D),16,Maths,4,09:25 - 10:20,Thursday,101,1,0.7711,high,YES
+620,42,Unique Test Faculty 1,8,Sem 5 (A),19,AI in HealthCare & Fintech (AIH),4,09:25 - 10:20,Thursday,95,1,0.9994,high,YES
+621,9,neha gajjar,11,Sem 7 (A),23,Fundamentals of Artificial Intelligence(FAI),4,09:25 - 10:20,Thursday,101,1,0.9203,high,YES
+622,0,N/A,64,Sem 1 (D),13,Web Application Development(WAD),7,13:00 - 14:00,Monday,46,1,0.949,high,YES
+623,42,Unique Test Faculty 1,8,Sem 5 (A),10,Predictive Analytics(PA),7,13:00 - 14:00,Monday,95,1,0.7951,high,YES
+624,4,nimisha patel,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),7,13:00 - 14:00,Monday,101,1,0.9086,high,YES
+625,8,khyati karia,64,Sem 1 (D),18,Cryptography and Network Security (CNS),5,10:30 - 11:30,Tuesday,46,1,0.977,high,YES
+626,42,Unique Test Faculty 1,8,Sem 5 (A),14,Python Programming(PP),5,10:30 - 11:30,Tuesday,19,1,0.9614,high,YES
+627,6,ajeet patel,11,Sem 7 (A),8,Agile Software Development & Devops(ASDD),5,10:30 - 11:30,Tuesday,46,1,0.8701,high,YES
+628,0,N/A,11,Sem 7 (A),9,Data Security(DS),4,09:25 - 10:20,Monday,19,1,0.9504,high,YES
+629,5,divya sharma,8,Sem 5 (A),13,Web Application Development(WAD),4,09:25 - 10:20,Monday,102,1,0.9104,high,YES
+630,42,Unique Test Faculty 1,8,Sem 5 (A),14,Python Programming(PP),4,09:25 - 10:20,Monday,101,1,0.9564,high,YES
+631,0,N/A,11,Sem 7 (A),15,Deep Learning (DL),7,13:00 - 14:00,Monday,19,1,0.9424,high,YES
+632,5,divya sharma,8,Sem 5 (A),21,Enterprise Resource Planning (ERP),7,13:00 - 14:00,Monday,102,1,0.8925,high,YES
+633,43,Unique Test Faculty 2,8,Sem 5 (A),15,Deep Learning (DL),7,13:00 - 14:00,Monday,101,1,0.9344,high,YES
+634,42,Unique Test Faculty 1,64,Sem 1 (D),11,Cyber Crime and Mitigation(CCM),6,11:30 - 12:30,Thursday,102,0,0.3662,medium,YES
+635,9,neha gajjar,64,Sem 1 (D),20,Natural Language Processing (NLP),6,11:30 - 12:30,Friday,101,0,0.749,high,NO
+636,7,chintan rana,10,Sem 3 (A),18,Cryptography and Network Security (CNS),6,11:30 - 12:30,Tuesday,101,0,0.6736,medium,NO
+637,8,khyati karia,10,Sem 3 (A),6,Image Processing(IP),9,15:10 - 16:10,Friday,102,0,0.1364,low,YES
+638,5,divya sharma,10,Sem 3 (A),6,Image Processing(IP),9,15:10 - 16:10,Monday,101,0,0.07,low,YES
+639,5,divya sharma,64,Sem 1 (D),19,AI in HealthCare & Fintech (AIH),10,16:10 - 17:10,Monday,46,0,0.04,low,YES
+640,43,Unique Test Faculty 2,64,Sem 1 (D),16,Maths,6,11:30 - 12:30,Friday,102,0,0.1572,low,YES
+641,43,Unique Test Faculty 2,11,Sem 7 (A),6,Image Processing(IP),8,14:00 - 15:00,Saturday,46,0,0.08,low,YES
+642,9,neha gajjar,11,Sem 7 (A),13,Web Application Development(WAD),5,10:30 - 11:30,Monday,101,0,0.6415,medium,NO
+643,6,ajeet patel,64,Sem 1 (D),11,Cyber Crime and Mitigation(CCM),10,16:10 - 17:10,Monday,19,0,0.06,low,YES
+644,4,nimisha patel,10,Sem 3 (A),17,Optimization Techniques(OT),6,11:30 - 12:30,Thursday,102,0,0.4134,medium,YES
+645,6,ajeet patel,8,Sem 5 (A),10,Predictive Analytics(PA),5,10:30 - 11:30,Saturday,19,0,0.0397,low,YES
+646,9,neha gajjar,8,Sem 5 (A),20,Natural Language Processing (NLP),10,16:10 - 17:10,Saturday,19,0,0.0,low,YES
+647,6,ajeet patel,8,Sem 5 (A),10,Predictive Analytics(PA),10,16:10 - 17:10,Saturday,102,0,0.03,low,YES
+648,8,khyati karia,10,Sem 3 (A),8,Agile Software Development & Devops(ASDD),6,11:30 - 12:30,Wednesday,102,0,0.6371,medium,NO
+649,43,Unique Test Faculty 2,10,Sem 3 (A),18,Cryptography and Network Security (CNS),5,10:30 - 11:30,Wednesday,101,0,0.6822,medium,NO
+650,6,ajeet patel,11,Sem 7 (A),5,Integrated Personality Development Course(IPDC),8,14:00 - 15:00,Saturday,46,0,0.0767,low,YES
+651,9,neha gajjar,10,Sem 3 (A),19,AI in HealthCare & Fintech (AIH),5,10:30 - 11:30,Monday,102,0,0.5739,medium,NO
+652,5,divya sharma,10,Sem 3 (A),8,Agile Software Development & Devops(ASDD),10,16:10 - 17:10,Friday,101,0,0.0438,low,YES
+653,9,neha gajjar,11,Sem 7 (A),19,AI in HealthCare & Fintech (AIH),9,15:10 - 16:10,Tuesday,101,0,0.0432,low,YES
+654,43,Unique Test Faculty 2,11,Sem 7 (A),11,Cyber Crime and Mitigation(CCM),10,16:10 - 17:10,Saturday,102,0,0.0,low,YES
+655,6,ajeet patel,64,Sem 1 (D),23,Fundamentals of Artificial Intelligence(FAI),5,10:30 - 11:30,Friday,101,0,0.5396,medium,NO
+656,43,Unique Test Faculty 2,10,Sem 3 (A),22,Big Data Analytics (BDA),5,10:30 - 11:30,Saturday,19,0,0.1073,low,YES
+657,6,ajeet patel,64,Sem 1 (D),5,Integrated Personality Development Course(IPDC),6,11:30 - 12:30,Tuesday,101,0,0.7869,high,NO
+658,8,khyati karia,64,Sem 1 (D),20,Natural Language Processing (NLP),6,11:30 - 12:30,Saturday,19,0,0.0859,low,YES
+659,6,ajeet patel,10,Sem 3 (A),10,Predictive Analytics(PA),5,10:30 - 11:30,Saturday,102,0,0.0477,low,YES
+660,4,nimisha patel,11,Sem 7 (A),6,Image Processing(IP),10,16:10 - 17:10,Wednesday,95,0,0.04,low,YES
+661,7,chintan rana,10,Sem 3 (A),8,Agile Software Development & Devops(ASDD),10,16:10 - 17:10,Saturday,95,0,0.0,low,YES
+662,6,ajeet patel,64,Sem 1 (D),21,Enterprise Resource Planning (ERP),10,16:10 - 17:10,Saturday,95,0,0.0,low,YES
+663,7,chintan rana,64,Sem 1 (D),18,Cryptography and Network Security (CNS),6,11:30 - 12:30,Wednesday,101,0,0.7252,high,NO
+664,6,ajeet patel,10,Sem 3 (A),14,Python Programming(PP),5,10:30 - 11:30,Friday,102,0,0.3281,medium,YES
+665,7,chintan rana,8,Sem 5 (A),18,Cryptography and Network Security (CNS),10,16:10 - 17:10,Monday,95,0,0.08,low,YES
+666,5,divya sharma,11,Sem 7 (A),14,Python Programming(PP),5,10:30 - 11:30,Saturday,95,0,0.0343,low,YES
+667,43,Unique Test Faculty 2,64,Sem 1 (D),19,AI in HealthCare & Fintech (AIH),3,08:30 - 09:25,Saturday,101,0,0.1486,low,YES
+668,6,ajeet patel,11,Sem 7 (A),22,Big Data Analytics (BDA),6,11:30 - 12:30,Friday,101,0,0.53,medium,NO
+669,5,divya sharma,10,Sem 3 (A),12,Machine Learning Essentials(MLE),5,10:30 - 11:30,Saturday,101,0,0.0661,low,YES
+670,9,neha gajjar,8,Sem 5 (A),19,AI in HealthCare & Fintech (AIH),9,15:10 - 16:10,Tuesday,19,0,0.04,low,YES
+671,43,Unique Test Faculty 2,11,Sem 7 (A),19,AI in HealthCare & Fintech (AIH),5,10:30 - 11:30,Wednesday,101,0,0.6827,medium,NO
+672,9,neha gajjar,64,Sem 1 (D),8,Agile Software Development & Devops(ASDD),3,08:30 - 09:25,Saturday,101,0,0.1167,low,YES
+673,7,chintan rana,64,Sem 1 (D),12,Machine Learning Essentials(MLE),5,10:30 - 11:30,Wednesday,102,0,0.4341,medium,YES
+674,9,neha gajjar,64,Sem 1 (D),8,Agile Software Development & Devops(ASDD),8,14:00 - 15:00,Saturday,46,0,0.1,low,YES
+675,4,nimisha patel,10,Sem 3 (A),22,Big Data Analytics (BDA),7,13:00 - 14:00,Saturday,101,0,0.1,low,YES
+676,4,nimisha patel,10,Sem 3 (A),19,AI in HealthCare & Fintech (AIH),6,11:30 - 12:30,Tuesday,102,0,0.3802,medium,YES
+677,8,khyati karia,8,Sem 5 (A),23,Fundamentals of Artificial Intelligence(FAI),9,15:10 - 16:10,Thursday,102,0,0.1193,low,YES
+678,7,chintan rana,11,Sem 7 (A),8,Agile Software Development & Devops(ASDD),10,16:10 - 17:10,Friday,102,0,0.01,low,YES
+679,5,divya sharma,64,Sem 1 (D),16,Maths,3,08:30 - 09:25,Saturday,101,0,0.1027,low,YES
+680,42,Unique Test Faculty 1,11,Sem 7 (A),17,Optimization Techniques(OT),5,10:30 - 11:30,Thursday,102,0,0.4482,medium,YES
+681,5,divya sharma,64,Sem 1 (D),10,Predictive Analytics(PA),3,08:30 - 09:25,Saturday,102,0,0.0886,low,YES
+682,5,divya sharma,10,Sem 3 (A),5,Integrated Personality Development Course(IPDC),10,16:10 - 17:10,Friday,95,0,0.0438,low,YES
+683,6,ajeet patel,64,Sem 1 (D),17,Optimization Techniques(OT),9,15:10 - 16:10,Tuesday,95,0,0.04,low,YES
+684,9,neha gajjar,10,Sem 3 (A),15,Deep Learning (DL),7,13:00 - 14:00,Saturday,95,0,0.1,low,YES
+685,8,khyati karia,10,Sem 3 (A),17,Optimization Techniques(OT),9,15:10 - 16:10,Tuesday,95,0,0.04,low,YES
+686,42,Unique Test Faculty 1,64,Sem 1 (D),19,AI in HealthCare & Fintech (AIH),7,13:00 - 14:00,Saturday,102,0,0.1045,low,YES
+687,7,chintan rana,64,Sem 1 (D),16,Maths,5,10:30 - 11:30,Tuesday,101,0,0.697,medium,NO
+688,9,neha gajjar,8,Sem 5 (A),11,Cyber Crime and Mitigation(CCM),10,16:10 - 17:10,Monday,101,0,0.0917,low,YES
+689,43,Unique Test Faculty 2,10,Sem 3 (A),12,Machine Learning Essentials(MLE),10,16:10 - 17:10,Saturday,19,0,0.02,low,YES
+690,5,divya sharma,64,Sem 1 (D),8,Agile Software Development & Devops(ASDD),10,16:10 - 17:10,Thursday,46,0,0.05,low,YES
+691,42,Unique Test Faculty 1,64,Sem 1 (D),5,Integrated Personality Development Course(IPDC),5,10:30 - 11:30,Tuesday,102,0,0.3588,medium,YES
+692,7,chintan rana,11,Sem 7 (A),15,Deep Learning (DL),9,15:10 - 16:10,Monday,102,0,0.048,low,YES
+693,42,Unique Test Faculty 1,10,Sem 3 (A),9,Data Security(DS),6,11:30 - 12:30,Friday,101,0,0.4169,medium,YES
+694,42,Unique Test Faculty 1,10,Sem 3 (A),23,Fundamentals of Artificial Intelligence(FAI),10,16:10 - 17:10,Tuesday,19,0,0.0175,low,YES
+695,6,ajeet patel,10,Sem 3 (A),10,Predictive Analytics(PA),6,11:30 - 12:30,Friday,101,0,0.5326,medium,NO
+696,7,chintan rana,8,Sem 5 (A),19,AI in HealthCare & Fintech (AIH),10,16:10 - 17:10,Tuesday,46,0,0.07,low,YES
+697,4,nimisha patel,10,Sem 3 (A),9,Data Security(DS),5,10:30 - 11:30,Tuesday,102,0,0.5348,medium,NO
+698,43,Unique Test Faculty 2,10,Sem 3 (A),18,Cryptography and Network Security (CNS),6,11:30 - 12:30,Friday,102,0,0.1821,low,YES
+699,43,Unique Test Faculty 2,11,Sem 7 (A),12,Machine Learning Essentials(MLE),6,11:30 - 12:30,Wednesday,102,0,0.2782,low,YES
+700,4,nimisha patel,10,Sem 3 (A),17,Optimization Techniques(OT),9,15:10 - 16:10,Saturday,102,0,0.01,low,YES
+701,8,khyati karia,64,Sem 1 (D),15,Deep Learning (DL),10,16:10 - 17:10,Saturday,101,0,0.0194,low,YES
+702,7,chintan rana,8,Sem 5 (A),17,Optimization Techniques(OT),9,15:10 - 16:10,Tuesday,95,0,0.06,low,YES
+703,43,Unique Test Faculty 2,10,Sem 3 (A),8,Agile Software Development & Devops(ASDD),6,11:30 - 12:30,Friday,101,0,0.357,medium,YES
+704,5,divya sharma,8,Sem 5 (A),15,Deep Learning (DL),10,16:10 - 17:10,Saturday,19,0,0.0,low,YES
+705,9,neha gajjar,11,Sem 7 (A),14,Python Programming(PP),6,11:30 - 12:30,Wednesday,101,0,0.7173,high,NO
+706,4,nimisha patel,10,Sem 3 (A),17,Optimization Techniques(OT),6,11:30 - 12:30,Tuesday,102,0,0.4046,medium,YES
+707,42,Unique Test Faculty 1,64,Sem 1 (D),5,Integrated Personality Development Course(IPDC),9,15:10 - 16:10,Thursday,101,0,0.05,low,YES
+708,8,khyati karia,8,Sem 5 (A),12,Machine Learning Essentials(MLE),3,08:30 - 09:25,Saturday,95,0,0.19,low,YES
+709,7,chintan rana,64,Sem 1 (D),22,Big Data Analytics (BDA),5,10:30 - 11:30,Thursday,102,0,0.4256,medium,YES
+710,6,ajeet patel,8,Sem 5 (A),5,Integrated Personality Development Course(IPDC),5,10:30 - 11:30,Saturday,19,0,0.099,low,YES
+711,5,divya sharma,10,Sem 3 (A),23,Fundamentals of Artificial Intelligence(FAI),10,16:10 - 17:10,Saturday,102,0,0.01,low,YES
+712,4,nimisha patel,11,Sem 7 (A),10,Predictive Analytics(PA),10,16:10 - 17:10,Tuesday,19,0,0.04,low,YES
+713,6,ajeet patel,64,Sem 1 (D),11,Cyber Crime and Mitigation(CCM),3,08:30 - 09:25,Saturday,46,0,0.085,low,YES
+714,42,Unique Test Faculty 1,11,Sem 7 (A),13,Web Application Development(WAD),9,15:10 - 16:10,Thursday,101,0,0.0472,low,YES
+715,43,Unique Test Faculty 2,11,Sem 7 (A),12,Machine Learning Essentials(MLE),10,16:10 - 17:10,Wednesday,101,0,0.0356,low,YES
+716,5,divya sharma,8,Sem 5 (A),6,Image Processing(IP),6,11:30 - 12:30,Saturday,19,0,0.0295,low,YES
+717,8,khyati karia,64,Sem 1 (D),21,Enterprise Resource Planning (ERP),4,09:25 - 10:20,Saturday,46,0,0.09,low,YES
+718,42,Unique Test Faculty 1,64,Sem 1 (D),23,Fundamentals of Artificial Intelligence(FAI),10,16:10 - 17:10,Wednesday,101,0,0.0282,low,YES
+719,6,ajeet patel,10,Sem 3 (A),17,Optimization Techniques(OT),5,10:30 - 11:30,Tuesday,101,0,0.6242,medium,NO
+720,7,chintan rana,11,Sem 7 (A),12,Machine Learning Essentials(MLE),6,11:30 - 12:30,Tuesday,101,0,0.7226,high,NO
+721,7,chintan rana,64,Sem 1 (D),19,AI in HealthCare & Fintech (AIH),5,10:30 - 11:30,Friday,102,0,0.3907,medium,YES
+722,43,Unique Test Faculty 2,64,Sem 1 (D),14,Python Programming(PP),6,11:30 - 12:30,Wednesday,102,0,0.1952,low,YES
+723,42,Unique Test Faculty 1,64,Sem 1 (D),15,Deep Learning (DL),5,10:30 - 11:30,Thursday,101,0,0.7046,high,NO
+724,4,nimisha patel,8,Sem 5 (A),6,Image Processing(IP),7,13:00 - 14:00,Saturday,46,0,0.081,low,YES
+725,6,ajeet patel,8,Sem 5 (A),17,Optimization Techniques(OT),6,11:30 - 12:30,Saturday,46,0,0.1107,low,YES
+726,43,Unique Test Faculty 2,11,Sem 7 (A),21,Enterprise Resource Planning (ERP),9,15:10 - 16:10,Friday,19,0,0.06,low,YES
+727,8,khyati karia,64,Sem 1 (D),19,AI in HealthCare & Fintech (AIH),4,09:25 - 10:20,Saturday,46,0,0.08,low,YES
+728,42,Unique Test Faculty 1,8,Sem 5 (A),8,Agile Software Development & Devops(ASDD),10,16:10 - 17:10,Thursday,19,0,0.07,low,YES
+729,4,nimisha patel,64,Sem 1 (D),10,Predictive Analytics(PA),9,15:10 - 16:10,Thursday,19,0,0.05,low,YES
+730,42,Unique Test Faculty 1,11,Sem 7 (A),8,Agile Software Development & Devops(ASDD),10,16:10 - 17:10,Tuesday,19,0,0.0489,low,YES
+731,43,Unique Test Faculty 2,64,Sem 1 (D),21,Enterprise Resource Planning (ERP),5,10:30 - 11:30,Monday,102,0,0.2334,low,YES
+732,9,neha gajjar,64,Sem 1 (D),6,Image Processing(IP),6,11:30 - 12:30,Friday,101,0,0.777,high,NO
+733,42,Unique Test Faculty 1,10,Sem 3 (A),19,AI in HealthCare & Fintech (AIH),6,11:30 - 12:30,Tuesday,102,0,0.34,medium,YES
+734,4,nimisha patel,64,Sem 1 (D),8,Agile Software Development & Devops(ASDD),6,11:30 - 12:30,Tuesday,101,0,0.8434,high,NO
+735,9,neha gajjar,10,Sem 3 (A),9,Data Security(DS),8,14:00 - 15:00,Saturday,46,0,0.1,low,YES
+736,42,Unique Test Faculty 1,11,Sem 7 (A),20,Natural Language Processing (NLP),9,15:10 - 16:10,Thursday,102,0,0.0433,low,YES
+737,9,neha gajjar,11,Sem 7 (A),16,Maths,8,14:00 - 15:00,Saturday,46,0,0.1,low,YES
+738,43,Unique Test Faculty 2,11,Sem 7 (A),10,Predictive Analytics(PA),5,10:30 - 11:30,Wednesday,102,0,0.2678,low,YES
+739,43,Unique Test Faculty 2,11,Sem 7 (A),13,Web Application Development(WAD),6,11:30 - 12:30,Friday,101,0,0.4464,medium,YES
+740,8,khyati karia,8,Sem 5 (A),12,Machine Learning Essentials(MLE),4,09:25 - 10:20,Saturday,102,0,0.2375,low,YES
+741,9,neha gajjar,8,Sem 5 (A),20,Natural Language Processing (NLP),6,11:30 - 12:30,Saturday,102,0,0.2361,low,YES
+742,43,Unique Test Faculty 2,64,Sem 1 (D),13,Web Application Development(WAD),4,09:25 - 10:20,Saturday,102,0,0.05,low,YES
+743,7,chintan rana,64,Sem 1 (D),14,Python Programming(PP),5,10:30 - 11:30,Friday,101,0,0.6467,medium,NO
+744,4,nimisha patel,11,Sem 7 (A),17,Optimization Techniques(OT),9,15:10 - 16:10,Wednesday,46,0,0.01,low,YES
+745,5,divya sharma,11,Sem 7 (A),6,Image Processing(IP),6,11:30 - 12:30,Saturday,101,0,0.0743,low,YES
+746,43,Unique Test Faculty 2,8,Sem 5 (A),13,Web Application Development(WAD),10,16:10 - 17:10,Friday,95,0,0.07,low,YES

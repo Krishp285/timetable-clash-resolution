@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Manage Faculty{% endblock %}
+{% block title %}Manage Faculty | Timetable Engine{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -10,25 +10,38 @@
         align-items: center;
     }
     .filter-select {
-        background: rgba(30, 41, 59, 0.7);
-        border: 1px solid rgba(148, 163, 184, 0.2);
-        color: #f1f5f9;
-        border-radius: 8px;
-        padding: 0.45rem 0.85rem;
-        font-size: 0.875rem;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        border-radius: var(--radius-md);
+        padding: 0.55rem 0.95rem;
+        font-size: 0.88rem;
         outline: none;
     }
-    .visiting-badge-sm {
-        background: linear-gradient(135deg, rgba(124, 58, 237, 0.25), rgba(6, 214, 160, 0.2));
-        border: 1px solid rgba(124, 58, 237, 0.4);
-        color: #c4b5fd;
-        padding: 0.2rem 0.5rem;
-        border-radius: 6px;
-        font-size: 0.72rem;
+    .tt-grid-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+        font-size: 0.82rem;
+    }
+    .tt-grid-table th, .tt-grid-table td {
+        border: 1px solid var(--border-color);
+        padding: 0.75rem;
+        text-align: center;
+        vertical-align: top;
+    }
+    .tt-grid-table th {
+        background: rgba(30, 41, 59, 0.8);
+        color: var(--brand-cyan);
         font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.25rem;
+    }
+    .tt-cell-card {
+        background: rgba(15, 23, 42, 0.6);
+        border-radius: var(--radius-xs);
+        padding: 0.45rem;
+        margin-bottom: 0.35rem;
+        border: 1px solid var(--border-color);
+        text-align: left;
     }
 </style>
 {% endblock %}
@@ -37,14 +50,14 @@
 <div class="card">
     <div class="card-header" style="flex-wrap: wrap; gap: 1rem;">
         <h1 class="card-title">
-            <i class="fas fa-chalkboard-teacher"></i> Faculty Directory
+            <i class="fas fa-chalkboard-user"></i> Faculty Directory
         </h1>
         
         <form method="GET" class="filter-group">
-            <div class="search-box">
+            <div class="header-search">
                 <i class="fas fa-search"></i>
                 <input type="text" name="search" class="form-control"
-                       placeholder="Search faculty, email, dept..." value="{{ search }}">
+                       placeholder="Search faculty, email, dept..." value="{{ search }}" autocomplete="off">
             </div>
             
             <select name="dept" class="filter-select" onchange="this.form.submit()">
@@ -61,15 +74,15 @@
             </select>
             
             {% if search or dept_filter or visiting_filter %}
-            <a href="{{ url_for('manage_faculty') }}" class="btn btn-sm btn-outline" style="padding: 0.45rem 0.75rem;">
+            <a href="{{ url_for('manage_faculty') }}" class="btn btn-sm btn-secondary">
                 <i class="fas fa-undo"></i> Reset
             </a>
             {% endif %}
         </form>
     </div>
 
-    <div class="table">
-        <table>
+    <div class="table-responsive">
+        <table class="table">
             <thead>
                 <tr>
                     <th>Name</th>
@@ -77,60 +90,42 @@
                     <th>Department</th>
                     <th>Designation</th>
                     <th>Type</th>
-                    <th>Subjects</th>
-                    <th>Available Hours / Slots</th>
+                    <th>Subjects Taught</th>
                     <th>Workload</th>
                     <th>Status</th>
-                    <th>Action</th>
+                    <th style="text-align: right;">Actions</th>
                 </tr>
             </thead>
 
             <tbody>
                 {% for faculty in faculty_list %}
                 <tr>
-                    <td><strong>{{ faculty.user.full_name }}</strong></td>
-                    <td>{{ faculty.user.email }}</td>
-                    <td>{{ faculty.department or '-' }}</td>
-                    <td>{{ faculty.designation or '-' }}</td>
+                    <td style="font-weight: 700; color: var(--text-main);">{{ faculty.user.full_name }}</td>
+                    <td style="color: var(--text-sub); font-size: 0.85rem;">{{ faculty.user.email }}</td>
+                    <td style="color: var(--text-main);">{{ faculty.department or '-' }}</td>
+                    <td style="color: var(--text-sub); font-size: 0.85rem;">{{ faculty.designation or '-' }}</td>
                     <td>
                         {% if faculty.is_visiting %}
-                            <span class="visiting-badge-sm">
+                            <span class="badge badge-cyan">
                                 <i class="fas fa-star"></i> Visiting
                             </span>
                         {% else %}
-                            <span class="badge badge-info" style="font-size: 0.72rem;">Regular</span>
+                            <span class="badge badge-info">Regular</span>
                         {% endif %}
                     </td>
 
                     <td>
                         {% if faculty.get_subjects() %}
                             {% for subject in faculty.get_subjects()[:3] %}
-                                <span class="badge badge-info">{{ subject }}</span>
+                                <span class="badge badge-info" style="font-size: 0.72rem; margin-right: 0.2rem;">{{ subject }}</span>
                             {% endfor %}
                             {% if faculty.get_subjects()|length > 3 %}
-                                <span class="badge badge-info">
+                                <span class="badge badge-secondary" style="font-size: 0.72rem;">
                                     +{{ faculty.get_subjects()|length - 3 }}
                                 </span>
                             {% endif %}
                         {% else %}
-                            <span style="color:#64748b;">Not set</span>
-                        {% endif %}
-                    </td>
-
-                    <td>
-                        {% if faculty.is_visiting %}
-                            <div style="font-size: 0.82rem; color: #c4b5fd;">
-                                <strong>Days:</strong> {{ faculty.get_visiting_days()|join(', ') if faculty.get_visiting_days() else 'None set' }}
-                            </div>
-                            <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 0.15rem;">
-                                {{ faculty.get_visiting_slots()|length }} time slot(s) selected
-                            </div>
-                        {% else %}
-                            {% if faculty.get_working_hours() %}
-                                {{ faculty.get_working_hours()['start'] }} - {{ faculty.get_working_hours()['end'] }}
-                            {% else %}
-                                <span style="color:#64748b;">Not set</span>
-                            {% endif %}
+                            <span style="color: var(--text-muted); font-size: 0.8rem;">Not set</span>
                         {% endif %}
                     </td>
 
@@ -138,11 +133,11 @@
                         {% set fac_wl = workload.get(faculty.id) %}
                         {% if fac_wl %}
                             {% set hours = fac_wl.total_hours %}
-                            <span class="badge" style="background: {% if hours <= 12 %}rgba(34,197,94,0.15); color: #86efac; border: 1px solid rgba(34,197,94,0.3);{% elif hours <= 20 %}rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3);{% else %}rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3);{% endif %} font-weight: 700; font-size: 0.85rem;">
+                            <span class="badge {% if hours <= 12 %}badge-success{% elif hours <= 20 %}badge-warning{% else %}badge-danger{% endif %}">
                                 {{ hours }} hrs ({{ fac_wl.lectures }}L / {{ fac_wl.labs }}P)
                             </span>
                         {% else %}
-                            <span class="badge" style="background: rgba(34,197,94,0.15); color: #86efac; border: 1px solid rgba(34,197,94,0.3); font-weight: 700; font-size: 0.85rem;">0 hrs</span>
+                            <span class="badge badge-success">0 hrs</span>
                         {% endif %}
                     </td>
 
@@ -154,20 +149,25 @@
                         {% endif %}
                     </td>
 
-                    <td>
-                        <form method="POST"
-                              action="{{ url_for('delete_faculty', faculty_id=faculty.id) }}"
-                              onsubmit="return confirm('Delete this faculty account? This cannot be undone.');"
-                              style="display:inline;">
-                            <button type="submit" class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i> Delete
+                    <td style="text-align: right;">
+                        <div style="display: inline-flex; gap: 0.35rem; align-items: center;">
+                            <button type="button" class="btn btn-sm btn-info" onclick="viewFacultyTimetable('{{ faculty.id }}')">
+                                <i class="fas fa-calendar-alt"></i> Schedule
                             </button>
-                        </form>
+                            <form method="POST"
+                                  action="{{ url_for('delete_faculty', faculty_id=faculty.id) }}"
+                                  onsubmit="return confirm('Delete this faculty account? This cannot be undone.');"
+                                  style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="9" style="text-align:center; color:#64748b; padding: 2rem;">
+                    <td colspan="9" style="text-align:center; color: var(--text-muted); padding: 2rem;">
                         No faculty found matching search/filter criteria.
                     </td>
                 </tr>
@@ -176,4 +176,96 @@
         </table>
     </div>
 </div>
+
+<!-- Admin Faculty Timetable Modal -->
+<div id="facultyTTModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:1rem; margin-bottom:1rem;">
+            <div>
+                <h2 style="margin:0; color: var(--text-main); font-size:1.3rem; font-weight: 800;" id="ftt-name">
+                    <i class="fas fa-calendar-alt" style="color: var(--brand-indigo);"></i> Faculty Timetable
+                </h2>
+                <div style="color: var(--text-sub); font-size:0.85rem; margin-top:0.25rem;" id="ftt-dept"></div>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeFacultyTTModal()" style="border-radius: 50%; width: 32px; height: 32px; padding: 0;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div id="ftt-body">
+            <div style="text-align:center; padding:2rem; color: var(--brand-cyan);">
+                <i class="fas fa-spinner fa-spin" style="font-size:1.5rem; margin-bottom:0.5rem;"></i>
+                <div>Loading schedule...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function viewFacultyTimetable(facultyId) {
+    const modal = document.getElementById('facultyTTModal');
+    const nameEl = document.getElementById('ftt-name');
+    const deptEl = document.getElementById('ftt-dept');
+    const bodyEl = document.getElementById('ftt-body');
+
+    modal.style.display = 'flex';
+    bodyEl.innerHTML = '<div style="text-align:center; padding:2rem; color: var(--brand-cyan);"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem; margin-bottom:0.5rem;"></i><div>Loading schedule...</div></div>';
+
+    fetch(`/admin/faculty/${facultyId}/timetable`)
+        .then(res => res.json())
+        .then(data => {
+            nameEl.innerHTML = `<i class="fas fa-calendar-alt" style="color: var(--brand-indigo);"></i> ${data.faculty_name}'s Timetable`;
+            deptEl.innerHTML = `<strong>Department:</strong> ${data.department} &nbsp;|&nbsp; <strong>Designation:</strong> ${data.designation}`;
+
+            let html = '<div class="table-responsive"><table class="tt-grid-table"><thead><tr><th>Time Slot</th>';
+            data.days.forEach(day => {
+                html += `<th>${day}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            data.timeslots.forEach(slot => {
+                html += `<tr><td style="font-weight:700; color: var(--brand-emerald);">${slot.time_range}</td>`;
+                data.days.forEach(day => {
+                    const entries = (data.matrix[day] && data.matrix[day][slot.id]) ? data.matrix[day][slot.id] : [];
+                    html += '<td>';
+                    if (entries.length > 0) {
+                        entries.forEach(e => {
+                            const isLab = e.entry_type === 'lab';
+                            const bg = isLab ? 'rgba(245, 158, 11, 0.12)' : 'rgba(99, 102, 241, 0.12)';
+                            const border = isLab ? 'rgba(245, 158, 11, 0.3)' : 'rgba(99, 102, 241, 0.3)';
+                            const color = isLab ? '#fde047' : '#a5b4fc';
+                            html += `
+                                <div class="tt-cell-card" style="background:${bg}; border-color:${border};">
+                                    <div style="font-weight:700; color:${color}; font-size:0.8rem;">
+                                        ${e.batch ? '<span class="badge badge-info" style="font-size:0.65rem;">' + e.batch + '</span> ' : ''}
+                                        ${e.subject}
+                                    </div>
+                                    <div style="color: var(--text-sub); font-size:0.75rem; margin-top:0.15rem;">
+                                        <i class="fas fa-users"></i> ${e.division} &nbsp;|&nbsp; <i class="fas fa-door-open"></i> ${e.room}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        html += '<span style="color: var(--text-muted); font-size:0.75rem;">—</span>';
+                    }
+                    html += '</td>';
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table></div>';
+            bodyEl.innerHTML = html;
+        })
+        .catch(err => {
+            bodyEl.innerHTML = '<div style="color: var(--brand-rose); padding:2rem; text-align:center;">Failed to load timetable schedule.</div>';
+        });
+}
+
+function closeFacultyTTModal() {
+    document.getElementById('facultyTTModal').style.display = 'none';
+}
+</script>
+{% endblock %}
 {% endblock %}

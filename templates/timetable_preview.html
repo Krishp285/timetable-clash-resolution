@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% block title %}AI Auto-Generator Preview - {{ division.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .preview-banner {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 214, 160, 0.05));
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-radius: 16px;
+        padding: 1.75rem;
+        margin-bottom: 2rem;
+        backdrop-filter: blur(12px);
+    }
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        margin-top: 1.25rem;
+    }
+    .preview-stat-card {
+        background: rgba(30, 41, 59, 0.6);
+        border: 1px solid rgba(148, 163, 184, 0.12);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        text-align: center;
+    }
+    .preview-stat-value {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #10b981;
+    }
+    .preview-stat-label {
+        font-size: 0.825rem;
+        color: #94a3b8;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .day-preview-card {
+        background: rgba(30, 41, 59, 0.4);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: 14px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    .day-preview-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #f1f5f9;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .entry-pill {
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.9rem;
+    }
+    .entry-pill.lecture {
+        background: rgba(56, 189, 248, 0.1);
+        border: 1px solid rgba(56, 189, 248, 0.25);
+        color: #38bdf8;
+    }
+    .entry-pill.lab {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.25);
+        color: #10b981;
+    }
+    .entry-pill.library {
+        background: rgba(148, 163, 184, 0.1);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        color: #94a3b8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="preview-banner">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <span class="badge badge-success" style="background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.4); padding: 0.35rem 0.75rem;">
+                    <i class="fas fa-flask"></i> AI Simulation Mode (Dry Run)
+                </span>
+                <h1 style="color: #f1f5f9; margin-top: 0.5rem; margin-bottom: 0.25rem;">
+                    ✨ AI Generated Timetable Preview
+                </h1>
+                <p style="color: #94a3b8; margin: 0; font-size: 0.95rem;">
+                    Division: <strong>{{ division.name }}</strong> (Semester {{ division.semester }}) | Academic Year: {{ division.academic_year }}
+                </p>
+            </div>
+            <div style="display: flex; gap: 0.75rem;">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+                <a href="{{ url_for('auto_generate_timetable', division_id=division.id, overwrite=1) }}" 
+                   onclick="return confirm('Commit this AI timetable to live database for {{ division.name }}?')" 
+                   class="btn btn-success" style="background: linear-gradient(135deg, #10b981, #059669); border: none; font-weight: 700;">
+                    <i class="fas fa-check-circle"></i> Commit to Live Schedule
+                </a>
+            </div>
+        </div>
+
+        <div class="stats-row">
+            <div class="preview-stat-card">
+                <div class="preview-stat-value">{{ preview_data.total_entries }}</div>
+                <div class="preview-stat-label">Total Entries</div>
+            </div>
+            <div class="preview-stat-card">
+                <div class="preview-stat-value" style="color: #38bdf8;">{{ preview_data.lectures_count }}</div>
+                <div class="preview-stat-label">Lectures</div>
+            </div>
+            <div class="preview-stat-card">
+                <div class="preview-stat-value" style="color: #10b981;">{{ preview_data.labs_count }}</div>
+                <div class="preview-stat-label">Parallel Lab Slots</div>
+            </div>
+            <div class="preview-stat-card">
+                <div class="preview-stat-value" style="color: #86efac;">0</div>
+                <div class="preview-stat-label">Active Clashes</div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="card-title" style="margin-bottom: 1.5rem;">
+        <i class="fas fa-calendar-alt"></i> Simulated AI Timetable Grid
+    </h2>
+
+    {% for day, entries in preview_data.schedule_by_day.items() %}
+    <div class="day-preview-card">
+        <div class="day-preview-title">
+            <i class="fas fa-calendar-day" style="color: #10b981;"></i> {{ day }}
+        </div>
+        
+        {% if entries %}
+            {% for e in entries %}
+            <div class="entry-pill {{ e.entry_type }}">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="font-weight: 700; min-width: 110px;">{{ e.time_range }}</span>
+                    <span class="badge" style="background: rgba(255,255,255,0.08);">{{ e.entry_type|upper }}</span>
+                    <span style="font-weight: 600; color: #f1f5f9;">{{ e.subject_name }}</span>
+                    {% if e.batch_name %}
+                        <span class="badge badge-info">Batch {{ e.batch_name }}</span>
+                    {% endif %}
+                </div>
+                <div style="display: flex; align-items: center; gap: 1rem; color: #94a3b8; font-size: 0.85rem;">
+                    <span><i class="fas fa-chalkboard-teacher"></i> {{ e.faculty_name }}</span>
+                    <span><i class="fas fa-door-open"></i> Room {{ e.room_number }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: #64748b; font-size: 0.9rem;">No simulated entries for this day.</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

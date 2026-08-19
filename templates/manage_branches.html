@@ -1,29 +1,29 @@
 {% extends 'base.html' %}
-{% block title %}Manage Branches{% endblock %}
+{% block title %}Manage Branches | Timetable Engine{% endblock %}
 
 {% block content %}
 <div class="card">
     <div class="card-header">
         <h1 class="card-title">
-            <i class="fas fa-building"></i> Manage Branches
+            <i class="fas fa-building"></i> Academic Branches
         </h1>
-        <div class="search-box">
+        <form method="GET" class="header-search">
             <i class="fas fa-search"></i>
-            <form method="GET" style="display: inline;">
-                <input type="text" name="q" class="form-control" placeholder="Search branches..." value="{{ q or '' }}">
-            </form>
-        </div>
+            <input type="text" name="q" placeholder="Search branches..." value="{{ q or '' }}" autocomplete="off">
+        </form>
     </div>
     
-    <form method="POST" action="{{ url_for('add_branch') }}" style="background: rgba(30, 41, 59, 0.5); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid rgba(148, 163, 184, 0.08);">
-        <h3 style="margin-bottom: 1rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-plus-circle"></i> Add New Branch</h3>
+    <form method="POST" action="{{ url_for('add_branch') }}" style="background: rgba(30, 41, 59, 0.4); padding: 1.5rem; border-radius: var(--radius-lg); margin-bottom: 2rem; border: 1px solid var(--border-color);">
+        <h3 style="margin-bottom: 1rem; color: var(--text-main); font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 0.55rem;">
+            <i class="fas fa-plus-circle" style="color: var(--brand-emerald);"></i> Add New Branch
+        </h3>
         <div style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 1rem; align-items: end;">
             <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Branch Name</label>
-                <input type="text" name="name" class="form-control" placeholder="e.g., Computer Science Engineering" required>
+                <input type="text" name="name" class="form-control" placeholder="e.g., Computer Engineering" required>
             </div>
             <div class="form-group" style="margin-bottom: 0;">
-                <label class="form-label">Short Name</label>
+                <label class="form-label">Short Code</label>
                 <input type="text" name="short_name" class="form-control" placeholder="e.g., CSE" required>
             </div>
             <button type="submit" class="btn btn-primary">
@@ -32,31 +32,32 @@
         </div>
     </form>
     
-    <h3 style="color: #94a3b8; font-weight: 700;"><i class="fas fa-list"></i> All Branches</h3>
-    <div class="table">
-        <table>
+    <h3 style="color: var(--text-sub); font-weight: 700; font-size: 1rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fas fa-list"></i> Registered Branches
+    </h3>
+    
+    <div class="table-responsive">
+        <table class="table">
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Branch Name</th>
                     <th>Short Name</th>
                     <th>Created Date</th>
-                    <th>Actions</th>
+                    <th style="text-align: right;">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for branch in branches %}
                 <tr>
-                    <td>{{ branch.id }}</td>
-                    <td>{{ branch.name }}</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--text-sub);">#{{ branch.id }}</td>
+                    <td style="font-weight: 700; color: var(--text-main);">{{ branch.name }}</td>
                     <td><span class="badge badge-info">{{ branch.short_name }}</span></td>
-                    <td>{{ branch.created_at.strftime('%Y-%m-%d') }}</td>
-                    <td>
-                        <button 
-        class="btn btn-sm btn-warning"
-        onclick="openEditModal('{{ branch.id }}', '{{ branch.name }}', '{{ branch.short_name }}')">
-        <i class="fas fa-edit"></i>
-    </button>
+                    <td style="color: var(--text-muted); font-size: 0.85rem;">{{ branch.created_at.strftime('%Y-%m-%d') if branch.created_at else 'N/A' }}</td>
+                    <td style="text-align: right;">
+                        <button class="btn btn-sm btn-warning" onclick="openEditModal('{{ branch.id }}', '{{ branch.name }}', '{{ branch.short_name }}')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
                         <form method="POST" action="{{ url_for('delete_branch', branch_id=branch.id) }}" style="display: inline;" onsubmit="return confirm('Delete this branch? All divisions will be removed.');">
                             <button type="submit" class="btn btn-sm btn-danger">
                                 <i class="fas fa-trash"></i> Delete
@@ -66,21 +67,25 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="5" style="text-align: center; color: #64748b;">No branches added yet</td>
+                    <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">No branches added yet</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-
-
+</div>
 
 <!-- Edit Branch Modal -->
-
-<div class="card">
-<div id="editBranchModal" class="modal" style="display:none;">
-    <div class="modal-content" style="max-width:500px;">
-        <h3><i class="fas fa-edit"></i> Edit Branch</h3>
+<div id="editBranchModal" class="modal-backdrop" style="display:none;">
+    <div class="modal-box" style="max-width: 500px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color);">
+            <h3 style="margin: 0; color: var(--text-main); font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-edit" style="color: var(--brand-indigo);"></i> Edit Branch
+            </h3>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeEditModal()" style="border-radius: 50%; width: 32px; height: 32px; padding: 0;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
 
         <form method="POST" action="{{ url_for('edit_branch') }}">
             <input type="hidden" name="branch_id" id="edit_branch_id">
@@ -95,7 +100,7 @@
                 <input type="text" name="short_name" id="edit_branch_short" class="form-control" required>
             </div>
 
-            <div style="display:flex; gap:1rem; justify-content:flex-end;">
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
                 <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i> Save Changes
@@ -103,16 +108,15 @@
             </div>
         </form>
     </div>
-    </div>
 </div>
-</div>
+
 {% block extra_js %}
 <script>
 function openEditModal(id, name, shortName) {
     document.getElementById('edit_branch_id').value = id;
     document.getElementById('edit_branch_name').value = name;
     document.getElementById('edit_branch_short').value = shortName;
-    document.getElementById('editBranchModal').style.display = 'block';
+    document.getElementById('editBranchModal').style.display = 'flex';
 }
 
 function closeEditModal() {

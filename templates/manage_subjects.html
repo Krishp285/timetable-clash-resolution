@@ -1,23 +1,56 @@
 {% extends 'base.html' %}
-{% block title %}Manage Subjects{% endblock %}
+{% block title %}Manage Subjects | Timetable Engine{% endblock %}
 
 {% block content %}
 <div class="card">
-    <div class="card-header">
+    <div class="card-header" style="margin-bottom: 1.5rem;">
         <h1 class="card-title">
-            <i class="fas fa-book"></i> Manage Subjects
+            <i class="fas fa-book-bookmark"></i> Curriculum Subjects
         </h1>
-        <div class="search-box">
-            <i class="fas fa-search"></i>
-            <form method="GET" style="display: inline;">
-                <input type="text" name="q" class="form-control" placeholder="Search subjects..." value="{{ q or search or '' }}">
-            </form>
-        </div>
     </div>
-    
-    <form method="POST" action="{{ url_for('add_subject') }}" style="background: rgba(30, 41, 59, 0.5); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid rgba(148, 163, 184, 0.08);">
-        <h3 style="margin-bottom: 1rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-plus-circle"></i> Add New Subject</h3>
-        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 1rem; align-items: end;">
+
+    <!-- Search & Filter Controls -->
+    <form method="GET" action="{{ url_for('manage_subjects') }}" style="background: rgba(17, 24, 39, 0.6); padding: 1.25rem 1.5rem; border-radius: var(--radius-lg); margin-bottom: 1.75rem; border: 1px solid var(--border-color);">
+        <div style="display: grid; grid-template-columns: 2fr 1.2fr 1.2fr auto auto; gap: 1rem; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 0.82rem; color: var(--text-sub);"><i class="fas fa-search"></i> Search Subject</label>
+                <input type="text" name="q" class="form-control" placeholder="Search by subject name or code..." value="{{ q or search or '' }}" autocomplete="off">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 0.82rem; color: var(--text-sub);"><i class="fas fa-code-branch"></i> Filter Branch</label>
+                <select name="branch_id" class="form-control" onchange="this.form.submit()">
+                    <option value="">All Branches</option>
+                    {% for b in branches %}
+                    <option value="{{ b.id }}" {% if selected_branch_id == b.id %}selected{% endif %}>{{ b.name }} ({{ b.short_name }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 0.82rem; color: var(--text-sub);"><i class="fas fa-layer-group"></i> Filter Semester</label>
+                <select name="semester" class="form-control" onchange="this.form.submit()">
+                    <option value="">All Semesters</option>
+                    {% for s in range(1, 9) %}
+                    <option value="{{ s }}" {% if selected_semester == s %}selected{% endif %}>Semester {{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="height: 42px;">
+                <i class="fas fa-filter"></i> Filter
+            </button>
+            {% if q or selected_branch_id or selected_semester %}
+            <a href="{{ url_for('manage_subjects') }}" class="btn btn-secondary" style="height: 42px; text-decoration: none;">
+                <i class="fas fa-undo"></i> Reset
+            </a>
+            {% endif %}
+        </div>
+    </form>
+
+    <!-- Add New Subject Form -->
+    <form method="POST" action="{{ url_for('add_subject') }}" style="background: rgba(30, 41, 59, 0.4); padding: 1.5rem; border-radius: var(--radius-lg); margin-bottom: 2rem; border: 1px solid var(--border-color);">
+        <h3 style="margin-bottom: 1rem; color: var(--text-main); font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 0.55rem;">
+            <i class="fas fa-plus-circle" style="color: var(--brand-emerald);"></i> Add New Subject
+        </h3>
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr 1.2fr 1fr 1.2fr 0.8fr 0.8fr auto; gap: 1rem; align-items: end;">
             <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Subject Name</label>
                 <input type="text" name="name" class="form-control" placeholder="e.g., Data Structures" required>
@@ -27,44 +60,104 @@
                 <input type="text" name="code" class="form-control" placeholder="e.g., CS301" required>
             </div>
             <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Branch</label>
+                <select name="branch_id" class="form-control" required>
+                    <option value="">-- Select Branch --</option>
+                    {% for b in branches %}
+                    <option value="{{ b.id }}">{{ b.name }} ({{ b.short_name }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Semester</label>
+                <select name="semester" class="form-control" required>
+                    {% for s in range(1, 9) %}
+                    <option value="{{ s }}">Semester {{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Subject Type</label>
+                <select name="has_lab" class="form-control" required>
+                    <option value="1">Lecture & Lab</option>
+                    <option value="0">Lecture Only</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" title="Weekly Lectures Limit">Lectures/Wk</label>
+                <input type="number" name="weekly_lectures" class="form-control" value="3" min="1" max="10" title="Weekly Lectures Limit (e.g. 3 for PPS)">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Credits</label>
                 <input type="number" name="credits" class="form-control" value="3" min="1" max="10">
             </div>
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary" style="height: 42px;">
                 <i class="fas fa-plus"></i> Add
             </button>
         </div>
     </form>
+
+    <h3 style="color: var(--text-sub); font-weight: 700; font-size: 1rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fas fa-list"></i> Registered Subjects
+    </h3>
     
-    <div class="table">
-        <table>
+    <div class="table-responsive">
+        <table class="table">
             <thead>
                 <tr>
                     <th>Subject Code</th>
+                    <th>Branch & Semester</th>
                     <th>Subject Name</th>
+                    <th>Type</th>
+                    <th>Lectures/Wk</th>
                     <th>Credits</th>
                     <th>Created Date</th>
-                    <th>Actions</th>
+                    <th style="text-align: right;">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for subject in subjects %}
                 <tr>
                     <td><span class="badge badge-info">{{ subject.code }}</span></td>
-                    <td>{{ subject.name }}</td>
-                    <td>{{ subject.credits }}</td>
-                    <td>{{ subject.created_at.strftime('%Y-%m-%d') }}</td>
                     <td>
-                        <button
-        class="btn btn-sm btn-warning"
-        onclick="openEditSubjectModal(
-            '{{ subject.id }}',
-            '{{ subject.name }}',
-            '{{ subject.code }}',
-            '{{ subject.credits }}'
-        )">
-        <i class="fas fa-edit"></i>
-    </button>
+                        <span class="badge badge-cyan">
+                            Sem {{ subject.semester or 'All' }} - {{ subject.branch.short_name if subject.branch else 'All' }}
+                        </span>
+                    </td>
+                    <td style="font-weight: 700; color: var(--text-main);">
+                        {{ subject.name }}
+                    </td>
+                    <td>
+                        {% if subject.has_lab %}
+                            <span class="badge badge-warning">
+                                <i class="fas fa-flask"></i> Lecture & Lab
+                            </span>
+                        {% else %}
+                            <span class="badge" style="background: rgba(148, 163, 184, 0.15); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.25);">
+                                <i class="fas fa-chalkboard-user"></i> Lecture Only
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge badge-success">
+                            <i class="fas fa-book-open"></i> {{ subject.required_lectures }} Lec/Wk
+                        </span>
+                    </td>
+                    <td style="font-weight: 700; color: var(--text-main);">{{ subject.credits }}</td>
+                    <td style="color: var(--text-muted); font-size: 0.85rem;">{{ subject.created_at.strftime('%Y-%m-%d') if subject.created_at else 'N/A' }}</td>
+                    <td style="text-align: right;">
+                        <button class="btn btn-sm btn-warning" onclick="openEditSubjectModal(
+                                '{{ subject.id }}',
+                                '{{ subject.name|replace("'", "\\'") }}',
+                                '{{ subject.code }}',
+                                '{{ subject.credits }}',
+                                '{{ subject.branch_id or '' }}',
+                                '{{ subject.semester or '' }}',
+                                '{{ 1 if subject.has_lab else 0 }}',
+                                '{{ subject.required_lectures }}'
+                            )">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
                         <form method="POST" action="{{ url_for('delete_subject', subject_id=subject.id) }}" style="display: inline;" onsubmit="return confirm('Delete this subject?');">
                             <button type="submit" class="btn btn-sm btn-danger">
                                 <i class="fas fa-trash"></i> Delete
@@ -74,7 +167,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="5" style="text-align: center; color: #64748b;">No subjects found</td>
+                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">No subjects match your filter criteria</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -83,48 +176,92 @@
 </div>
 
 <!-- Edit Subject Modal -->
- <div class="card">
-    <div id="editSubjectModal" class="modal" style="display:none;">
-        <div class="modal-content" style="max-width:600px;">
-            <h3><i class="fas fa-edit"></i> Edit Subject</h3>
-
-            <form method="POST" action="{{ url_for('edit_subject') }}">
-                <input type="hidden" name="subject_id" id="edit_subject_id">
-
-                <div class="form-group">
-                    <label class="form-label">Subject Name</label>
-                    <input type="text" name="name" id="edit_subject_name" class="form-control" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Subject Code</label>
-                    <input type="text" name="code" id="edit_subject_code" class="form-control" required>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Credits</label>
-                    <input type="number" name="credits" id="edit_subject_credits" class="form-control" min="1" max="10">
-                </div>
-
-                <div style="display:flex; gap:1rem; justify-content:flex-end;">
-                    <button type="button" class="btn btn-secondary" onclick="closeEditSubjectModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Save Changes
-                    </button>
-                </div>
-            </form>
+<div id="editSubjectModal" class="modal-backdrop" style="display:none;">
+    <div class="modal-box" style="max-width: 600px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color);">
+            <h3 style="margin: 0; color: var(--text-main); font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-edit" style="color: var(--brand-indigo);"></i> Edit Subject
+            </h3>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeEditSubjectModal()" style="border-radius: 50%; width: 32px; height: 32px; padding: 0;">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
+
+        <form method="POST" action="{{ url_for('edit_subject') }}">
+            <input type="hidden" name="subject_id" id="edit_subject_id">
+
+            <div class="form-group">
+                <label class="form-label">Subject Name</label>
+                <input type="text" name="name" id="edit_subject_name" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Subject Code</label>
+                <input type="text" name="code" id="edit_subject_code" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Branch</label>
+                <select name="branch_id" id="edit_subject_branch_id" class="form-control" required>
+                    <option value="">-- Select Branch --</option>
+                    {% for b in branches %}
+                    <option value="{{ b.id }}">{{ b.name }} ({{ b.short_name }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Semester</label>
+                <select name="semester" id="edit_subject_semester" class="form-control" required>
+                    {% for s in range(1, 9) %}
+                    <option value="{{ s }}">Semester {{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Subject Type</label>
+                <select name="has_lab" id="edit_subject_has_lab" class="form-control" required>
+                    <option value="1">Lecture & Lab</option>
+                    <option value="0">Lecture Only</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Weekly Lectures Quota</label>
+                <input type="number" name="weekly_lectures" id="edit_subject_weekly_lectures" class="form-control" value="3" min="1" max="10" required title="Weekly Lectures Quota (e.g. 3 lectures/week)">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Credits</label>
+                <input type="number" name="credits" id="edit_subject_credits" class="form-control" min="1" max="10">
+            </div>
+
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeEditSubjectModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </form>
     </div>
 </div>
+
 {% block extra_js %}
 <script>
-function openEditSubjectModal(id, name, code, credits) {
+function openEditSubjectModal(id, name, code, credits, branch_id, semester, has_lab, weekly_lectures) {
     document.getElementById('edit_subject_id').value = id;
     document.getElementById('edit_subject_name').value = name;
     document.getElementById('edit_subject_code').value = code;
     document.getElementById('edit_subject_credits').value = credits;
+    if (document.getElementById('edit_subject_weekly_lectures')) {
+        document.getElementById('edit_subject_weekly_lectures').value = weekly_lectures || 3;
+    }
+    if (branch_id) document.getElementById('edit_subject_branch_id').value = branch_id;
+    if (semester) document.getElementById('edit_subject_semester').value = semester;
+    if (has_lab !== undefined) document.getElementById('edit_subject_has_lab').value = has_lab;
 
-    document.getElementById('editSubjectModal').style.display = 'block';
+    document.getElementById('editSubjectModal').style.display = 'flex';
 }
 
 function closeEditSubjectModal() {
@@ -132,5 +269,4 @@ function closeEditSubjectModal() {
 }
 </script>
 {% endblock %}
-
 {% endblock %}

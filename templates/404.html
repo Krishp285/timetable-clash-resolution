@@ -3,93 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - Page Not Found</title>
+    <title>404 Page Not Found | Timetable Engine</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --brand-indigo: #6366f1;
+            --brand-purple: #8b5cf6;
+            --bg-body: #090d16;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #0a0e1a;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #f1f5f9;
-            text-align: center;
             padding: 2rem;
             overflow: hidden;
+            position: relative;
         }
-        body::before {
-            content: '';
-            position: fixed;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: 
-                radial-gradient(ellipse 400px 400px at 30% 40%, rgba(124, 58, 237, 0.12) 0%, transparent 70%),
-                radial-gradient(ellipse 350px 350px at 70% 60%, rgba(56, 189, 248, 0.08) 0%, transparent 70%);
-            animation: bgDrift 20s ease-in-out infinite alternate;
-            z-index: 0;
+
+        .ambient-bg {
+            position: fixed; inset: 0; pointer-events: none; z-index: 0;
         }
-        @keyframes bgDrift {
+        .orb {
+            position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.35;
+            animation: orbFloat 22s ease-in-out infinite alternate;
+        }
+        .orb-1 { width: 500px; height: 500px; background: radial-gradient(circle, var(--brand-indigo), transparent 70%); top: -100px; left: -100px; }
+        .orb-2 { width: 450px; height: 450px; background: radial-gradient(circle, var(--brand-purple), transparent 70%); bottom: -100px; right: -100px; }
+
+        @keyframes orbFloat {
             0% { transform: translate(0, 0); }
-            100% { transform: translate(2%, -2%); }
+            100% { transform: translate(30px, -30px); }
         }
-        .error-container {
-            max-width: 600px;
+
+        .error-card {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 3.5rem 3rem;
+            max-width: 580px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
             position: relative;
             z-index: 1;
         }
-        .error-code {
-            font-size: 8rem;
-            font-weight: 900;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #7c3aed 0%, #06d6a0 50%, #38bdf8 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.05em;
-            line-height: 1;
-        }
-        h1 {
-            font-size: 2.2rem;
-            margin-bottom: 1rem;
-            font-weight: 800;
-            color: #f1f5f9;
-        }
-        p {
-            font-size: 1.1rem;
-            margin-bottom: 2rem;
-            color: #94a3b8;
-        }
-        .btn {
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, #06d6a0 0%, #0ea5e9 100%);
-            color: #0a0e1a;
-            text-decoration: none;
-            border-radius: 12px;
-            font-weight: 700;
+
+        .error-badge {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            font-family: 'Inter', sans-serif;
+            padding: 0.35rem 0.95rem;
+            border-radius: 20px;
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #a5b4fc;
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
         }
-        .btn:hover {
+
+        .error-code {
+            font-size: 6.5rem;
+            font-weight: 900;
+            line-height: 1;
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, var(--brand-indigo) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.05em;
+            margin-bottom: 0.8rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 0.75rem;
+        }
+
+        p {
+            color: var(--text-sub);
+            font-size: 0.98rem;
+            line-height: 1.6;
+            margin-bottom: 2.25rem;
+        }
+
+        .btn-home {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            padding: 0.85rem 1.85rem;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--brand-indigo) 0%, var(--brand-purple) 100%);
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-home:hover {
             transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(6, 214, 160, 0.3);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.5);
         }
     </style>
 </head>
 <body>
-    <div class="error-container">
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <div class="error-card">
+        <div class="error-badge">
+            <i class="fas fa-triangle-exclamation"></i> Error 404 &bull; Resource Missing
+        </div>
         <div class="error-code">404</div>
-        <h1><i class="fas fa-compass"></i> Page Not Found</h1>
-        <p>Sorry, the page you're looking for doesn't exist or has been moved.</p>
-        <a href="/" class="btn">
-            <i class="fas fa-home"></i> Back to Home
+        <h1>Page Not Found</h1>
+        <p>The requested route or resource could not be found on the Timetable Engine server. It may have been moved or deleted.</p>
+        
+        <a href="{{ url_for('admin_dashboard') }}" class="btn-home">
+            <i class="fas fa-house"></i> Return to Command Center
         </a>
     </div>
 </body>

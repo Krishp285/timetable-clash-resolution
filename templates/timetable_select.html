@@ -28,13 +28,29 @@
             </select>
         </div>
         
-        <button type="submit" class="btn btn-primary" style="width: 100%;">
-            <i class="fas fa-arrow-right"></i> Continue to Timetable Creation
-        </button>
+        <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+            <button type="submit" class="btn btn-primary" style="flex: 1;">
+                <i class="fas fa-arrow-right"></i> Continue to Timetable Creation
+            </button>
+            <button type="button" onclick="autoGenerate()" class="btn btn-success" style="flex: 1; background: linear-gradient(135deg, #10b981, #059669); border: none; font-weight: 600;">
+                <i class="fas fa-magic"></i> ✨ Auto-Generate (AI)
+            </button>
+        </div>
     </form>
 </div>
 
 <script>
+function autoGenerate() {
+    const divId = document.getElementById('divisionSelect').value;
+    if (!divId) {
+        alert('Please select a branch and division first.');
+        return;
+    }
+    const preserve = confirm('Click OK to PRESERVE all manually added timetable entries and auto-fill remaining slots.\n\nClick Cancel if you want to replace all entries with a fresh schedule.');
+    const overwriteParam = preserve ? '0' : '1';
+    window.location.href = `/timetable/auto-generate/${divId}?overwrite=${overwriteParam}`;
+}
+
 function loadDivisions() {
     const branchId = document.getElementById('branchSelect').value;
     const divisionSelect = document.getElementById('divisionSelect');

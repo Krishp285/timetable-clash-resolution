@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% block title %}System Activity History | Timetable Engine{% endblock %}
+
+{% block extra_css %}
+<style>
+    .activity-timeline {
+        position: relative;
+        padding-left: 2rem;
+        margin-top: 1.5rem;
+    }
+
+    .activity-timeline::before {
+        content: '';
+        position: absolute;
+        top: 0; bottom: 0; left: 15px;
+        width: 2px;
+        background: var(--border-color);
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+        background: rgba(17, 24, 39, 0.6);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem 1.5rem;
+        transition: var(--transition);
+    }
+
+    .timeline-item:hover {
+        transform: translateX(4px);
+        border-color: rgba(99, 102, 241, 0.35);
+        background: rgba(17, 24, 39, 0.85);
+    }
+
+    .timeline-icon-dot {
+        position: absolute;
+        left: -2.35rem;
+        top: 1.25rem;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--bg-card-solid);
+        border: 2px solid var(--brand-indigo);
+        color: var(--brand-indigo);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        box-shadow: 0 0 10px var(--glow-indigo);
+    }
+
+    .timeline-item.action-autogen .timeline-icon-dot {
+        border-color: var(--brand-emerald);
+        color: var(--brand-emerald);
+        box-shadow: 0 0 10px var(--glow-emerald);
+    }
+
+    .timeline-item.action-delete .timeline-icon-dot {
+        border-color: var(--brand-rose);
+        color: var(--brand-rose);
+    }
+
+    .action-badge {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        padding: 0.25rem 0.65rem;
+        border-radius: var(--radius-pill);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header" style="flex-wrap: wrap; gap: 1rem;">
+        <h1 class="card-title">
+            <i class="fas fa-clock-rotate-left" style="color: var(--brand-indigo);"></i> System Activity & Audit History
+        </h1>
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <span class="badge badge-info" style="font-size: 0.9rem; padding: 0.4rem 0.85rem;">
+                <i class="fas fa-list-check"></i> {{ logs|length }} Activity Records
+            </span>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <form method="GET" action="{{ url_for('activity_log') }}" class="filter-bar" style="display: flex; gap: 0.85rem; flex-wrap: wrap; background: rgba(30, 41, 59, 0.4); padding: 1.25rem; border-radius: var(--radius-md); margin-bottom: 2rem; border: 1px solid var(--border-color);">
+        <div style="flex: 1; min-width: 220px;">
+            <label class="form-label">Search Activity</label>
+            <input type="text" name="q" class="form-control" placeholder="Search description, user or entity..." value="{{ q or '' }}" autocomplete="off">
+        </div>
+
+        <div style="width: 180px;">
+            <label class="form-label">Action Type</label>
+            <select name="action_type" class="form-control" onchange="this.form.submit()">
+                <option value="">All Actions</option>
+                <option value="AUTO_GENERATE" {% if selected_action == 'AUTO_GENERATE' %}selected{% endif %}>Auto Generate</option>
+                <option value="ADD_ENTRY" {% if selected_action == 'ADD_ENTRY' %}selected{% endif %}>Add Entry</option>
+                <option value="EDIT_ENTRY" {% if selected_action == 'EDIT_ENTRY' %}selected{% endif %}>Edit Entry</option>
+                <option value="DELETE_ENTRY" {% if selected_action == 'DELETE_ENTRY' %}selected{% endif %}>Delete Entry</option>
+                <option value="CLEAR_TIMETABLE" {% if selected_action == 'CLEAR_TIMETABLE' %}selected{% endif %}>Clear Timetable</option>
+            </select>
+        </div>
+
+        <div style="display: flex; align-items: flex-end; gap: 0.5rem;">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-filter"></i> Filter
+            </button>
+            {% if q or selected_action %}
+            <a href="{{ url_for('activity_log') }}" class="btn btn-secondary">
+                <i class="fas fa-undo"></i> Reset
+            </a>
+            {% endif %}
+        </div>
+    </form>
+
+    <!-- Activity Timeline Feed -->
+    {% if logs %}
+    <div class="activity-timeline">
+        {% for log in logs %}
+        {% set act = log.action_type %}
+        <div class="timeline-item {% if 'AUTO' in act %}action-autogen{% elif 'DELETE' in act or 'CLEAR' in act %}action-delete{% endif %}">
+            <div class="timeline-icon-dot">
+                <i class="fas fa-{% if 'AUTO' in act %}wand-magic-sparkles{% elif 'ADD' in act or 'CREATE' in act %}plus{% elif 'EDIT' in act %}pen{% elif 'DELETE' in act or 'CLEAR' in act %}trash{% else %}bolt{% endif %}"></i>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+                    <span class="action-badge {% if 'AUTO' in act %}badge-success{% elif 'DELETE' in act or 'CLEAR' in act %}badge-danger{% elif 'EDIT' in act %}badge-warning{% else %}badge-info{% endif %}">
+                        {{ log.action_type }}
+                    </span>
+                    <span style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">
+                        <i class="fas fa-user-circle" style="color: var(--brand-indigo);"></i> {{ log.user_name or 'System Engine' }}
+                    </span>
+                </div>
+                <span style="color: var(--text-muted); font-size: 0.82rem; display: flex; align-items: center; gap: 0.35rem;">
+                    <i class="fas fa-clock"></i> {{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                </span>
+            </div>
+
+            <p style="color: var(--text-light); font-size: 0.92rem; line-height: 1.5; margin: 0;">
+                {{ log.description }}
+            </p>
+
+            {% if log.entity_type %}
+            <div style="margin-top: 0.6rem; display: flex; gap: 0.5rem; align-items: center; font-size: 0.78rem; color: var(--text-sub);">
+                <span class="badge badge-cyan" style="font-size: 0.7rem;">Entity: {{ log.entity_type|upper }}</span>
+                {% if log.entity_id %}
+                <span style="font-family: 'JetBrains Mono', monospace;">ID: #{{ log.entity_id }}</span>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 4rem 2rem; color: var(--text-muted);">
+        <i class="fas fa-clock-rotate-left" style="font-size: 3rem; margin-bottom: 1rem; color: var(--border-hover);"></i>
+        <h3 style="color: var(--text-main); font-weight: 700;">No Activity Records Found</h3>
+        <p style="margin-top: 0.3rem;">System operations, timetable modifications, and auto-generations will appear here.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

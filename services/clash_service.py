@@ -64,12 +64,12 @@ class ClashService:
         if existing:
             details = {
                 'type': 'faculty_clash',
-                'faculty_name': existing.faculty.user.full_name,
-                'subject': existing.subject.name,
-                'division': existing.division.full_name,
-                'room': existing.room_number,
+                'faculty_name': existing.faculty.user.full_name if existing.faculty and existing.faculty.user else 'N/A',
+                'subject': existing.subject.name if existing.subject else existing.entry_type.upper(),
+                'division': existing.division.full_name if existing.division else 'N/A',
+                'room': existing.room_number or 'N/A',
                 'day': existing.day,
-                'time': existing.time_slot.time_range
+                'time': existing.time_slot.time_range if existing.time_slot else 'N/A'
             }
             return True, details
         
@@ -104,12 +104,13 @@ class ClashService:
             details = {
                 'type': 'room_clash',
                 'room': room_number,
-                'division': existing.division.full_name,
-                'subject': existing.subject.name,
-                'faculty': existing.faculty.user.full_name,
+                'division': existing.division.full_name if existing.division else 'N/A',
+                'subject': existing.subject.name if existing.subject else existing.entry_type.upper(),
+                'faculty': existing.faculty.user.full_name if existing.faculty and existing.faculty.user else 'N/A',
                 'day': existing.day,
-                'time': existing.time_slot.time_range
+                'time': existing.time_slot.time_range if existing.time_slot else 'N/A'
             }
+            return True, details
             return True, details
         
         return False, None
@@ -224,6 +225,48 @@ class ClashService:
                         'day': day,
                         'time_slot': time_slot.time_range
                     })
+
+            # STRICT WORKLOAD CAP: Max 30 Weekly Hours and Max 6 Daily Hours per Faculty
+            if faculty:
+                hours_to_add = 2 if entry_type == 'lab' else 1
+                
+                # 1. Weekly Workload Cap (Max 30 Hours)
+                fac_weekly_query = Timetable.query.filter(
+                    Timetable.faculty_id == faculty_id,
+                    Timetable.entry_type.in_(['lecture', 'lab'])
+                )
+                if exclude_entry_id:
+                    fac_weekly_query = fac_weekly_query.filter(Timetable.id != exclude_entry_id)
+                current_weekly_hours = fac_weekly_query.count()
+                
+                if current_weekly_hours + hours_to_add > 30:
+                    clashes.append({
+                        'type': 'faculty_weekly_workload_clash',
+                        'message': f"Faculty {faculty.user.full_name} has reached maximum weekly workload limit of 30 teaching hours (Current: {current_weekly_hours}h).",
+                        'faculty_id': faculty_id,
+                        'current_hours': current_weekly_hours,
+                        'max_hours': 30
+                    })
+
+                # 2. Daily Workload Cap (Max 6 Hours per Day)
+                fac_daily_query = Timetable.query.filter(
+                    Timetable.faculty_id == faculty_id,
+                    Timetable.day == day,
+                    Timetable.entry_type.in_(['lecture', 'lab'])
+                )
+                if exclude_entry_id:
+                    fac_daily_query = fac_daily_query.filter(Timetable.id != exclude_entry_id)
+                current_daily_hours = fac_daily_query.count()
+                
+                if current_daily_hours + hours_to_add > 6:
+                    clashes.append({
+                        'type': 'faculty_daily_workload_clash',
+                        'message': f"Faculty {faculty.user.full_name} has reached maximum daily workload limit of 6 teaching hours on {day} (Current: {current_daily_hours}h).",
+                        'faculty_id': faculty_id,
+                        'day': day,
+                        'current_hours': current_daily_hours,
+                        'max_hours': 6
+                    })
         
         # Check room clash
         if room_number:
@@ -231,7 +274,16 @@ class ClashService:
                 room_number, day, time_slot_id, exclude_entry_id
             )
             if has_clash:
+                details['suggestion'] = f"Room {room_number} is occupied on {day} at this slot. Select an available room in Manage Rooms or pick an alternative time slot."
                 clashes.append(details)
+        else:
+            clashes.append({
+                'type': 'room_missing_clash',
+                'message': f"Room constraint failed: No room specified. Entries must have a valid non-empty room number.",
+                'suggestion': "Select an available room or create a room in Manage Rooms.",
+                'day': day,
+                'time_slot_id': time_slot_id
+            })
         
         # Check division clash (batch-aware)
         has_clash, details = ClashService.check_division_clash(
@@ -240,26 +292,56 @@ class ClashService:
         if has_clash:
             clashes.append(details)
             
-        # Check weekly lab limit for this batch: at most 1 lab session of this subject per week
-        if entry_type == 'lab' and batch_id and subject_id:
-            existing_lab = Timetable.query.filter(
-                Timetable.division_id == division_id,
-                Timetable.batch_id == batch_id,
-                Timetable.subject_id == subject_id,
-                Timetable.entry_type == 'lab',
-                Timetable.day != day
-            ).first()
-            if existing_lab and (exclude_entry_id is None or existing_lab.id != exclude_entry_id):
-                batch_obj = Batch.query.get(batch_id)
-                batch_name = batch_obj.name if batch_obj else str(batch_id)
-                clashes.append({
-                    'type': 'batch_lab_limit_clash',
-                    'message': f"Batch {batch_name} already has a lab for this subject on {existing_lab.day}.",
-                    'batch_id': batch_id,
-                    'subject_id': subject_id,
-                    'day': existing_lab.day,
-                    'time_slot': TimeSlot.query.get(existing_lab.time_slot_id).time_range
-                })
+        # Check subject weekly lecture limit
+        if entry_type == 'lecture' and subject_id and division_id:
+            subject = Subject.query.get(subject_id)
+            if subject:
+                req_lecs = subject.required_lectures
+                q_lecs = Timetable.query.filter(
+                    Timetable.division_id == division_id,
+                    Timetable.subject_id == subject_id,
+                    Timetable.entry_type == 'lecture'
+                )
+                if exclude_entry_id:
+                    q_lecs = q_lecs.filter(Timetable.id != exclude_entry_id)
+                current_count = q_lecs.count()
+                if current_count >= req_lecs:
+                    clashes.append({
+                        'type': 'subject_lecture_limit_clash',
+                        'message': f"Weekly lecture limit reached for {subject.name}. Maximum allowed: {req_lecs} lectures per week.",
+                        'subject_id': subject_id,
+                        'max_lectures': req_lecs
+                    })
+
+        # Check subject weekly lab limit (Fixed 1 lab session per week, 0 if has_lab is False)
+        if entry_type == 'lab' and subject_id:
+            subject = Subject.query.get(subject_id)
+            if subject:
+                if not subject.has_lab:
+                    clashes.append({
+                        'type': 'subject_no_lab_clash',
+                        'message': f"Subject {subject.name} does NOT contain a lab session (Lecture Only).",
+                        'subject_id': subject_id
+                    })
+                elif batch_id:
+                    existing_lab_days = db.session.query(Timetable.day).filter(
+                        Timetable.division_id == division_id,
+                        Timetable.batch_id == batch_id,
+                        Timetable.subject_id == subject_id,
+                        Timetable.entry_type == 'lab'
+                    )
+                    if exclude_entry_id:
+                        existing_lab_days = existing_lab_days.filter(Timetable.id != exclude_entry_id)
+                    distinct_lab_days = [d[0] for d in existing_lab_days.distinct().all()]
+                    if day not in distinct_lab_days and len(distinct_lab_days) >= 1:
+                        batch_obj = Batch.query.get(batch_id)
+                        batch_name = batch_obj.name if batch_obj else str(batch_id)
+                        clashes.append({
+                            'type': 'batch_lab_limit_clash',
+                            'message': f"Weekly lab limit reached for {subject.name} (Batch {batch_name}). Maximum allowed: 1 lab session per week.",
+                            'batch_id': batch_id,
+                            'subject_id': subject_id
+                        })
         
         # For lab entries: faculty must also be free in the NEXT consecutive slot (lab = 2 hrs)
         if entry_type == 'lab' and faculty_id:
@@ -435,7 +517,10 @@ class ClashService:
         clash_log.set_details(details)
         
         db.session.add(clash_log)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
         
         return clash_log
     

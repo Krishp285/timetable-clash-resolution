@@ -8,11 +8,12 @@ import io
 import zipfile
 from flask import Flask
 from extensions import db
-from models import ClashLog, User, Faculty, Branch, Division, Subject, TimeSlot, Timetable, Room, Batch
+from models import ClashLog, User, Faculty, Branch, Division, Subject, TimeSlot, Timetable, Room, Batch, ActivityLog
 from services.clash_service import ClashService
+from services.auto_generator_service import AutoTimetableGenerator
 from flask import render_template, request, redirect, url_for, flash, session, jsonify, make_response
 from functools import wraps
-from datetime import datetime
+from datetime import datetime, date
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 
 
@@ -461,16 +462,35 @@ def manage_divisions():
 
 
 
+@app.route('/admin/divisions/add', methods=['POST'])
 @app.route('/admin/divisions', methods=['GET', 'POST'])
 @admin_required
 def add_division():
     if request.method == 'POST':
         branch_id = request.form.get('branch_id', type=int)
-        name = request.form.get('name')
+        name = (request.form.get('name') or '').strip()
         semester = request.form.get('semester', type=int)
-        academic_year = request.form.get('academic_year')
+        academic_year = (request.form.get('academic_year') or '').strip()
         student_count = request.form.get('student_count', type=int) or 60
         num_batches = request.form.get('num_batches', type=int) or 1
+
+        if not branch_id or not name or not semester or not academic_year:
+            flash('⚠️ All division fields (Branch, Name, Semester, Academic Year) are required!', 'danger')
+            return redirect(url_for('manage_divisions'))
+
+        # Check if division with same branch_id, name, semester, academic_year already exists
+        existing = Division.query.filter_by(
+            branch_id=branch_id,
+            name=name,
+            semester=semester,
+            academic_year=academic_year
+        ).first()
+
+        if existing:
+            branch = Branch.query.get(branch_id)
+            b_name = branch.short_name if branch else ''
+            flash(f"⚠️ Division '{name}' (Semester {semester}) already exists for {b_name} in academic year {academic_year}!", "danger")
+            return redirect(url_for('manage_divisions'))
         
         division = Division(
             branch_id=branch_id,
@@ -481,7 +501,7 @@ def add_division():
             num_batches=num_batches
         )
         db.session.add(division)
-        db.session.flush()  # Get the division.id
+        db.session.flush()  # Get division.id
         
         # Auto-create batch rows if num_batches > 1
         if num_batches > 1:
@@ -496,14 +516,10 @@ def add_division():
         
         db.session.commit()
         
-        flash('Division added successfully', 'success')
-        return redirect(url_for('add_division'))
+        flash(f'✨ Division {division.full_name} added successfully!', 'success')
+        return redirect(url_for('manage_divisions'))
     
-    branches = Branch.query.all()
-    divisions = Division.query.all()
-    return render_template('manage_divisions.html',
-                         branches=branches,
-                         divisions=divisions)
+    return redirect(url_for('manage_divisions'))
 
 
 
@@ -687,34 +703,53 @@ def delete_room(room_id):
 @admin_required
 def manage_subjects():
     q = (request.args.get('q') or request.args.get('search') or '').strip()
-    query = Subject.query.order_by(Subject.code)
+    branch_id = request.args.get('branch_id', type=int)
+    semester = request.args.get('semester', type=int)
+
+    query = Subject.query.order_by(Subject.semester, Subject.code)
     if q:
         query = query.filter(
             (Subject.name.ilike(f'%{q}%')) |
             (Subject.code.ilike(f'%{q}%'))
         )
+    if branch_id:
+        query = query.filter(Subject.branch_id == branch_id)
+    if semester:
+        query = query.filter(Subject.semester == semester)
+
     subjects = query.all()
+    branches = Branch.query.order_by(Branch.name).all()
     return render_template(
         'manage_subjects.html',
         subjects=subjects,
+        branches=branches,
+        selected_branch_id=branch_id,
+        selected_semester=semester,
         q=q,
         search=q
     )
 
 
-
 @app.route('/admin/subjects/add', methods=['POST'])
 @admin_required
 def add_subject():
+    branch_id = request.form.get('branch_id', type=int)
+    semester = request.form.get('semester', type=int)
+    has_lab = request.form.get('has_lab', type=int, default=1) == 1
+    weekly_lectures = request.form.get('weekly_lectures', type=int) or request.form.get('credits', type=int) or 3
     subject = Subject(
         name=request.form['name'],
         code=request.form['code'],
         credits=request.form['credits'],
+        weekly_lectures=weekly_lectures,
+        branch_id=branch_id,
+        semester=semester,
+        has_lab=has_lab,
         created_by=current_user.id
     )
     db.session.add(subject)
     db.session.commit()
-    flash('Subject added', 'success')
+    flash('Subject added successfully', 'success')
     return redirect(url_for('manage_subjects'))
 
 
@@ -725,6 +760,10 @@ def edit_subject():
     name = request.form.get('name')
     code = request.form.get('code')
     credits = request.form.get('credits', type=int)
+    weekly_lectures = request.form.get('weekly_lectures', type=int) or credits or 3
+    branch_id = request.form.get('branch_id', type=int)
+    semester = request.form.get('semester', type=int)
+    has_lab = request.form.get('has_lab', type=int, default=1) == 1
 
     subject = Subject.query.get_or_404(subject_id)
 
@@ -741,6 +780,10 @@ def edit_subject():
     subject.name = name
     subject.code = code
     subject.credits = credits
+    subject.weekly_lectures = weekly_lectures
+    subject.branch_id = branch_id
+    subject.semester = semester
+    subject.has_lab = has_lab
 
     db.session.commit()
 
@@ -922,11 +965,105 @@ def delete_faculty(faculty_id):
     return redirect(url_for('manage_faculty'))
 
 
+@app.route('/admin/faculty/<int:faculty_id>/timetable')
+@admin_required
+def admin_view_faculty_timetable(faculty_id):
+    faculty = Faculty.query.get_or_404(faculty_id)
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    timeslots = TimeSlot.query.order_by(TimeSlot.start_time).all()
+    entries = Timetable.query.filter_by(faculty_id=faculty.id).all()
+
+    # Build matrix: {day: {slot_id: [entries]}}
+    timetable_matrix = {day: {slot.id: [] for slot in timeslots} for day in days}
+    for entry in entries:
+        if entry.day in timetable_matrix and entry.time_slot_id in timetable_matrix[entry.day]:
+            timetable_matrix[entry.day][entry.time_slot_id].append({
+                'id': entry.id,
+                'subject': entry.subject.name if entry.subject else 'N/A',
+                'subject_code': entry.subject.code if entry.subject else '',
+                'division': entry.division.full_name if entry.division else 'N/A',
+                'batch': entry.batch.name if entry.batch else None,
+                'room': entry.room_number or 'N/A',
+                'entry_type': entry.entry_type
+            })
+
+    return jsonify({
+        'faculty_name': faculty.user.full_name,
+        'department': faculty.department or 'N/A',
+        'designation': faculty.designation or 'Faculty',
+        'days': days,
+        'timeslots': [{'id': s.id, 'time_range': s.time_range, 'label': s.slot_label or ''} for s in timeslots],
+        'matrix': timetable_matrix
+    })
+
+
 
 
 # ============================================
 # 7️⃣ TIMETABLE MODULE (ADMIN)
 # ============================================
+
+def get_dynamic_lab_start_slots(timeslots):
+    """
+    Dynamically identifies valid lab start slots from an ordered list of TimeSlot records.
+    A lab is 2 hours long. A slot is a valid lab start slot if it forms a continuous
+    2-hour block with the immediately following time slot (gap <= 15 minutes),
+    and is the start of that 2-hour block.
+    """
+    valid_start_ids = set()
+    i = 0
+    n = len(timeslots)
+    while i < n:
+        if i + 1 < n:
+            t1_end = timeslots[i].end_time
+            t2_start = timeslots[i+1].start_time
+            dt1 = datetime.combine(date.today(), t1_end)
+            dt2 = datetime.combine(date.today(), t2_start)
+            gap = (dt2 - dt1).total_seconds() / 60.0
+            
+            if 0 <= gap <= 15:
+                valid_start_ids.add(timeslots[i].id)
+                i += 2  # Skip 2nd hour slot as start slot
+                continue
+        i += 1
+    return valid_start_ids
+
+@app.route('/timetable/auto-generate/<int:division_id>', methods=['GET', 'POST'])
+@admin_required
+def auto_generate_timetable(division_id):
+    division = Division.query.get_or_404(division_id)
+    # Default to overwrite=True so newly generated timetable cleanly replaces old entries
+    overwrite = request.args.get('overwrite', '1') != '0' and request.form.get('overwrite', '1') != '0'
+    res = AutoTimetableGenerator.generate_timetable(division_id, overwrite=overwrite, created_by=session.get('user_id', 1))
+    
+    if res.get('success'):
+        flash(f"✨ {res['message']}", 'success')
+    else:
+        flash(f"Error auto-generating timetable: {res.get('message')}", 'danger')
+        
+    return redirect(url_for('timetable_create', division_id=division_id, day='Monday'))
+
+
+@app.route('/timetable/auto-generate-all', methods=['GET', 'POST'])
+@admin_required
+def auto_generate_all():
+    divisions = Division.query.all()
+    count = 0
+    for div in divisions:
+        res = AutoTimetableGenerator.generate_timetable(div.id, overwrite=True, created_by=session.get('user_id', 1))
+        if res.get('success'):
+            count += 1
+    flash(f"✨ AI Auto-Generator successfully processed {count} active division timetables cleanly!", 'success')
+    return redirect(url_for('admin_dashboard'))
+
+
+@app.route('/timetable/preview-auto-generate/<int:division_id>')
+@admin_required
+def preview_auto_generate(division_id):
+    division = Division.query.get_or_404(division_id)
+    preview_data = AutoTimetableGenerator.preview_timetable(division_id)
+    return render_template('timetable_preview.html', division=division, preview_data=preview_data)
+
 
 @app.route('/timetable/select')
 @admin_required
@@ -1003,7 +1140,13 @@ def timetable_create():
         ).all()
         occupied_rooms[slot.id] = {entry.room_number for entry in occupied_entries}
 
-    subjects = Subject.query.order_by(Subject.name).all()
+    # Filter subjects strictly by division semester and branch_id
+    subjects = Subject.query.filter(
+        (Subject.semester == division.semester) | (Subject.semester.is_(None)),
+        (Subject.branch_id == division.branch_id) | (Subject.branch_id.is_(None))
+    ).order_by(Subject.name).all()
+    if not subjects:
+        subjects = Subject.query.order_by(Subject.name).all()
     rooms = Room.query.order_by(Room.name).all()
 
     # Subject load for this division (count of scheduled lectures per subject)
@@ -1016,6 +1159,7 @@ def timetable_create():
     div_batches = division.batches.order_by(Batch.name).all() if division.num_batches and division.num_batches > 1 else []
 
     # Calculate exact slot status for UI form rendering
+    valid_lab_start_ids = get_dynamic_lab_start_slots(timeslots)
     slot_status = {}
     for slot in timeslots:
         entries = timetable_map.get(slot.id, [])
@@ -1025,8 +1169,7 @@ def timetable_create():
         all_batches_assigned = bool(div_batches and len(assigned_batch_ids) >= len(div_batches))
         is_fully_occupied = is_library_or_break or has_full_div or all_batches_assigned
         
-        t_str = str(slot.start_time).strip()
-        is_lab_start_slot = any(t_str.startswith(t) for t in ('08:30', '10:30', '13:00', '8:30'))
+        is_lab_start_slot = slot.id in valid_lab_start_ids
 
         slot_status[slot.id] = {
             'has_full_div': has_full_div,
@@ -1068,12 +1211,12 @@ def add_timetable_entry():
     entry_type = request.form.get('entry_type', 'lecture')
     batch_id = request.form.get('batch_id', type=int) or None
 
-    # Enforce lab start slot restrictions (labs only start at 08:30, 10:30, 13:00)
+    # Enforce lab start slot restrictions dynamically (labs can only start at the beginning of a 2-hour continuous block before a break)
     if entry_type == 'lab':
-        slot_obj = TimeSlot.query.get(time_slot_id)
-        t_str = str(slot_obj.start_time).strip() if slot_obj else ''
-        if not any(t_str.startswith(t) for t in ('08:30', '10:30', '13:00', '8:30')):
-            flash('Labs can only start at 08:30, 10:30, or 13:00 (2-hour blocks before breaks).', 'danger')
+        all_slots = TimeSlot.query.order_by(TimeSlot.start_time).all()
+        valid_start_ids = get_dynamic_lab_start_slots(all_slots)
+        if time_slot_id not in valid_start_ids:
+            flash('Labs can only start at the beginning of a 2-hour continuous block before a break.', 'danger')
             return redirect(url_for('timetable_create', division_id=division_id, day=day))
 
     # Library / Break entries: no faculty, subject, or room needed
@@ -1098,6 +1241,7 @@ def add_timetable_entry():
             day=day,
             room_number=None,
             entry_type=entry_type,
+            is_manual=True,
             created_by=session['user_id']
         )
         db.session.add(entry)
@@ -1161,6 +1305,7 @@ def add_timetable_entry():
         day=day,
         room_number=room_number,
         entry_type=entry_type,
+        is_manual=True,
         created_by=session['user_id']
     )
 
@@ -1191,6 +1336,7 @@ def add_timetable_entry():
                         day=day,
                         room_number=room_number,
                         entry_type=entry_type,
+                        is_manual=True,
                         created_by=session['user_id']
                     )
                     db.session.add(next_entry)
@@ -1465,20 +1611,23 @@ def faculty_profile():
             if start_t and end_t:
                 faculty.set_working_hours(start_t, end_t)
 
+        # Save subjects from checkboxes and custom input
+        selected_subjects = request.form.getlist('subject_select')
         subjects_raw = request.form.get('subjects', '')
-        subjects_list = [
-        s.strip()
-        for s in subjects_raw.split(',')
-            if s.strip()
-        ]
+        raw_list = [s.strip() for s in subjects_raw.split(',') if s.strip()]
+        
+        combined_subjects = []
+        for s in selected_subjects + raw_list:
+            if s and s not in combined_subjects:
+                combined_subjects.append(s)
 
-        faculty.set_subjects(subjects_list)
+        faculty.set_subjects(combined_subjects)
 
         db.session.commit()
         flash('Profile updated successfully', 'success')
         return redirect(url_for('faculty_profile'))
 
-    # 🔹 FETCH FACULTY TIMETABLE
+    # 🔹 FETCH FACULTY TIMETABLE & SUBJECTS
     timetable_entries = (
         Timetable.query
         .filter_by(faculty_id=faculty.id)
@@ -1487,12 +1636,14 @@ def faculty_profile():
     )
 
     timeslots = TimeSlot.query.order_by(TimeSlot.start_time).all()
+    system_subjects = Subject.query.order_by(Subject.semester, Subject.code).all()
 
     return render_template(
         'faculty_profile.html',
         faculty=faculty,
         timetable_entries=timetable_entries,
-        timeslots=timeslots
+        timeslots=timeslots,
+        system_subjects=system_subjects
     )
 
 
@@ -1604,16 +1755,27 @@ def api_faculty_matrix():
 @app.route('/api/subjects/search')
 def api_search_subjects():
     query = request.args.get('q', '')
-    subjects = Subject.query.filter(
-        (Subject.name.ilike(f'%{query}%')) |
-        (Subject.code.ilike(f'%{query}%'))
-    ).limit(10).all()
+    semester = request.args.get('semester', type=int)
+    branch_id = request.args.get('branch_id', type=int)
+
+    q_filter = (Subject.name.ilike(f'%{query}%')) | (Subject.code.ilike(f'%{query}%'))
+    base_query = Subject.query.filter(q_filter)
+
+    if semester:
+        base_query = base_query.filter((Subject.semester == semester) | (Subject.semester.is_(None)))
+    if branch_id:
+        base_query = base_query.filter((Subject.branch_id == branch_id) | (Subject.branch_id.is_(None)))
+
+    subjects = base_query.limit(15).all()
     
     return jsonify({
         'subjects': [{
             'id': s.id,
             'name': s.name,
-            'code': s.code
+            'code': s.code,
+            'display_name': s.display_name,
+            'semester': s.semester,
+            'branch': s.branch.short_name if s.branch else None
         } for s in subjects]
     })
 
@@ -1723,6 +1885,19 @@ def view_clashes():
 def resolve_clash(clash_id):
     ClashService.resolve_clash(clash_id, resolved_by_id=current_user.id)
     flash('Clash marked as resolved', 'success')
+    return redirect(url_for('view_clashes'))
+
+@app.route('/admin/clashes/clear-all', methods=['POST'])
+@admin_required
+def clear_all_clashes():
+    """Clear all logged clashes from database"""
+    try:
+        count = db.session.query(ClashLog).delete()
+        db.session.commit()
+        flash(f'🧹 Successfully cleared all {count} logged clashes!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error clearing clashes: {str(e)}', 'danger')
     return redirect(url_for('view_clashes'))
 
 @app.route('/api/ml/clash-suggestions/<int:clash_id>', methods=['GET'])
@@ -1910,22 +2085,257 @@ def api_clash_risk_summary():
             'error': str(e)
         }), 400
 
-@app.route('/api/ml/train-model', methods=['POST'])
-@admin_required
-def api_train_model():
-    """Train/retrain the ML clash prediction model"""
-    try:
-        success = ClashService.train_clash_prediction_model()
-        
-        return jsonify({
-            'success': success,
-            'message': 'Model trained successfully' if success else 'Model training failed'
+# ============================================
+# 🔹 AJAX APIs (Asynchronous Un-refreshed UI Operations)
+# ============================================
+
+@app.route('/api/division/<int:division_id>/subjects')
+@login_required
+def api_get_division_subjects(division_id):
+    division = Division.query.get_or_404(division_id)
+    subjects = Subject.query.filter(
+        (Subject.semester == division.semester) | (Subject.semester.is_(None)),
+        (Subject.branch_id == division.branch_id) | (Subject.branch_id.is_(None))
+    ).order_by(Subject.name).all()
+    if not subjects:
+        subjects = Subject.query.order_by(Subject.name).all()
+    
+    subject_list = []
+    for s in subjects:
+        subject_list.append({
+            'id': s.id,
+            'name': s.name,
+            'code': s.code,
+            'display_name': s.display_name,
+            'has_lab': s.has_lab,
+            'required_lectures': s.required_lectures
         })
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 400
+    return jsonify({'success': True, 'division_id': division_id, 'subjects': subject_list})
+
+
+@app.route('/api/subject/<int:subject_id>/faculties')
+@login_required
+def api_get_subject_faculties(subject_id):
+    subject = Subject.query.get_or_404(subject_id)
+    all_faculty = Faculty.query.filter_by(is_available=True).all()
+    qualified = []
+    
+    sub_name_clean = subject.name.strip().lower()
+    sub_code_clean = subject.code.strip().lower()
+
+    for fac in all_faculty:
+        fac_subs = [s.strip().lower() for s in fac.get_subjects()]
+        is_qualified = any(
+            sub_name_clean == fs or sub_code_clean == fs or sub_name_clean in fs or fs in sub_name_clean
+            for fs in fac_subs
+        )
+        if not is_qualified and subject.branch:
+            is_qualified = bool(fac.department and fac.department.lower() in subject.branch.name.lower())
+        
+        if is_qualified or not qualified:
+            qualified.append({
+                'id': fac.id,
+                'name': fac.user.full_name,
+                'department': fac.department or 'General',
+                'is_visiting': fac.is_visiting
+            })
+            
+    return jsonify({'success': True, 'subject_id': subject_id, 'faculties': qualified})
+
+
+@app.route('/api/division/<int:division_id>/timetable-data')
+@login_required
+def api_get_timetable_data(division_id):
+    division = Division.query.get_or_404(division_id)
+    entries = Timetable.query.filter_by(division_id=division_id).all()
+    timeslots = TimeSlot.query.order_by(TimeSlot.start_time).all()
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    
+    grid = {d: {ts.id: [] for ts in timeslots} for d in days}
+    for e in entries:
+        if e.day in grid and e.time_slot_id in grid[e.day]:
+            grid[e.day][e.time_slot_id].append({
+                'id': e.id,
+                'entry_type': e.entry_type,
+                'subject_name': e.subject.name if e.subject else ('LIBRARY' if e.entry_type == 'library' else 'BREAK'),
+                'subject_code': e.subject.code if e.subject else '',
+                'faculty_name': e.faculty.user.full_name if e.faculty and e.faculty.user else '',
+                'room_number': e.room_number or '',
+                'batch_name': e.batch.name if e.batch else '',
+                'is_manual': e.is_manual
+            })
+            
+    timeslots_info = [{'id': ts.id, 'time_range': ts.time_range, 'label': ts.slot_label} for ts in timeslots]
+    
+    return jsonify({
+        'success': True,
+        'division': {
+            'id': division.id,
+            'full_name': division.full_name,
+            'semester': division.semester,
+            'academic_year': division.academic_year
+        },
+        'days': days,
+        'timeslots': timeslots_info,
+        'grid': grid,
+        'total_entries': len(entries)
+    })
+
+
+@app.route('/api/timetable/add-entry', methods=['POST'])
+@login_required
+def api_add_timetable_entry():
+    data = request.get_json() or request.form
+    division_id = int(data.get('division_id'))
+    day = data.get('day')
+    time_slot_id = int(data.get('time_slot_id'))
+    entry_type = data.get('entry_type', 'lecture')
+    
+    if entry_type in ('library', 'break'):
+        entry = Timetable(
+            division_id=division_id, subject_id=None, faculty_id=None,
+            time_slot_id=time_slot_id, batch_id=None, day=day, room_number='Library' if entry_type == 'library' else None,
+            entry_type=entry_type, is_manual=True, created_by=current_user.id
+        )
+        db.session.add(entry)
+        db.session.commit()
+        return jsonify({'success': True, 'message': f'{entry_type.capitalize()} added successfully!', 'entry_id': entry.id})
+
+    subject_id = int(data.get('subject_id'))
+    faculty_id = int(data.get('faculty_id'))
+    room_number = data.get('room_number')
+    batch_id = int(data.get('batch_id')) if data.get('batch_id') else None
+
+    faculty = Faculty.query.get_or_404(faculty_id)
+    is_valid, clashes = ClashService.validate_and_detect_clashes(
+        faculty.id, division_id, room_number, day, time_slot_id,
+        batch_id=batch_id, entry_type=entry_type, subject_id=subject_id
+    )
+
+    if not is_valid:
+        return jsonify({'success': False, 'message': clashes[0].get('message', 'Clash detected'), 'clashes': clashes}), 400
+
+    entry = Timetable(
+        division_id=division_id, subject_id=subject_id, faculty_id=faculty.id,
+        time_slot_id=time_slot_id, batch_id=batch_id, day=day, room_number=room_number,
+        entry_type=entry_type, is_manual=True, created_by=current_user.id
+    )
+    db.session.add(entry)
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': 'Entry added successfully!', 'entry_id': entry.id})
+
+
+@app.route('/api/timetable/delete-entry/<int:entry_id>', methods=['POST', 'DELETE'])
+@login_required
+def api_delete_timetable_entry(entry_id):
+    entry = Timetable.query.get_or_404(entry_id)
+    division_id = entry.division_id
+    db.session.delete(entry)
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'Entry deleted successfully!', 'division_id': division_id})
+
+
+@app.route('/api/auto-generate/<int:division_id>', methods=['POST'])
+@login_required
+def api_auto_generate(division_id):
+    result = AutoTimetableGenerator.generate_timetable(division_id, overwrite=True, created_by=current_user.id)
+    if result.get('success'):
+        div = Division.query.get(division_id)
+        d_name = div.full_name if div else f"ID #{division_id}"
+        ActivityLog.log(
+            action_type='AUTO_GENERATE',
+            description=f'✨ Auto-generated 100% clash-free timetable for Division {d_name} ({result.get("total_entries", 0)} entries created)',
+            user_id=current_user.id,
+            user_name=getattr(current_user, 'full_name', 'User'),
+            entity_type='division',
+            entity_id=division_id,
+            details=result
+        )
+    return jsonify(result)
+
+
+# ============================================
+# 📜 ACTIVITY HISTORY & USER PROFILE ROUTES
+# ============================================
+
+@app.route('/admin/activity-log')
+@login_required
+def activity_log():
+    """View overall system activity history log"""
+    q = (request.args.get('q') or '').strip()
+    action_type = (request.args.get('action_type') or '').strip()
+    
+    query = ActivityLog.query.order_by(ActivityLog.created_at.desc())
+    
+    if action_type:
+        query = query.filter(ActivityLog.action_type == action_type)
+    if q:
+        query = query.filter(
+            (ActivityLog.description.ilike(f'%{q}%')) |
+            (ActivityLog.user_name.ilike(f'%{q}%')) |
+            (ActivityLog.entity_type.ilike(f'%{q}%'))
+        )
+    
+    logs = query.limit(300).all()
+    return render_template('activity_log.html', logs=logs, q=q, selected_action=action_type)
+
+
+@app.route('/admin/profile', methods=['GET', 'POST'])
+@login_required
+def admin_profile():
+    """View and edit current user's profile settings"""
+    user = User.query.get_or_404(current_user.id)
+    faculty = Faculty.query.filter_by(user_id=user.id).first()
+    
+    if request.method == 'POST':
+        full_name = (request.form.get('full_name') or '').strip()
+        username = (request.form.get('username') or '').strip()
+        email = (request.form.get('email') or '').strip()
+        new_password = request.form.get('new_password')
+        
+        department = request.form.get('department')
+        designation = request.form.get('designation')
+        
+        # Check duplicate username/email if changed
+        if username != user.username and User.query.filter_by(username=username).first():
+            flash('⚠️ Username is already taken!', 'danger')
+            return redirect(url_for('admin_profile'))
+            
+        if email != user.email and User.query.filter_by(email=email).first():
+            flash('⚠️ Email address is already registered!', 'danger')
+            return redirect(url_for('admin_profile'))
+            
+        user.full_name = full_name
+        user.username = username
+        user.email = email
+        
+        if new_password and len(new_password.strip()) > 0:
+            user.set_password(new_password.strip())
+            
+        if faculty:
+            faculty.department = department
+            faculty.designation = designation
+            
+        db.session.commit()
+        
+        # Update session info
+        session['name'] = user.full_name
+        session['username'] = user.username
+        
+        ActivityLog.log(
+            action_type='PROFILE_UPDATE',
+            description=f'Updated account profile details for {user.full_name} (@{user.username})',
+            user_id=user.id,
+            user_name=user.full_name,
+            entity_type='user',
+            entity_id=user.id
+        )
+        
+        flash('✨ Your profile details have been updated successfully!', 'success')
+        return redirect(url_for('admin_profile'))
+        
+    return render_template('admin_profile.html', user=user, faculty=faculty)
 
 
 # ============================================

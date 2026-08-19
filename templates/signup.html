@@ -3,240 +3,496 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - Timetable System</title>
+    <title>Create Account | Timetable Operating System</title>
+    
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome 6 Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        :root {
+            --brand-indigo: #6366f1;
+            --brand-purple: #8b5cf6;
+            --brand-emerald: #10b981;
+            --brand-cyan: #06b6d4;
+            --bg-body: #090d16;
+            --bg-card: rgba(17, 24, 39, 0.75);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --text-muted: #64748b;
+            --glow-indigo: rgba(99, 102, 241, 0.3);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #0a0e1a;
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
+            padding: 1.5rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Ambient Background Glow */
+        .ambient-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
             overflow: hidden;
         }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: 
-                radial-gradient(ellipse 500px 500px at 25% 25%, rgba(124, 58, 237, 0.15) 0%, transparent 70%),
-                radial-gradient(ellipse 400px 400px at 75% 65%, rgba(6, 214, 160, 0.1) 0%, transparent 70%),
-                radial-gradient(ellipse 300px 300px at 60% 30%, rgba(56, 189, 248, 0.06) 0%, transparent 70%);
-            animation: bgDrift 20s ease-in-out infinite alternate;
-            z-index: 0;
-        }
-        @keyframes bgDrift {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            50% { transform: translate(2%, -2%) rotate(1deg); }
-            100% { transform: translate(-1%, 1%) rotate(-0.5deg); }
-        }
-
         .orb {
-            position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0;
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.35;
+            animation: orbFloat 22s ease-in-out infinite alternate;
         }
         .orb-1 {
-            width: 300px; height: 300px;
-            background: rgba(124, 58, 237, 0.18);
-            top: 5%; right: 15%;
-            animation: float1 18s ease-in-out infinite;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, var(--brand-purple), transparent 70%);
+            top: -150px; right: -150px;
         }
         .orb-2 {
-            width: 250px; height: 250px;
-            background: rgba(6, 214, 160, 0.12);
-            bottom: 10%; left: 10%;
-            animation: float2 22s ease-in-out infinite;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, var(--brand-cyan), transparent 70%);
+            bottom: -100px; left: -100px;
+            animation-delay: -10s;
         }
-        @keyframes float1 { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(30px,-20px); } }
-        @keyframes float2 { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-25px,20px); } }
 
-        .auth-container {
-            background: rgba(15, 23, 42, 0.7);
+        @keyframes orbFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-50px, 40px) scale(1.05); }
+            100% { transform: translate(40px, -50px) scale(0.95); }
+        }
+
+        /* Split Screen Container */
+        .auth-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1.1fr;
+            width: 100%;
+            max-width: 1150px;
+            min-height: 700px;
+            background: rgba(17, 24, 39, 0.65);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
-            padding: 3rem;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 80px rgba(6, 214, 160, 0.04);
-            max-width: 500px;
-            width: 100%;
-            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            border: 1px solid rgba(148, 163, 184, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6), 0 0 1px 1px rgba(255, 255, 255, 0.08);
+            overflow: hidden;
             position: relative;
             z-index: 1;
         }
-        .auth-container::before {
-            content: '';
-            position: absolute;
-            top: -1px; left: -1px; right: -1px; bottom: -1px;
-            border-radius: 21px;
-            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), transparent 50%, rgba(6, 214, 160, 0.1));
-            z-index: -1;
-            pointer-events: none;
+
+        @media (max-width: 900px) {
+            .auth-wrapper {
+                grid-template-columns: 1fr;
+            }
+            .hero-panel {
+                display: none;
+            }
         }
-        @keyframes slideUp {
-            from { transform: translateY(30px) scale(0.97); opacity: 0; }
-            to { transform: translateY(0) scale(1); opacity: 1; }
+
+        /* Hero Left Panel */
+        .hero-panel {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(99, 102, 241, 0.1) 50%, rgba(6, 182, 212, 0.05) 100%);
+            border-right: 1px solid var(--border-color);
+            padding: 3.5rem 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
         }
-        .auth-header { text-align: center; margin-bottom: 2rem; }
-        .auth-header h1 {
-            font-size: 1.9rem;
+
+        .hero-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .brand-icon-box {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--brand-purple), var(--brand-cyan));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; color: white;
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+        }
+
+        .hero-content h2 {
+            font-size: 2.2rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #7c3aed 0%, #06d6a0 50%, #38bdf8 100%);
-            background-size: 200% 200%;
-            background-clip: text;
+            line-height: 1.25;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
-            animation: shimmer 6s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+
+        .hero-content p {
+            color: var(--text-sub);
+            font-size: 0.98rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.1rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.9rem;
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 14px;
+        }
+
+        .feature-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--brand-purple);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .feature-text h4 {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .feature-text p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .hero-footer {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.82rem;
+            color: #67e8f9;
+            font-weight: 600;
+        }
+
+        /* Form Right Panel */
+        .form-panel {
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-header {
+            margin-bottom: 1.75rem;
+        }
+
+        .form-header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-main);
             letter-spacing: -0.02em;
+            margin-bottom: 0.4rem;
         }
-        @keyframes shimmer {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+
+        .form-header p {
+            color: var(--text-sub);
+            font-size: 0.9rem;
         }
-        .auth-header p { color: #94a3b8; font-size: 0.95rem; }
-        .form-group { margin-bottom: 1.5rem; }
-        .form-label {
-            display: block; margin-bottom: 0.5rem; font-weight: 600;
-            color: #94a3b8; font-size: 0.85rem;
-            text-transform: uppercase; letter-spacing: 0.03em;
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
         }
-        .form-control {
-            width: 100%; padding: 0.8rem 1rem;
-            border: 1px solid rgba(148, 163, 184, 0.15);
-            border-radius: 10px; font-size: 0.95rem;
-            transition: all 0.3s ease;
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-group-custom {
+            position: relative;
+            margin-bottom: 1.15rem;
+        }
+
+        .input-group-custom label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.4rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i.input-icon {
+            position: absolute;
+            left: 1rem;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            pointer-events: none;
+            transition: color 0.3s;
+        }
+
+        .input-wrapper input, .input-wrapper select {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.65rem;
             background: rgba(30, 41, 59, 0.6);
-            color: #f1f5f9;
-            font-family: 'Inter', sans-serif;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.92rem;
+            transition: all 0.3s ease;
         }
-        .form-control:focus {
-            outline: none; border-color: #06d6a0;
-            box-shadow: 0 0 0 3px rgba(6, 214, 160, 0.2), 0 0 20px rgba(6, 214, 160, 0.08);
-            background: rgba(30, 41, 59, 0.8);
-        }
-        .form-control::placeholder { color: #64748b; }
-        select.form-control {
-            cursor: pointer; appearance: none;
+
+        .input-wrapper select {
+            cursor: pointer;
+            appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 1rem center;
             padding-right: 2.5rem;
         }
-        select.form-control option { background: #1e293b; color: #f1f5f9; }
-        .btn {
-            width: 100%; padding: 0.9rem; border: none; border-radius: 10px;
-            font-size: 1rem; font-weight: 700; cursor: pointer;
-            background: linear-gradient(135deg, #7c3aed 0%, #06d6a0 100%);
-            color: white; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            font-family: 'Inter', sans-serif; letter-spacing: 0.01em;
-            position: relative; overflow: hidden;
+
+        .input-wrapper select option {
+            background: #111827;
+            color: var(--text-main);
         }
-        .btn::before {
-            content: ''; position: absolute; top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-            transition: left 0.5s ease;
+
+        .input-wrapper input:focus, .input-wrapper select:focus {
+            outline: none;
+            border-color: var(--brand-purple);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+            background: rgba(30, 41, 59, 0.85);
         }
-        .btn:hover::before { left: 100%; }
-        .btn:hover {
+
+        .input-wrapper input:focus + i.input-icon, .input-wrapper select:focus + i.input-icon {
+            color: var(--brand-purple);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 0.9rem;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, var(--brand-purple) 0%, var(--brand-indigo) 100%);
+            color: white;
+            font-family: inherit;
+            font-size: 0.98rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn-submit:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.35), 0 0 50px rgba(6, 214, 160, 0.12);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.45);
         }
-        .auth-footer { text-align: center; margin-top: 1.5rem; color: #64748b; font-size: 0.9rem; }
-        .auth-footer a {
-            color: #06d6a0; text-decoration: none; font-weight: 600; transition: color 0.3s ease;
+
+        .alert-banner {
+            padding: 0.85rem 1.15rem;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            border: 1px solid;
         }
-        .auth-footer a:hover { color: #38bdf8; text-shadow: 0 0 12px rgba(6, 214, 160, 0.4); }
-        .alert {
-            padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem;
-            font-weight: 500;
-        }
+
         .alert-success {
-            background: rgba(34, 197, 94, 0.15);
-            color: #86efac;
-            border: 1px solid rgba(34, 197, 94, 0.25);
+            background: rgba(16, 185, 129, 0.12);
+            color: #6ee7b7;
+            border-color: rgba(16, 185, 129, 0.3);
         }
+
         .alert-danger, .alert-error {
-            background: rgba(239, 68, 68, 0.15);
-            color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.25);
+            background: rgba(244, 63, 94, 0.12);
+            color: #fda4af;
+            border-color: rgba(244, 63, 94, 0.3);
         }
-        .alert-warning {
-            background: rgba(245, 158, 11, 0.15);
-            color: #fcd34d;
-            border: 1px solid rgba(245, 158, 11, 0.25);
+
+        .form-footer {
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 0.88rem;
+            color: var(--text-muted);
         }
-        .alert-info {
-            background: rgba(56, 189, 248, 0.15);
-            color: #7dd3fc;
-            border: 1px solid rgba(56, 189, 248, 0.25);
+
+        .form-footer a {
+            color: var(--brand-purple);
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.2s;
         }
-        ::selection { background: #06d6a0; color: #0a0e1a; }
+
+        .form-footer a:hover {
+            color: #c4b5fd;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
 
-    <div class="auth-container">
-        <div class="auth-header">
-            <h1><i class="fas fa-user-plus"></i> Create Account</h1>
-            <p>Join the Timetable Management System</p>
+    <div class="auth-wrapper">
+        <!-- Hero Left Branding Panel -->
+        <div class="hero-panel">
+            <div class="hero-brand">
+                <div class="brand-icon-box">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main);">Timetable Engine</h3>
+                    <span style="font-size: 0.72rem; color: var(--brand-cyan); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">Account Registration</span>
+                </div>
+            </div>
+
+            <div class="hero-content">
+                <h2>Join the Next-Gen Academic Scheduling Portal</h2>
+                <p>Register as an administrator or faculty member to access personalized schedule management.</p>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-id-badge"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Personalized Faculty Portals</h4>
+                            <p>View your weekly teaching load, assigned lab sessions, and classroom locations.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon" style="background: rgba(6, 182, 212, 0.15); color: var(--brand-cyan);">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Automated Workload Analytics</h4>
+                            <p>Real-time calculation of weekly teaching hours with smart workload limits.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-footer">
+                <i class="fas fa-lock"></i> Secured & Encrypted Portal
+            </div>
         </div>
-        
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                        <div class="alert alert-{{ category if category in ['success', 'danger', 'warning', 'info'] else 'info' }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        <form method="POST">
-            <div class="form-group">
-                <label class="form-label">Full Name</label>
-                <input type="text" name="full_name" class="form-control" required>
+
+        <!-- Right Form Panel -->
+        <div class="form-panel">
+            <div class="form-header">
+                <h1>Create Account</h1>
+                <p>Fill in your details to register a new account</p>
             </div>
-            
-            <div class="form-group">
-                <label class="form-label">Username</label>
-                <input type="text" name="username" class="form-control" required>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert-banner alert-{{ category if category in ['success', 'danger', 'warning', 'info'] else 'danger' }}">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                <div class="form-grid">
+                    <div class="input-group-custom">
+                        <label>Full Name</label>
+                        <div class="input-wrapper">
+                            <input type="text" name="full_name" placeholder="Dr. John Doe" required autofocus>
+                            <i class="fas fa-user-tie input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="input-group-custom">
+                        <label>Username</label>
+                        <div class="input-wrapper">
+                            <input type="text" name="username" placeholder="johndoe" required autocomplete="username">
+                            <i class="fas fa-at input-icon"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group-custom">
+                    <label>Email Address</label>
+                    <div class="input-wrapper">
+                        <input type="email" name="email" placeholder="john.doe@university.edu" required autocomplete="email">
+                        <i class="fas fa-envelope input-icon"></i>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="input-group-custom">
+                        <label>Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" name="password" placeholder="Create password" required autocomplete="new-password">
+                            <i class="fas fa-lock input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="input-group-custom">
+                        <label>Account Role</label>
+                        <div class="input-wrapper">
+                            <select name="role" required>
+                                <option value="">Select Role</option>
+                                <option value="admin">Admin</option>
+                                <option value="faculty">Faculty</option>
+                            </select>
+                            <i class="fas fa-user-shield input-icon"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-user-plus"></i> Complete Registration
+                </button>
+            </form>
+
+            <div class="form-footer">
+                Already have an account? <a href="{{ url_for('login') }}">Sign in here</a>
             </div>
-            
-            <div class="form-group">
-                <label class="form-label">Email</label>
-                <input type="email" name="email" class="form-control" required>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Password</label>
-                <input type="password" name="password" class="form-control" required>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Role</label>
-                <select name="role" class="form-control" required>
-                    <option value="">-- Select Role --</option>
-                    <option value="admin">Admin</option>
-                    <option value="faculty">Faculty</option>
-                </select>
-            </div>
-            
-            <button type="submit" class="btn">
-                <i class="fas fa-user-plus"></i> Sign Up
-            </button>
-        </form>
-        
-        <div class="auth-footer">
-            Already have an account? <a href="{{ url_for('login') }}">Login here</a>
         </div>
     </div>
 </body>

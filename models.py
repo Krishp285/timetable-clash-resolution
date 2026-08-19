@@ -282,8 +282,33 @@ class Subject(db.Model):
     name = db.Column(db.String(200), nullable=False)
     code = db.Column(db.String(20), unique=True, nullable=False)
     credits = db.Column(db.Integer, default=3)
+    semester = db.Column(db.Integer, nullable=True)
+    branch_id = db.Column(db.Integer, db.ForeignKey('branches.id'), nullable=True)
+    has_lab = db.Column(db.Boolean, default=True)
+    weekly_lectures = db.Column(db.Integer, default=3)  # Required lectures per week (e.g., 3 for PPS)
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    branch = db.relationship('Branch', backref='subjects')
+
+    @property
+    def required_lectures(self):
+        return self.weekly_lectures if self.weekly_lectures and self.weekly_lectures > 0 else (self.credits if self.credits and self.credits > 0 else 3)
+
+    @property
+    def required_labs(self):
+        return 1 if self.has_lab else 0
+
+    @property
+    def display_name(self):
+        branch_code = self.branch.short_name if self.branch else 'ALL'
+        sem_str = f"Sem {self.semester}" if self.semester else 'All Sem'
+        return f"[{sem_str} - {branch_code}] {self.name}"
+
+    @property
+    def subject_type_label(self):
+        lab_str = " + 1 Lab" if self.has_lab else ""
+        return f"{self.required_lectures} Lec/Wk{lab_str}"
     
     def __repr__(self):
         return f'<Subject {self.code} - {self.name}>'
@@ -318,6 +343,7 @@ class Timetable(db.Model):
     day = db.Column(db.String(20), nullable=False)  # Monday-Saturday
     room_number = db.Column(db.String(50), nullable=True)  # Nullable for library/break
     entry_type = db.Column(db.String(20), default='lecture')  # 'lecture', 'lab', 'library', 'break'
+    is_manual = db.Column(db.Boolean, default=False)
     
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -394,3 +420,52 @@ class ClashLog(db.Model):
     
     def __repr__(self):
         return f'<ClashLog {self.clash_type} - {self.severity}>'
+
+
+class ActivityLog(db.Model):
+    """Overall system activity log tracking all actions across the project"""
+    __tablename__ = 'activity_logs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    user_name = db.Column(db.String(150), default='System')
+    action_type = db.Column(db.String(50), nullable=False)  # 'CREATE_TIMETABLE', 'AUTO_GENERATE', 'ADD_ENTRY', 'DELETE_ENTRY', 'BRANCH_ADD', etc.
+    description = db.Column(db.Text, nullable=False)
+    entity_type = db.Column(db.String(50))  # 'timetable', 'division', 'branch', 'room', etc.
+    entity_id = db.Column(db.Integer, nullable=True)
+    details_json = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    user = db.relationship('User', backref='activity_logs', foreign_keys=[user_id])
+
+    @staticmethod
+    def log(action_type, description, user_id=None, user_name='System', entity_type=None, entity_id=None, details=None):
+        """Helper to create and commit an activity log record safely"""
+        try:
+            log_entry = ActivityLog(
+                user_id=user_id,
+                user_name=user_name,
+                action_type=action_type,
+                description=description,
+                entity_type=entity_type,
+                entity_id=entity_id,
+                details_json=json.dumps(details) if details else None
+            )
+            db.session.add(log_entry)
+            db.session.commit()
+            return log_entry
+        except Exception as e:
+            db.session.rollback()
+            print(f"[ActivityLog] Exception logging activity: {e}")
+            return None
+
+    def get_details(self):
+        if self.details_json:
+            try:
+                return json.loads(self.details_json)
+            except Exception:
+                return {}
+        return {}
+
+    def __repr__(self):
+        return f'<ActivityLog {self.action_type} - {self.description[:30]}>'

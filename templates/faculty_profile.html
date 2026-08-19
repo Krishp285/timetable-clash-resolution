@@ -235,12 +235,32 @@
         <hr class="section-divider">
 
         <!-- Subjects -->
-        <h3 style="margin: 0 0 1rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-book"></i> Subjects You Can Teach</h3>
+        <h3 style="margin: 0 0 1rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-book"></i> Subjects You Teach / Can Teach</h3>
+        <p style="color: #64748b; font-size: 0.88rem; margin-bottom: 1.25rem;">Select the subjects you teach from the curriculum checklist below. Your profile will be linked to these subjects for timetable scheduling:</p>
+        
+        {% set fac_subs = faculty.get_subjects() or [] %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; max-height: 320px; overflow-y: auto; padding: 0.75rem; background: rgba(15, 23, 42, 0.5); border-radius: 10px; border: 1px solid rgba(148, 163, 184, 0.12);">
+            {% for sub in system_subjects %}
+            {% set sub_label = sub.name %}
+            {% set is_checked = false %}
+            {% for fs in fac_subs %}
+                {% if fs.lower() == sub.name.lower() or fs.lower() == sub.code.lower() or sub.name.lower() in fs.lower() or fs.lower() in sub.name.lower() %}
+                    {% set is_checked = true %}
+                {% endif %}
+            {% endfor %}
+            <label class="slot-chip" style="font-size: 0.82rem; justify-content: flex-start;">
+                <input type="checkbox" name="subject_select" value="{{ sub.name }}" {% if is_checked %}checked{% endif %}>
+                <span class="badge badge-info" style="font-size: 0.68rem; margin-right: 0.2rem;">Sem {{ sub.semester or 'All' }}</span>
+                <span>{{ sub.name }}</span>
+            </label>
+            {% endfor %}
+        </div>
+
         <div class="form-group">
-            <label class="form-label">Enter subjects (comma-separated)</label>
-            <textarea name="subjects" class="form-control" rows="4"
-                      placeholder="e.g., Data Structures, Algorithms, DBMS">{{ faculty.get_subjects()|join(', ') if faculty.get_subjects() else '' }}</textarea>
-            <small class="form-text">Separate multiple subjects with commas</small>
+            <label class="form-label">Additional / Custom Subjects (comma-separated)</label>
+            <textarea name="subjects" class="form-control" rows="2"
+                      placeholder="e.g., Special Elective, Machine Learning Projects">{{ faculty.get_subjects()|join(', ') if faculty.get_subjects() else '' }}</textarea>
+            <small class="form-text">Selected subjects automatically populate in your profile for scheduling.</small>
         </div>
 
         <div class="d-flex gap-2" style="margin-top: 2rem;">

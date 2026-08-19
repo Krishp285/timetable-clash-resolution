@@ -1,23 +1,24 @@
 {% extends 'base.html' %}
-{% block title %}Manage Divisions{% endblock %}
+{% block title %}Manage Divisions | Timetable Engine{% endblock %}
 
 {% block content %}
 <div class="card">
     <div class="card-header">
         <h1 class="card-title">
-            <i class="fas fa-users"></i> Manage Divisions
+            <i class="fas fa-users-rectangle"></i> Student Divisions
         </h1>
-        <div class="search-box">
+        <form method="GET" class="header-search">
             <i class="fas fa-search"></i>
-            <form method="GET" style="display: inline;">
-                <input type="text" name="q" class="form-control" placeholder="Search divisions..." value="{{ q or '' }}">
-            </form>
-        </div>
+            <input type="text" name="q" placeholder="Search divisions..." value="{{ q or '' }}" autocomplete="off">
+        </form>
     </div>
 
+    <!-- Add Division Form -->
     <form method="POST" action="{{ url_for('add_division') }}"
-        style="background: rgba(30, 41, 59, 0.5); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid rgba(148, 163, 184, 0.08);">
-        <h3 style="margin-bottom: 1rem; color: #94a3b8; font-weight: 700;"><i class="fas fa-plus-circle"></i> Add New Division</h3>
+        style="background: rgba(30, 41, 59, 0.4); padding: 1.5rem; border-radius: var(--radius-lg); margin-bottom: 2rem; border: 1px solid var(--border-color);">
+        <h3 style="margin-bottom: 1rem; color: var(--text-main); font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 0.55rem;">
+            <i class="fas fa-plus-circle" style="color: var(--brand-emerald);"></i> Add New Division
+        </h3>
         <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr auto; gap: 1rem; align-items: end;">
             <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label">Branch</label>
@@ -29,7 +30,7 @@
                 </select>
             </div>
             <div class="form-group" style="margin-bottom: 0;">
-                <label class="form-label">Division Name</label>
+                <label class="form-label">Division</label>
                 <input type="text" name="name" class="form-control" placeholder="A, B, C" required>
             </div>
             <div class="form-group" style="margin-bottom: 0;">
@@ -54,9 +55,12 @@
         </div>
     </form>
 
-    <h3 style="color: #94a3b8; font-weight: 700;"><i class="fas fa-list"></i> All Divisions</h3>
-    <div class="table">
-        <table>
+    <h3 style="color: var(--text-sub); font-weight: 700; font-size: 1rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fas fa-list"></i> Registered Divisions
+    </h3>
+
+    <div class="table-responsive">
+        <table class="table">
             <thead>
                 <tr>
                     <th>Division</th>
@@ -65,50 +69,44 @@
                     <th>Academic Year</th>
                     <th>Students / Batches</th>
                     <th>Created Date</th>
-                    <th>Actions</th>
+                    <th style="text-align: right;">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for division in divisions %}
                 <tr>
-                    <td><span class="badge badge-success">{{ division.full_name }}</span></td>
-                    <td>{{ division.branch.name }}</td>
-                    <td>{{ division.semester }}</td>
-                    <td>{{ division.academic_year }}</td>
                     <td>
-                        {{ division.student_count or 60 }} students
+                        <span class="badge badge-success" style="font-size: 0.85rem;">{{ division.full_name }}</span>
+                    </td>
+                    <td style="font-weight: 600; color: var(--text-main);">{{ division.branch.name }}</td>
+                    <td><span class="badge badge-info">Sem {{ division.semester }}</span></td>
+                    <td style="color: var(--text-sub); font-size: 0.85rem;">{{ division.academic_year }}</td>
+                    <td>
+                        <strong style="color: var(--text-main);">{{ division.student_count or 60 }}</strong> <span style="color: var(--text-muted); font-size: 0.8rem;">students</span>
                         {% if division.num_batches and division.num_batches > 1 %}
-                            <br><span class="badge" style="background: rgba(124,58,237,0.15); color: #c4b5fd; border: 1px solid rgba(124,58,237,0.3); font-size: 0.75rem;">{{ division.num_batches }} batches ({% for b in division.batches %}{{ b.name }}{% if not loop.last %}, {% endif %}{% endfor %})</span>
+                            <br><span class="badge badge-cyan" style="font-size: 0.72rem; margin-top: 0.2rem;">{{ division.num_batches }} Batches ({% for b in division.batches %}{{ b.name }}{% if not loop.last %}, {% endif %}{% endfor %})</span>
                         {% endif %}
                     </td>
-                    <td>{{ division.created_at.strftime('%Y-%m-%d') }}</td>
-                    <td>
-                        <a href="{{ url_for('view_timetable', division_id=division.id) }}"
-                            class="btn btn-sm btn-primary">
-                            <i class="fas fa-eye"></i> View
-                        </a>
-                        <button class="btn btn-sm btn-warning" onclick="openEditDivisionModal(
-                                '{{ division.id }}',
-                                '{{ division.branch_id }}',
-                                '{{ division.name }}',
-                                '{{ division.semester }}',
-                                '{{ division.academic_year }}',
-                                '{{ division.student_count or 60 }}',
-                                '{{ division.num_batches or 1 }}'
-                            )">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <form method="POST" action="{{ url_for('delete_division', division_id=division.id) }}"
-                            style="display: inline;" onsubmit="return confirm('Delete this division?');">
-                            <button type="submit" class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i>
+                    <td style="color: var(--text-muted); font-size: 0.85rem;">{{ division.created_at.strftime('%Y-%m-%d') if division.created_at else 'N/A' }}</td>
+                    <td style="text-align: right; white-space: nowrap; vertical-align: middle;">
+                        <div style="display: inline-flex; align-items: center; justify-content: flex-end; gap: 0.4rem;">
+                            <a href="{{ url_for('view_timetable', division_id=division.id) }}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <button class="btn btn-sm btn-warning" onclick="openEditDivisionModal('{{ division.id }}', '{{ division.branch_id }}', '{{ division.name }}', '{{ division.semester }}', '{{ division.academic_year }}', '{{ division.student_count or 60 }}', '{{ division.num_batches or 1 }}')">
+                                <i class="fas fa-edit"></i> Edit
                             </button>
-                        </form>
+                            <form method="POST" action="{{ url_for('delete_division', division_id=division.id) }}" style="display: inline;" onsubmit="return confirm('Delete this division?');">
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="7" style="text-align: center; color: #64748b;">No divisions added yet</td>
+                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No divisions added yet</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -117,10 +115,16 @@
 </div>
 
 <!-- Edit Division Modal -->
-<div class="card">
-<div id="editDivisionModal" class="modal" style="display:none;">
-    <div class="modal-content" style="max-width:600px;">
-        <h3><i class="fas fa-edit"></i> Edit Division</h3>
+<div id="editDivisionModal" class="modal-backdrop" style="display:none;">
+    <div class="modal-box" style="max-width: 600px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color);">
+            <h3 style="margin: 0; color: var(--text-main); font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-edit" style="color: var(--brand-indigo);"></i> Edit Division
+            </h3>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeEditDivisionModal()" style="border-radius: 50%; width: 32px; height: 32px; padding: 0;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
 
         <form method="POST" action="{{ url_for('edit_division') }}">
             <input type="hidden" name="division_id" id="edit_division_id">
@@ -160,7 +164,7 @@
                 </div>
             </div>
 
-            <div style="display:flex; gap:1rem; justify-content:flex-end;">
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
                 <button type="button" class="btn btn-secondary" onclick="closeEditDivisionModal()">Cancel</button>
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i> Save Changes
@@ -169,7 +173,7 @@
         </form>
     </div>
 </div>
-</div>
+
 {% block extra_js %}
 <script>
 function openEditDivisionModal(id, branchId, name, semester, academicYear, studentCount, numBatches) {
@@ -180,8 +184,7 @@ function openEditDivisionModal(id, branchId, name, semester, academicYear, stude
     document.getElementById('edit_academic_year').value = academicYear;
     document.getElementById('edit_student_count').value = studentCount || 60;
     document.getElementById('edit_num_batches').value = numBatches || 1;
-
-    document.getElementById('editDivisionModal').style.display = 'block';
+    document.getElementById('editDivisionModal').style.display = 'flex';
 }
 
 function closeEditDivisionModal() {
@@ -189,5 +192,4 @@ function closeEditDivisionModal() {
 }
 </script>
 {% endblock %}
-
 {% endblock %}
